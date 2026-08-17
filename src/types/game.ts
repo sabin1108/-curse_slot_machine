@@ -1,0 +1,179 @@
+export type ReelId = 'action' | 'target' | 'modifier';
+
+export type ActionType = 'BULLET' | 'SHIELD' | 'HEART' | 'DAGGER' | 'POISON' | 'BOMB';
+export type TargetType = 'ENEMY' | 'SELF' | 'ALL';
+export type ModifierType = 'X1' | 'X2' | 'X3' | 'CRIT' | 'VAMP';
+
+export interface ReelSymbol {
+  id: string;
+  name: string;
+  type: ActionType | TargetType | ModifierType;
+  category: 'ACTION' | 'TARGET' | 'MODIFIER';
+  baseValue: number;
+  icon: string;
+  imgUrl?: string;
+  color: string;
+  description: string;
+}
+
+export interface SlotResult {
+  action: ReelSymbol;
+  target: ReelSymbol;
+  modifier: ReelSymbol;
+  isMiss: boolean;
+  missReason?: string;
+  calculatedValue: number;
+  finalEffectText: string;
+}
+
+export type SynergyTag =
+  | 'COMBO'
+  | 'MULTI_HIT'
+  | 'CRITICAL'
+  | 'BURN'
+  | 'DEFENSE'
+  | 'CURSE'
+  | 'RISK'
+  | 'RESOURCE';
+
+export interface AugmentItem {
+  id: string;
+  name: string;
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'CURSED' | 'LEGENDARY';
+  tags: SynergyTag[];
+  description: string;
+  icon: string;
+  imgUrl?: string;
+  effectValue: string;
+}
+
+export interface SynergyProgress {
+  synergyId: string;
+  name: string;
+  tag: SynergyTag;
+  current: number;
+  required: number;
+  completed: boolean;
+  effectDescription: string;
+}
+
+export interface BuildState {
+  augments: AugmentItem[];
+  items: string[];
+  activeSynergies: string[];
+  synergyProgress: SynergyProgress[];
+}
+
+export interface PlayerState {
+  hp: number;
+  maxHp: number;
+  shield: number;
+  gold: number;
+}
+
+export interface EnemyIntent {
+  id: string;
+  name: string;
+  type: 'ATTACK' | 'DEFEND' | 'CURSE' | 'HEAL';
+  value: number;
+  icon: string;
+  description: string;
+}
+
+export interface EnemyState {
+  id: string;
+  name: string;
+  hp: number;
+  maxHp: number;
+  shield: number;
+  statuses: { type: string; duration: number; value: number }[];
+  intent: EnemyIntent;
+  spriteUrl?: string;
+}
+
+export interface CurseState {
+  current: number;
+  max: number;
+  threshold1Triggered: boolean;
+  threshold2Triggered: boolean;
+}
+
+export type GameScreen = 'TITLE' | 'BATTLE' | 'REWARD' | 'MAP' | 'SHOP' | 'REST' | 'GAMEOVER' | 'VICTORY';
+
+export type GameMode = 'NORMAL' | 'SHOWCASE';
+
+export interface ShowcaseStep {
+  stepIndex: number;
+  title: string;
+  instruction: string;
+  actionScript: string;
+  forcedResult?: {
+    actionId: string;
+    targetId: string;
+    modifierId: string;
+  };
+  highlightMessage: string;
+}
+
+export interface GameState {
+  mode: GameMode;
+  screen: GameScreen;
+  seed: string;
+  turn: number;
+  wave: number;
+  totalWaves: number;
+  player: PlayerState;
+  enemy: EnemyState;
+  curse: CurseState;
+  build: BuildState;
+  visitedNodePath: number[]; // Persistent visited map node IDs
+  
+  // Combat Slot Machine State
+  reels: {
+    action: ReelSymbol[];
+    target: ReelSymbol[];
+    modifier: ReelSymbol[];
+  };
+  reelIndexes: {
+    action: number;
+    target: number;
+    modifier: number;
+  };
+  lockedReels: Set<ReelId>;
+  currentResult: SlotResult | null;
+  hasSpunThisTurn: boolean;
+  isSpinning: boolean;
+  
+  // Augment Slot Machine Presentation State (Reward reveal)
+  rewardCandidates: AugmentItem[];
+  augSlotPresentation: {
+    reels: [string, string, string];
+    targetAugment: AugmentItem | null;
+    isRevealed: boolean;
+  } | null;
+
+  // Combat Log & Floating Feedback
+  combatLogs: string[];
+  lastDamagePop: { value: number; type: 'PLAYER_DMG' | 'ENEMY_DMG' | 'HEAL' | 'SHIELD'; id: number } | null;
+  
+  // Showcase State
+  showcase: {
+    active: boolean;
+    currentStep: number;
+    steps: ShowcaseStep[];
+  };
+}
+
+export type GameCommand =
+  | { type: 'START_RUN'; seed?: string; mode?: GameMode }
+  | { type: 'SELECT_MAP_NODE'; nodeId: number }
+  | { type: 'SPIN_COMBAT_SLOT' }
+  | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
+  | { type: 'REROLL_UNLOCKED' }
+  | { type: 'CONFIRM_SLOT_RESULT' }
+  | { type: 'CHOOSE_REWARD'; augmentId: string }
+  | { type: 'NAVIGATE'; screen: GameScreen }
+  | { type: 'START_SHOWCASE'; scenarioId?: string }
+  | { type: 'NEXT_SHOWCASE_STEP' }
+  | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
+  | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
