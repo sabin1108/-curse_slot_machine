@@ -63,4 +63,4 @@
 ### GitHub
 
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/2
-- Branch commits: `06b9cdc`, `2a975b2`
+- Implementation commit: `06b9cdc`; PR documentation updates are included on the branch.
