@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone, starting with `feature/project-baseline`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline` is merged; current work is `feature/game-engine-core`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -23,19 +23,19 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 ## Environment Setup Results
 
 - Fresh clone created at `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh` because the requested `curse_slot_machine_repo` folder already existed with dirty changes.
-- Active branch: `feature/project-baseline`.
+- Active branch: `feature/game-engine-core`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
-- `gh auth status` now succeeds for `kimcheolhui9846`.
+- `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
 - `npm.cmd install` completed after network approval.
 - `npx.cmd playwright install chromium` completed.
-- Vitest/Vite commands were run outside the sandbox because esbuild scans parent directories while loading config and this sandbox denies `C:\Users\00` directory scans.
+- Vitest/Vite commands are run outside the sandbox because esbuild scans parent directories while loading config and this sandbox denies `C:\Users\00` directory scans.
 
 ## GitHub Repository And Branch Strategy
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/project-baseline`
+- Current branch: `feature/game-engine-core`
 - Strategy: each feature branch starts from latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -43,7 +43,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 | Branch | Commit | PR | Status |
 | --- | --- | --- | --- |
-| `feature/project-baseline` | `fa5b0de` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Draft PR opened |
+| `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
+| `feature/game-engine-core` | `06b9cdc` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Draft PR opened |
 
 ## Verification Commands
 
@@ -54,31 +55,43 @@ npm.cmd run build
 npm.cmd run test:e2e
 ```
 
-Results:
+Latest completed verification:
 
-- `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 1 test.
-- `npm.cmd run build`: passed.
-- `npm.cmd run test:e2e`: passed, 1 Playwright Chromium test.
+- Baseline branch: `typecheck`, `test:run`, `build`, and `test:e2e` passed before PR #1 merge.
+- `feature/game-engine-core`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` passed with 3 tests.
+- `feature/game-engine-core`: `npm.cmd run typecheck` passed.
+- `feature/game-engine-core`: full `npm.cmd run test:run` passed with 4 tests across 2 files.
+- `feature/game-engine-core`: `npm.cmd run build` passed.
+- `feature/game-engine-core`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
 
 ## Remaining Problems
 
-- None for the baseline branch at this handoff point.
+- `feature/game-engine-core` is open as draft PR #2 and awaiting review.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
-- `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and all verification commands passed outside the sandbox.
+- `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Wait for user review and merge approval for PR #1.
-2. After merge, start `feature/game-engine-core` from latest `main` with TDD.
+1. Wait for user review and merge approval for PR #2.
+2. After merge, start `feature/combat-slot-machine`.
 
 ## Branch Log
 
 ### feature/project-baseline
 
 - Branch: `feature/project-baseline`
-- Commit: `fa5b0de`
+- Commit: `2ce9e20`
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/1
 - Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: waiting for PR review and user merge approval.
+- Remaining issues: none.
 - Next branch: `feature/game-engine-core`
+
+### feature/game-engine-core
+
+- Branch: `feature/game-engine-core`
+- Implementation commit: `06b9cdc`; PR documentation updates are included on the branch.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/2
+- Implemented so far: seeded RNG, `GameCommand`, `GameEvent`, `GameState`, and minimal deterministic `GameEngine`.
+- Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
+- Remaining issues: waiting for PR review and user merge approval.
+- Next branch: `feature/combat-slot-machine`
