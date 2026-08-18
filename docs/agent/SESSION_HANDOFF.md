@@ -44,7 +44,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | Branch | Commit | PR | Status |
 | --- | --- | --- | --- |
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
-| `feature/game-engine-core` | Pending | Pending | In progress |
+| `feature/game-engine-core` | `06b9cdc` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Draft PR opened |
 
 ## Verification Commands
 
@@ -66,15 +66,14 @@ Latest completed verification:
 
 ## Remaining Problems
 
-- `feature/game-engine-core` is verified but not committed or pushed yet.
+- `feature/game-engine-core` is open as draft PR #2 and awaiting review.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Finish `feature/game-engine-core` full verification.
-2. Commit and open draft PR for `feature/game-engine-core`.
-3. After user review/merge approval, start `feature/combat-slot-machine`.
+1. Wait for user review and merge approval for PR #2.
+2. After merge, start `feature/combat-slot-machine`.
 
 ## Branch Log
 
@@ -90,9 +89,9 @@ Latest completed verification:
 ### feature/game-engine-core
 
 - Branch: `feature/game-engine-core`
-- Commit: Pending
-- PR: Pending
+- Commit: `06b9cdc`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/2
 - Implemented so far: seeded RNG, `GameCommand`, `GameEvent`, `GameState`, and minimal deterministic `GameEngine`.
 - Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: full verification, commit, push, and draft PR pending.
+- Remaining issues: waiting for PR review and user merge approval.
 - Next branch: `feature/combat-slot-machine`

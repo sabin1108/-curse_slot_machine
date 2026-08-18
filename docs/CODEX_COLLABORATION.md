@@ -59,3 +59,7 @@
 - `npm.cmd run test:run`: passed, 4 tests across 2 files.
 - `npm.cmd run build`: passed.
 - `npm.cmd run test:e2e`: passed, 1 Playwright Chromium test.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/2
