@@ -286,7 +286,7 @@ No browser behavior changed in this branch. `npm.cmd run test:e2e` was still run
 
 Record branch name, commits, verification output, remaining issues, and next branch `feature/combat-resolution`.
 
-- [ ] **Step 4: Commit and open draft PR**
+- [x] **Step 4: Commit and open draft PR**
 
 ```powershell
 git add .

@@ -99,4 +99,5 @@
 
 ### GitHub
 
-- Draft PR: pending.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/3
+- Implementation commit: `4a2edb5`; PR documentation updates are included on the branch.

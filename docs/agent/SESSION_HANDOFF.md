@@ -45,7 +45,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | --- | --- | --- | --- |
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
 | `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
-| `feature/combat-slot-machine` | pending | pending | Implemented locally |
+| `feature/combat-slot-machine` | `4a2edb5` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Draft PR opened |
 
 ## Verification Commands
 
@@ -72,15 +72,14 @@ Latest completed verification:
 
 ## Remaining Problems
 
-- `feature/combat-slot-machine` is implemented locally and still needs commit, push, and draft PR creation.
+- `feature/combat-slot-machine` is open as draft PR #3 and awaiting user review.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit and push `feature/combat-slot-machine`.
-2. Open a draft PR for `feature/combat-slot-machine`.
-3. After user review and merge approval, start `feature/combat-resolution`.
+1. Wait for user review and merge approval for PR #3.
+2. After merge, start `feature/combat-resolution`.
 
 ## Branch Log
 
@@ -106,9 +105,9 @@ Latest completed verification:
 ### feature/combat-slot-machine
 
 - Branch: `feature/combat-slot-machine`
-- Commit: pending.
-- PR: pending.
+- Commit: `4a2edb5` plus PR documentation updates.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/3
 - Implemented: weighted combat reels, one-payline `[action, target, modifier]` results, lock-aware rerolls, deterministic seeded spin sequences, and curse costs for 0/1/2 locks.
 - Verification: targeted RED/GREEN test run, `typecheck`, full `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: commit, push, and draft PR are pending.
+- Remaining issues: waiting for user review and merge approval.
 - Next branch: `feature/combat-resolution`
