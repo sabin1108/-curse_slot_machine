@@ -28,6 +28,7 @@
 
 - GitHub CLI authenticated as `kimcheolhui9846`.
 - Repository-local Git author set to `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/1
 
 ### Verification
 

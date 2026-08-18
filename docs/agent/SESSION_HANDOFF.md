@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 | Branch | Commit | PR | Status |
 | --- | --- | --- | --- |
-| `feature/project-baseline` | Pending | Pending | Verified locally; commit and PR creation in progress |
+| `feature/project-baseline` | `fa5b0de` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Draft PR opened |
 
 ## Verification Commands
 
@@ -69,17 +69,16 @@ Results:
 
 ## Next Session Work
 
-1. Commit `feature/project-baseline`.
-2. Push and open draft PR.
-3. After user approval/merge, start `feature/game-engine-core` with TDD.
+1. Wait for user review and merge approval for PR #1.
+2. After merge, start `feature/game-engine-core` from latest `main` with TDD.
 
 ## Branch Log
 
 ### feature/project-baseline
 
 - Branch: `feature/project-baseline`
-- Commit: Pending
-- PR: Pending
+- Commit: `fa5b0de`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/1
 - Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: commit, push, and PR pending.
+- Remaining issues: waiting for PR review and user merge approval.
 - Next branch: `feature/game-engine-core`
