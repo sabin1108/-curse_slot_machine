@@ -1,0 +1,38 @@
+# Codex Collaboration
+
+## 2026-08-18 - Project Baseline
+
+### Human Direction
+
+- Use the local planning documents as reference material.
+- Clone into a user-owned workspace because a prior sandbox checkout had Git permission issues.
+- Work branch by branch, open draft PRs, and do not merge without approval.
+- Preserve and update agent handoff/status documentation.
+
+### Codex Work
+
+- Read the two planning documents and the setup guide.
+- Created a fresh clone at `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh` after finding the requested sibling folder already dirty.
+- Confirmed `gh auth status` is blocked by an invalid stored token.
+- Installed npm dependencies and Playwright Chromium.
+- Added required handoff, planning summary, collaboration log, and asset log.
+- Added the `test:run` script alias expected by the branch workflow.
+- Moved the app shell from `src/App.tsx` to `src/app/App.tsx` and kept the baseline test at `src/app/App.test.tsx`.
+- Verified `typecheck`, `test:run`, `build`, and Playwright e2e smoke locally.
+
+### Human Decisions Pending
+
+- Approve PR merge only after reviewing the draft PR.
+
+### GitHub / Git Identity
+
+- GitHub CLI authenticated as `kimcheolhui9846`.
+- Repository-local Git author set to `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/1
+
+### Verification
+
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 1 test.
+- `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e`: passed, 1 test.
