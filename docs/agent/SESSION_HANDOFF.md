@@ -44,7 +44,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | Branch | Commit | PR | Status |
 | --- | --- | --- | --- |
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
-| `feature/game-engine-core` | `06b9cdc` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Draft PR opened |
+| `feature/game-engine-core` | `06b9cdc`, `2a975b2` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Draft PR opened |
 
 ## Verification Commands
 
@@ -89,7 +89,7 @@ Latest completed verification:
 ### feature/game-engine-core
 
 - Branch: `feature/game-engine-core`
-- Commit: `06b9cdc`
+- Commits: `06b9cdc`, `2a975b2`
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/2
 - Implemented so far: seeded RNG, `GameCommand`, `GameEvent`, `GameState`, and minimal deterministic `GameEngine`.
 - Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
