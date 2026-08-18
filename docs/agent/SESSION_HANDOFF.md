@@ -45,6 +45,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | --- | --- | --- | --- |
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
 | `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
+| `feature/combat-slot-machine` | pending | pending | Implemented locally |
 
 ## Verification Commands
 
@@ -63,18 +64,23 @@ Latest completed verification:
 - `feature/game-engine-core`: full `npm.cmd run test:run` passed with 4 tests across 2 files.
 - `feature/game-engine-core`: `npm.cmd run build` passed.
 - `feature/game-engine-core`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
+- `feature/combat-slot-machine`: targeted `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts` failed first because slot modules did not exist, then passed with 5 tests after implementation.
+- `feature/combat-slot-machine`: `npm.cmd run typecheck` passed.
+- `feature/combat-slot-machine`: full `npm.cmd run test:run` passed with 9 tests across 3 files.
+- `feature/combat-slot-machine`: `npm.cmd run build` passed.
+- `feature/combat-slot-machine`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
 
 ## Remaining Problems
 
-- `feature/combat-slot-machine` has not been implemented yet.
+- `feature/combat-slot-machine` is implemented locally and still needs commit, push, and draft PR creation.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Implement `feature/combat-slot-machine` with TDD.
-2. Verify `typecheck`, `test:run`, `build`, and e2e if the branch touches browser behavior.
-3. Open a draft PR for `feature/combat-slot-machine`.
+1. Commit and push `feature/combat-slot-machine`.
+2. Open a draft PR for `feature/combat-slot-machine`.
+3. After user review and merge approval, start `feature/combat-resolution`.
 
 ## Branch Log
 
@@ -102,7 +108,7 @@ Latest completed verification:
 - Branch: `feature/combat-slot-machine`
 - Commit: pending.
 - PR: pending.
-- Planned implementation: weighted combat reels, one-payline `[action, target, modifier]` results, lock-aware rerolls, and curse costs for 0/1/2 locks.
-- Verification: pending.
-- Remaining issues: implementation not started.
+- Implemented: weighted combat reels, one-payline `[action, target, modifier]` results, lock-aware rerolls, deterministic seeded spin sequences, and curse costs for 0/1/2 locks.
+- Verification: targeted RED/GREEN test run, `typecheck`, full `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
+- Remaining issues: commit, push, and draft PR are pending.
 - Next branch: `feature/combat-resolution`

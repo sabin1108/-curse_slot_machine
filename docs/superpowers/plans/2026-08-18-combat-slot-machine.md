@@ -42,7 +42,7 @@
   - `type WeightedReelEntry<T extends string> = { symbol: T; weight: number }`
   - `function pickWeightedSymbol<T extends string>(pool: readonly WeightedReelEntry<T>[], rng: SeededRng): T`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 it('picks weighted symbols from the provided reel pool', () => {
@@ -65,13 +65,13 @@ it('picks weighted symbols from the provided reel pool', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
 Expected: FAIL because `src/game/slot/ReelPool.ts` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 import type { SeededRng } from '../engine/rng'
@@ -99,7 +99,7 @@ export function pickWeightedSymbol<T extends string>(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
@@ -123,7 +123,7 @@ Expected: PASS for the weighted reel test.
   - `type CombatSlotResult = { action: CombatActionSymbol; target: CombatTargetSymbol; modifier: CombatModifierSymbol }`
   - `function spinCombatSlot(rng: SeededRng): CombatSlotResult`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 it('produces one payline with action, target, and modifier symbols', () => {
@@ -135,17 +135,17 @@ it('produces one payline with action, target, and modifier symbols', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
 Expected: FAIL because `spinCombatSlot` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Use the default weighted reel pools and call `pickWeightedSymbol` once per reel.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
@@ -166,7 +166,7 @@ Expected: PASS for weighted reel and initial spin tests.
   - `type CombatSlotLocks = { action?: boolean; target?: boolean; modifier?: boolean }`
   - `function rerollCombatSlot(previous: CombatSlotResult, locks: CombatSlotLocks, rng: SeededRng): CombatSlotResult`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 it('keeps locked reels and rerolls unlocked reels', () => {
@@ -184,17 +184,17 @@ it('keeps locked reels and rerolls unlocked reels', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
 Expected: FAIL because `rerollCombatSlot` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Preserve locked reel values and call the matching default pool only for unlocked reels.
 
-- [ ] **Step 4: Add deterministic sequence test**
+- [x] **Step 4: Add deterministic sequence test**
 
 ```ts
 it('produces the same spin sequence for the same seed', () => {
@@ -213,7 +213,7 @@ it('produces the same spin sequence for the same seed', () => {
 })
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
@@ -232,7 +232,7 @@ Expected: PASS for all combat slot tests.
 - Produces:
   - `function getCombatRerollCurseCost(locks: CombatSlotLocks): number`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 it('charges curse based on the number of locked reels', () => {
@@ -242,17 +242,17 @@ it('charges curse based on the number of locked reels', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
 Expected: FAIL because `getCombatRerollCurseCost` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Count truthy lock fields and return `lockCount + 1`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`
 
@@ -270,7 +270,7 @@ Expected: PASS for all combat slot tests.
 - Consumes: branch implementation and verification output
 - Produces: updated branch handoff and collaboration log
 
-- [ ] **Step 1: Run full verification**
+- [x] **Step 1: Run full verification**
 
 ```powershell
 npm.cmd run typecheck
@@ -278,11 +278,11 @@ npm.cmd run test:run
 npm.cmd run build
 ```
 
-- [ ] **Step 2: Run e2e if browser behavior changed**
+- [x] **Step 2: Run e2e if browser behavior changed**
 
-No browser behavior is expected in this branch. If only pure TypeScript files changed, record e2e as not run for this branch.
+No browser behavior changed in this branch. `npm.cmd run test:e2e` was still run as a smoke regression check and passed with 1 Playwright Chromium test.
 
-- [ ] **Step 3: Update handoff docs**
+- [x] **Step 3: Update handoff docs**
 
 Record branch name, commits, verification output, remaining issues, and next branch `feature/combat-resolution`.
 

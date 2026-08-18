@@ -74,3 +74,29 @@
 - PR #2 merged: https://github.com/sabin1108/-curse_slot_machine/pull/2
 - Squash merge commit: `49f5eab`.
 - Next branch started from updated `main`: `feature/combat-slot-machine`.
+
+## 2026-08-18 - Combat Slot Machine
+
+### Human Direction
+
+- Continue from the merged game engine core.
+- Implement `feature/combat-slot-machine` with TDD.
+- Keep combat slot outcome logic in pure TypeScript, separate from React UI.
+
+### Codex Work
+
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing combat slot tests before adding production slot modules.
+- Implemented weighted reel picking, default combat reel pools, one-payline spin results, lock-aware rerolls, deterministic seeded sequences, and lock-count curse costs.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts`: failed first because slot modules did not exist, then passed with 5 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 9 tests across 3 files.
+- `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e`: passed, 1 Playwright Chromium test.
+
+### GitHub
+
+- Draft PR: pending.
