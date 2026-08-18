@@ -1,6 +1,8 @@
 # 오픈소스 에셋 사용 및 라이선스 목록 (Third Party Assets)
 
-본 프로젝트는 아래의 오픈소스 에셋 팩을 활용하여 제작되었습니다.
+본 프로젝트는 아래의 오픈소스 에셋 팩 및 라이브러리를 활용하여 제작되었습니다.
+
+## 1. Asset Packs
 
 1. **Kenney Pixel UI Pack (`kenney.nl/assets/pixel-ui-pack`)**
    - **라이선스**: CC0 1.0 Universal (Public Domain)
@@ -21,3 +23,16 @@
 5. **Kenney Casino & UI Audio (`kenney_casino-audio`, `kenney_ui-audio`)**
    - **라이선스**: CC0 1.0 Universal
    - **용도**: 레버 당김, 릴 회전/정지 클릭, 버튼 호버/클릭 사운드 큐
+
+## 2. Libraries & Runtime Dependencies
+
+| Name | Use | Source | License Notes |
+| --- | --- | --- | --- |
+| React | UI runtime | `package.json` npm dependency | MIT License |
+| React DOM | Browser rendering | `package.json` npm dependency | MIT License |
+| Vite | Build/dev server | `package.json` npm dependency | MIT License |
+| TypeScript | Static typing | `package.json` npm dependency | Apache-2.0 |
+| Vitest | Unit tests | `package.json` npm dependency | MIT License |
+| Playwright | Browser tests | `package.json` npm dependency | Apache-2.0 |
+| Testing Library | React component tests | `package.json` npm dependency | MIT License |
+

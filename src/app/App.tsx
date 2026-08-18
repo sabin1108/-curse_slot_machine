@@ -1,16 +1,16 @@
 import { useState, useMemo } from 'react';
-import { GameEngine } from './game/GameEngine';
-import { GameCommand } from './types/game';
+import { GameEngine } from '../game/GameEngine';
+import { GameCommand } from '../types/game';
 
-import { TitleScreen } from './components/Title/TitleScreen';
-import { BattleScreen } from './components/Battle/BattleScreen';
-import { RewardModal } from './components/Reward/RewardModal';
-import { DungeonMapScreen } from './components/Navigation/DungeonMapScreen';
-import { ShopScreen } from './components/Navigation/ShopScreen';
-import { RestScreen } from './components/Navigation/RestScreen';
-import { GameOverVictoryModal } from './components/Navigation/GameOverVictoryModal';
+import { TitleScreen } from '../components/Title/TitleScreen';
+import { BattleScreen } from '../components/Battle/BattleScreen';
+import { RewardModal } from '../components/Reward/RewardModal';
+import { DungeonMapScreen } from '../components/Navigation/DungeonMapScreen';
+import { ShopScreen } from '../components/Navigation/ShopScreen';
+import { RestScreen } from '../components/Navigation/RestScreen';
+import { GameOverVictoryModal } from '../components/Navigation/GameOverVictoryModal';
 
-import './styles.css';
+import '../styles.css';
 
 export function App() {
   const engine = useMemo(() => new GameEngine(), []);

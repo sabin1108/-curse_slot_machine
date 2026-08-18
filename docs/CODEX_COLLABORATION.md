@@ -17,7 +17,28 @@
 
 ## 3. Codex (Antigravity AI)가 수행한 역할
 1. `D:\sabin\note\codex_ai 게임해커톤` 통합 명세서 v2.1 및 UI/UX 기획서 완벽 학습 및 아키텍처 설계.
-2. `C:\Users\sabin\Desktop\겜 코덱스` 에셋 검수 및 최적 오픈소스 에셋 팩 추출/배치.
+2. 에셋 검수 및 최적 오픈소스 에셋 팩 추출/배치.
 3. Seeded RNG 기반 `GameEngine` 구현 및 단일 페이라인 `CombatSlotMachine` 문장 조합 및 MISS 로직 개발.
 4. 다크 던전 카지노 테마의 반응형 CSS 스타일링, 레버 당김 애니메이션, 릴 블러 스핀 연출, Web Audio API 사운드 매니저 제작.
-5. Vitest 자동화 단위 테스트 및 Vite 프로덕션 정적 웹 빌드 성공적 검증.
+5. 결정론적 코어 엔진(PR #2)과 픽셀 레트로 UI/UX 연동 및 통합 검증 완료.
+
+---
+
+# Codex Collaboration Log
+
+## 2026-08-18 - Project Baseline & UI/UX Integration
+
+### Human Direction
+
+- Use local planning documents as reference material.
+- Work branch by branch, open draft PRs, and merge after local verification.
+- Maintain retro UI/UX pixel visual experience while building core engine systems.
+
+### Codex Work
+
+- Initialized project baseline with Vite + React + TypeScript.
+- Implemented core deterministic game engine primitives (`src/game/engine`).
+- Moved app shell to `src/app/App.tsx`.
+- Integrated retro pixel visual UI (`BattleScreen`, `DungeonMapScreen`, `RestScreen`, `ShopScreen`, `RewardModal`).
+- Verified `typecheck`, `test:run`, `build`, and Playwright e2e smoke tests.
+
