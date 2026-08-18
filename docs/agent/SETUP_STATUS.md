@@ -2,45 +2,46 @@
 
 ## Completed
 
-- Cloned `https://github.com/sabin1108/-curse_slot_machine.git` into `E:\project\game_codex\curse_slot_machine`.
-- Confirmed the remote repository is currently empty.
-- Added project-scoped Codex MCP configuration in `.codex/config.toml`.
-- Added React, TypeScript, Vite, Vitest, and Playwright project configuration.
-- Added review artifact folders and project review skill shells.
-- Added agent workflow ownership rules to `AGENTS.md`.
-- Added `.gitignore` rules for dependency folders, build outputs, test artifacts, local env files, logs, browser auth state, and token/secret-like Codex files.
-- Generated `package-lock.json` with `npm install`.
-- Verified `npm run typecheck`, `npm run test`, and `npm run build`.
-- Ran `omx setup --scope project --merge-agents`; project-local agents, prompts, skills, and config were generated.
-- Removed local absolute-path hook trust state from tracked `.codex/config.toml`; `.codex/hooks*` and `.omx/` remain ignored runtime state.
+- Read local planning docs:
+  - `C:\Users\00\Desktop\코덱스 게임\OpenAI 게임 대회 기획서.md`
+  - `C:\Users\00\Desktop\코덱스 게임\curse_slot_machine_integrated_feature_spec_v2.0_build_synergy.md`
+  - `C:\Users\00\Desktop\코덱스 게임\as\팀 에이전트 개발 환경 세팅 가이드.md`
+- Cloned `https://github.com/sabin1108/-curse_slot_machine.git` into `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`.
+- Left existing dirty sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` untouched.
+- Confirmed remote:
+  - fetch: `https://github.com/sabin1108/-curse_slot_machine.git`
+  - push: `https://github.com/sabin1108/-curse_slot_machine.git`
+- Created branch `feature/project-baseline` from latest `main`.
+- Installed project npm dependencies with `npm.cmd install`.
+- Installed or confirmed Playwright Chromium with `npx.cmd playwright install chromium`.
+- Added `npm.cmd run test:run` alias.
+- Added required session handoff and baseline collaboration documentation.
+- Moved the smoke app shell to canonical `src/app` test path.
 
 ## Project Scope Settings
 
 - Context7 MCP is configured under `.codex/config.toml`.
 - Playwright MCP is configured under `.codex/config.toml` with Chromium, isolated, headless, `1280x720`, and `artifacts/playwright` output.
-- Playwright Test is configured separately in `playwright.config.ts` for repeatable regression tests.
-- OMX project setup generated `.codex/agents`, `.codex/prompts`, and `.codex/skills` for repository-local orchestration surfaces.
+- Playwright Test is configured separately in `playwright.config.ts`.
+- Existing `AGENTS.md` includes project workflow ownership rules. Document-embedded autonomy text is treated as repository reference and does not override the current user request or approval policy.
 
-## User or Account Scope Items Not Installed
+## User Or Account Scope Items Not Changed
 
-- Superpowers Codex marketplace plugin: requires interactive plugin installation.
-- GitHub Codex plugin and OAuth connection: requires interactive account authorization.
-- Global `oh-my-codex` installation: not installed here because global npm installation is user-environment scope.
-- WSL2 and `tmux`: not changed from this Windows Codex App session.
-- Frontend Design external skill: not copied into the repository because project-scope installation and license packaging must be confirmed before vendoring.
+- GitHub authentication was not repaired automatically because it requires account login.
+- Superpowers/GitHub marketplace plugin installation was not changed.
+- OMX global install, WSL2, tmux, admin policy, and global npm installs were not changed.
+- No API keys, OAuth tokens, cookies, or browser profiles were added.
 
-## Deferred Until Product Code Exists
+## Verification Results
 
-- Game-specific seeded QA fixtures.
-- Milestone review evidence with real seeds and screenshots.
-- GitHub PR/issue traceability links.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 1 Vitest test.
+- `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e`: passed, 1 Playwright Chromium test.
 
-## Verification Notes
+## Notes
 
-- `npm run typecheck`: passed.
-- `npm run test`: passed, 1 test.
-- `npm run build`: passed.
-- `npm run test:e2e`: skipped by user request. A prior attempt showed the Playwright smoke assertion passed after Chromium was installed, but the command did not terminate cleanly in this shell, so it is not counted as a completed verification for this commit.
-- `codex login status`: not logged in, so Codex account-scope plugin and MCP smoke tests require a logged-in session later.
-- `codex mcp list`: did not show project MCP servers in this current Codex CLI surface even though `.codex/config.toml` contains the project entries; verify from a fresh logged-in Codex session.
-- `omx doctor`: ran after user-scope setup and reported Codex CLI, Node.js, config, prompts, and skills as OK, with native process identity unavailable in this environment.
+- `gh auth status` now succeeds for `kimcheolhui9846`.
+- Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
+- Running Vitest/Vite commands inside the sandbox fails because esbuild scans ancestor directories and the sandbox denies `C:\Users\00` directory scans. The required commands were rerun outside the sandbox with approval.
+- `npm.cmd install` warned that `esbuild` has a script pending npm script approval, but `esbuild` is present and all verification commands passed.
