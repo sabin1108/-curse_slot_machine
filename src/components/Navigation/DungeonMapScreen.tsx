@@ -33,9 +33,9 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
   // 16 Nodes positioned in normalized 0..100 percentage coordinates
   const nodes: MapNodeData[] = [
     // Floor 1 (x: 8%) - 3 Starting Choice Nodes
-    { id: 1, floor: 1, name: '1-A: 초소 전투', type: 'BATTLE', icon: getAsset('sword_gold'), x: 8, y: 20, description: '초소 파수꾼 해골과 전투합니다.' },
-    { id: 2, floor: 1, name: '1-B: 서쪽 습격', type: 'BATTLE', icon: getAsset('sword_red'), x: 8, y: 50, description: '서쪽 회랑의 기습 몬스터와 전투합니다.' },
-    { id: 3, floor: 1, name: '1-C: 감옥 전투', type: 'BATTLE', icon: getAsset('orb_purple'), x: 8, y: 80, description: '지하 감옥 파수꾼과 슬롯 대결합니다.' },
+    { id: 1, floor: 1, name: '1-A: 초소 전투', type: 'BATTLE', icon: getAsset('skull_white'), x: 8, y: 20, description: '초소 파수꾼 해골과 전투합니다.' },
+    { id: 2, floor: 1, name: '1-B: 서쪽 습격', type: 'BATTLE', icon: getAsset('skull_white'), x: 8, y: 50, description: '서쪽 회랑의 기습 몬스터와 전투합니다.' },
+    { id: 3, floor: 1, name: '1-C: 감옥 전투', type: 'BATTLE', icon: getAsset('skull_white'), x: 8, y: 80, description: '지하 감옥 파수꾼과 슬롯 대결합니다.' },
 
     // Floor 2 (x: 23%)
     { id: 4, floor: 2, name: '2-A: 암시장 상점', type: 'SHOP', icon: getAsset('dg_coin_anim_f0'), x: 23, y: 20, description: '희귀 무기와 물약을 구매합니다.' },
@@ -43,9 +43,9 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
     { id: 6, floor: 2, name: '2-C: 비밀 궤짝', type: 'EVENT', icon: getAsset('dg_crate'), x: 23, y: 80, description: '저주받은 보물상자를 엽니다.' },
 
     // Floor 3 (x: 38%)
-    { id: 7, floor: 3, name: '3-A: 고블린 군단', type: 'BATTLE', icon: getAsset('goblin'), x: 38, y: 20, description: '그림자 고블린 전사들과 슬롯 전투!' },
+    { id: 7, floor: 3, name: '3-A: 고블린 군단', type: 'BATTLE', icon: getAsset('skull_white'), x: 38, y: 20, description: '그림자 고블린 전사들과 슬롯 전투!' },
     { id: 8, floor: 3, name: '3-B: 중간 쉼터', type: 'REST', icon: getAsset('fx_campfire_strip_f0'), x: 38, y: 50, description: '엘리트전에 대비하여 체력을 정비합니다.' },
-    { id: 9, floor: 3, name: '3-C: 수금원 기습', type: 'BATTLE', icon: getAsset('sword_red'), x: 38, y: 80, description: '저주 수금원 해골들과 대결합니다.' },
+    { id: 9, floor: 3, name: '3-C: 수금원 기습', type: 'BATTLE', icon: getAsset('skull_white'), x: 38, y: 80, description: '저주 수금원 해골들과 대결합니다.' },
 
     // Floor 4 (x: 53% - Elites)
     { id: 10, floor: 4, name: '4-A: 엘리트 오우거', type: 'ELITE', icon: getAsset('ogre'), x: 53, y: 35, description: '👹 묵직한 오우거 집행관! 희귀 증강 보상 획득 가능!' },
@@ -57,7 +57,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
     { id: 14, floor: 5, name: '5-C: 행운의 기계', type: 'EVENT', icon: getAsset('orb_gold'), x: 68, y: 80, description: '골드를 넣고 무작위 잭팟 아이템을 뽑습니다.' },
 
     // Floor 6 (x: 82% - Gate)
-    { id: 15, floor: 6, name: '6-A: 성채 관문', type: 'BATTLE', icon: getAsset('sword_gold'), x: 82, y: 50, description: '보스 방문을 지키는 최후의 성채 문지기!' },
+    { id: 15, floor: 6, name: '6-A: 성채 관문', type: 'BATTLE', icon: getAsset('skull_white'), x: 82, y: 50, description: '보스 방문을 지키는 최후의 성채 문지기!' },
 
     // Floor 7 (x: 94% - Boss)
     { id: 16, floor: 7, name: '7-A: 하우스 딜러 (BOSS)', type: 'BOSS', icon: getAsset('skull_red'), x: 94, y: 50, description: '💀 최종 보스 하우스 딜러! 슬롯머신 잭팟으로 분쇄하세요!' }
