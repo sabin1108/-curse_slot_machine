@@ -52,7 +52,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/combat-slot-machine` | `6edc91d` | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Merged |
 | `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
 | `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
-| `feature/augment-slot-machine` | local branch | not opened yet | In progress |
+| `feature/augment-slot-machine` | `e57b615` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Draft PR opened |
 
 ## Verification Commands
 
@@ -95,15 +95,14 @@ Latest completed verification:
 
 ## Remaining Problems
 
-- `feature/augment-slot-machine` is implemented locally and needs commit, push, and a draft PR.
+- `feature/augment-slot-machine` is open as draft PR #8 and awaiting user review.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Open a draft PR for `feature/augment-slot-machine`.
-2. Wait for user review and merge approval for the augment slot PR.
-3. After augment slot is merged, start `feature/showcase-mode`.
+1. Wait for user review and merge approval for PR #8.
+2. After augment slot is merged, start `feature/showcase-mode`.
 
 ## Branch Log
 
@@ -163,7 +162,9 @@ Latest completed verification:
 - Branch: `feature/augment-slot-machine`
 - Base: `main` after PR #7 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `e57b615` plus PR documentation updates.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/8
 - Implemented: deterministic `AugmentSlotMachine` presentation types and pure functions, hidden three-reel reward presentation, immutable reveal helper, random API guard test, and `GameEngine` reward state/event integration.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: commit, push, and open draft PR.
+- Remaining issues: waiting for user review and merge approval; no merge without user approval.
 - Next branch: `feature/showcase-mode`
