@@ -1840,4 +1840,109 @@ html, body {
   100% { opacity: 0; transform: scale(1.05); }
 }
 
+/* ---------- 몬스터 대형 RED 위협 경고 배너 & 박진감 카메라 흔들림 연출 ---------- */
+.mob-intent-threat-banner {
+  background: linear-gradient(135deg, rgba(160, 20, 20, 0.95), rgba(70, 5, 5, 0.98));
+  border: 3px solid #ff3333;
+  border-radius: 10px;
+  padding: 8px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 0 25px rgba(255, 30, 30, 0.8), inset 0 0 15px rgba(255, 100, 100, 0.4);
+  animation: threatAlarmPulse 1.2s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes threatAlarmPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 30, 30, 0.7), inset 0 0 10px rgba(255, 100, 100, 0.3);
+    border-color: #ff3333;
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 60, 60, 1), inset 0 0 22px rgba(255, 180, 180, 0.6);
+    border-color: #ffaa00;
+    transform: scale(1.03);
+  }
+}
+
+.threat-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.threat-warning-tag {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #ffdd00;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 221, 0, 0.5);
+}
+
+.threat-intent-name {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.threat-damage-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.threat-icon {
+  font-size: 22px;
+}
+
+.threat-damage-val {
+  font-size: 26px;
+  color: #ffea00;
+  font-weight: 900;
+  text-shadow: 0 0 10px #ff3300, 2px 2px 0 #000;
+  letter-spacing: 1px;
+}
+
+.threat-damage-unit {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* 카메라 셰이크 타격 연출 */
+.screen-shake {
+  animation: screenShake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes screenShake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(3px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
+
+/* 던전 맵 상단 최종 보스 런 목표 배너 */
+.map-boss-goal-banner {
+  background: linear-gradient(90deg, rgba(80, 10, 10, 0.9), rgba(160, 30, 30, 0.95), rgba(80, 10, 10, 0.9));
+  border-bottom: 2px solid #ff3300;
+  color: #ffffff;
+  text-align: center;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(255, 51, 0, 0.4);
+  position: relative;
+  z-index: 5;
+}
+
+
 

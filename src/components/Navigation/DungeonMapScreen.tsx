@@ -145,6 +145,9 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
       <div className="map-floor-texture" />
 
       {/* Map Header Banner */}
+      <div className="map-boss-goal-banner">
+        🎯 런 최종 목표: 3층 (3-7) 보스 '하우스 딜러'를 처치하고 저주의 족쇄에서 해방되세요!
+      </div>
       <div className="map-header-banner">
         <div className="map-chapter-title">
           🏰 저주받은 성채 탐사 지도 — Stage {activeFloor} / {totalWaves}

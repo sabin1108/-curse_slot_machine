@@ -70,7 +70,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
   return (
     <div
       id="frame-battle"
-      className="frame battle-screen"
+      className={`frame battle-screen ${state.lastDamagePop ? 'screen-shake' : ''}`}
       style={{
         ['--floor-tile' as string]: `url(${theme.floorTile})`,
         ['--wall-tile' as string]: `url(${theme.wallTile})`
@@ -174,6 +174,19 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
 
           {/* Center Column: Monster Stage + Formula Banner + Slot Cabinet */}
           <div className="center-battle-stage">
+            {/* High Threat Red Warning Banner above Monster */}
+            <div className="mob-intent-threat-banner">
+              <div className="threat-title-row">
+                <span className="threat-warning-tag">⚠️ 몬스터 공격 예고</span>
+                <span className="threat-intent-name">{state.enemy.intent.name}</span>
+              </div>
+              <div className="threat-damage-display">
+                <span className="threat-icon">{state.enemy.intent.icon}</span>
+                <span className="threat-damage-val">{state.enemy.intent.value}</span>
+                <span className="threat-damage-unit">피해 예상!</span>
+              </div>
+            </div>
+
             {/* Interactive Monster Target Zone */}
             <div
               className={`mob-zone ${selectedTarget === 'ENEMY' ? 'target-selected' : ''} ${state.isEnemyAttacking ? 'mob-lunge-attack' : ''} ${state.enemy.hp <= 0 || state.isEnemyDefeated ? 'mob-defeat-collapse' : ''}`}
@@ -194,10 +207,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
                 <div className="mob-hp-text">
                   {state.enemy.hp} / {state.enemy.maxHp}
                 </div>
-              </div>
-
-              <div className="mob-intent-badge" style={{ marginTop: '6px', fontSize: '11px', color: '#ffd25a' }}>
-                {state.enemy.intent.icon} {state.enemy.intent.name} ({state.enemy.intent.value} 예고)
               </div>
             </div>
 
