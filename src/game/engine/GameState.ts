@@ -1,6 +1,8 @@
+import { createCombatState } from '../combat/CombatSystem'
+import type { CombatState } from '../combat/CombatTypes'
 import { createSeededRng, type RngSeed, type RngSnapshot } from './rng'
 
-export type GamePhase = 'idle' | 'battle'
+export type GamePhase = 'idle' | 'battle' | 'victory' | 'defeat'
 
 export type GameState = {
   seed: RngSeed
@@ -8,6 +10,7 @@ export type GameState = {
   turn: number
   rng: RngSnapshot
   log: number[]
+  combat: CombatState
 }
 
 export function createInitialGameState(seed: RngSeed): GameState {
@@ -17,5 +20,6 @@ export function createInitialGameState(seed: RngSeed): GameState {
     turn: 0,
     rng: createSeededRng(seed).snapshot(),
     log: [],
+    combat: createCombatState(),
   }
 }

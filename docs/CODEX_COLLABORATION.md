@@ -123,3 +123,36 @@
 
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/3
 - Implementation commit: `4a2edb5`; PR documentation updates are included on the branch.
+
+## 2026-08-19 - Combat Resolution
+
+### Human Direction
+
+- Proceed with item 1 from the spec gap list: interpret slot results into real combat state changes.
+- Keep this work on a combat resolution branch and continue the TDD workflow.
+- Verify `typecheck`, unit tests, and build before opening a draft PR.
+- Do not merge without explicit user approval.
+
+### Codex Work
+
+- Created and used the isolated worktree `C:\Users\00\Documents\Codex\curse_slot_machine_repo_combat_resolution`.
+- Stacked `feature/combat-resolution` on `feature/combat-slot-machine` because PR #3 is still open and this branch depends on its combat slot result types.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `CombatSystem` tests before adding production combat modules.
+- Implemented deterministic combat actors, curse state, enemy attack intent, slot result resolution, block absorption, capped healing, victory/defeat outcomes, and event emission.
+- Wrote failing `GameEngine` integration tests before adding the `RESOLVE_COMBAT_SLOT` command.
+- Integrated combat resolution into `GameState`, `GameCommand`, `GameEvent`, and `GameEngine`.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts`: failed first because `CombatSystem` did not exist, then passed with 4 tests.
+- `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because combat state and `RESOLVE_COMBAT_SLOT` did not exist, then passed with 4 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 14 tests across 4 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/6
+- Implementation commit: `1be0afa`; PR documentation updates are included on the branch.
+- Merge policy: no merge without explicit user approval.
