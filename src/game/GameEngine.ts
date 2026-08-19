@@ -5,7 +5,8 @@ import {
   SlotResult,
   ReelSymbol,
   AugmentItem,
-  SynergyProgress
+  SynergyProgress,
+  EnemyState
 } from '../types/game';
 import {
   ACTION_SYMBOLS,
@@ -34,7 +35,7 @@ export class GameEngine {
   }
 
   private createInitialState(seed: string): GameState {
-    const enemyCopy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[0]));
+    const enemyCopy = this.generateEnemyForStage(1, 1);
 
     return {
       mode: 'NORMAL',
@@ -429,6 +430,44 @@ export class GameEngine {
     };
   }
 
+  private generateEnemyForStage(floor: number, wave: number): EnemyState {
+    const isBoss = wave === 7 && floor === 3;
+    const isElite = wave === 4;
+
+    let baseEnemy: EnemyState;
+    if (isBoss) {
+      baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[6])); // Final Boss
+    } else if (isElite) {
+      const eliteIdx = floor === 1 ? 3 : floor === 2 ? 4 : 5;
+      baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[eliteIdx]));
+    } else {
+      const idx = (wave - 1) % 3;
+      baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[idx]));
+    }
+
+    // Dynamic Roguelike Level Design Scaling Formula
+    const hpScale = 1 + (floor - 1) * 0.70 + (wave - 1) * 0.08;
+    const dmgScale = 1 + (floor - 1) * 0.50 + (wave - 1) * 0.06;
+    const shieldBonus = (floor - 1) * 12 + (wave > 3 ? 6 : 0);
+
+    const scaledHp = Math.round(baseEnemy.maxHp * hpScale);
+    const scaledDmg = Math.round(baseEnemy.intent.value * dmgScale);
+    const scaledShield = Math.round(baseEnemy.shield + shieldBonus);
+
+    return {
+      ...baseEnemy,
+      name: `${floor}층 ${wave}단계: ${baseEnemy.name.split(': ')[1] || baseEnemy.name}`,
+      hp: scaledHp,
+      maxHp: scaledHp,
+      shield: scaledShield,
+      intent: {
+        ...baseEnemy.intent,
+        value: scaledDmg,
+        description: `다음 턴 ${scaledDmg} 피해 예고`
+      }
+    };
+  }
+
   private handleChooseReward(augmentId: string) {
     const chosen = ALL_AUGMENTS.find((a) => a.id === augmentId);
     if (chosen) {
@@ -453,8 +492,7 @@ export class GameEngine {
       this.state.wave += 1;
     }
 
-    const enemyIndex = Math.min((this.state.floor - 1) * 2 + (this.state.wave - 1), DEFAULT_ENEMIES.length - 1);
-    this.state.enemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[enemyIndex]));
+    this.state.enemy = this.generateEnemyForStage(this.state.floor, this.state.wave);
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
     this.state.screen = 'MAP';
