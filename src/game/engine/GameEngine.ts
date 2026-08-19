@@ -1,3 +1,4 @@
+import { resolveCombatSlot } from '../combat/CombatSystem'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
 import { createInitialGameState, type GameState } from './GameState'
@@ -19,6 +20,8 @@ export class GameEngine {
         return this.startRun()
       case 'ADVANCE_TURN':
         return this.advanceTurn()
+      case 'RESOLVE_COMBAT_SLOT':
+        return this.resolveCombatSlot(command)
     }
   }
 
@@ -61,6 +64,34 @@ export class GameEngine {
         type: 'TURN_ADVANCED',
         turn,
         roll,
+      },
+    ]
+  }
+
+  private resolveCombatSlot(command: Extract<GameCommand, { type: 'RESOLVE_COMBAT_SLOT' }>): GameEvent[] {
+    const resolution = resolveCombatSlot(this.state.combat, command.result)
+    const turn = this.state.turn + 1
+
+    this.state = {
+      ...this.state,
+      phase: resolution.outcome === 'ongoing' ? 'battle' : resolution.outcome,
+      turn,
+      combat: {
+        player: resolution.player,
+        enemy: resolution.enemy,
+        curse: resolution.curse,
+        enemyIntent: resolution.enemyIntent,
+        lastSlotResult: resolution.lastSlotResult,
+      },
+    }
+
+    return [
+      {
+        type: 'COMBAT_SLOT_RESOLVED',
+        turn,
+        result: command.result,
+        outcome: resolution.outcome,
+        combatEvents: resolution.events,
       },
     ]
   }

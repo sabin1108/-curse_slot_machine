@@ -33,6 +33,51 @@ describe('GameEngine', () => {
       log: expect.arrayContaining([expect.any(Number)]),
     })
   })
+
+  it('resolves a confirmed combat slot result into combat state', () => {
+    const engine = new GameEngine('combat-table')
+    const slotResult = {
+      action: 'bullet',
+      target: 'enemy',
+      modifier: 'x2',
+    } as const
+
+    engine.dispatch({ type: 'START_RUN' })
+    const events = engine.dispatch({
+      type: 'RESOLVE_COMBAT_SLOT',
+      result: slotResult,
+    })
+
+    expect(events).toEqual([
+      {
+        type: 'COMBAT_SLOT_RESOLVED',
+        turn: 1,
+        result: slotResult,
+        outcome: 'ongoing',
+        combatEvents: expect.arrayContaining([
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', target: 'enemy' }),
+          expect.objectContaining({ type: 'ENEMY_ATTACKED' }),
+          expect.objectContaining({ type: 'CURSE_INCREASED', value: 1 }),
+        ]),
+      },
+    ])
+    expect(engine.getState()).toMatchObject({
+      phase: 'battle',
+      turn: 1,
+      combat: {
+        player: {
+          health: 26,
+        },
+        enemy: {
+          health: 6,
+        },
+        curse: {
+          value: 1,
+        },
+        lastSlotResult: slotResult,
+      },
+    })
+  })
 })
 
 describe('createInitialGameState', () => {
@@ -43,5 +88,16 @@ describe('createInitialGameState', () => {
     expect(state.phase).toBe('idle')
     expect(state.turn).toBe(0)
     expect(state.log).toEqual([])
+    expect(state.combat).toMatchObject({
+      player: {
+        health: 30,
+      },
+      enemy: {
+        health: 18,
+      },
+      curse: {
+        value: 0,
+      },
+    })
   })
 })

@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline` and `feature/game-engine-core` are merged; current work is `feature/combat-slot-machine`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline` and `feature/game-engine-core` are merged; current work is `feature/combat-resolution`, stacked on the open `feature/combat-slot-machine` draft PR. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -23,7 +23,9 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 ## Environment Setup Results
 
 - Fresh clone created at `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh` because the requested `curse_slot_machine_repo` folder already existed with dirty changes.
-- Active branch: `feature/combat-slot-machine`.
+- Main checkout active branch: `feature/combat-slot-machine`.
+- Combat resolution worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_combat_resolution`.
+- Combat resolution active branch: `feature/combat-resolution`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -35,8 +37,9 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/combat-slot-machine`
-- Strategy: each feature branch starts from latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
+- Current branch: `feature/combat-resolution`
+- Strategy: each feature branch starts from the latest stable base, is verified locally, committed, pushed, and opened as a draft PR.
+- `feature/combat-resolution` is stacked on `feature/combat-slot-machine` because PR #3 is still open and contains the combat slot result types this branch resolves.
 - Merge policy: no PR merge without explicit user approval.
 
 ## Implemented Branches And PRs
@@ -46,6 +49,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
 | `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
 | `feature/combat-slot-machine` | `4a2edb5` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Draft PR opened |
+| `feature/combat-resolution` | pending | pending draft PR | Local verification passed |
 
 ## Verification Commands
 
@@ -69,17 +73,24 @@ Latest completed verification:
 - `feature/combat-slot-machine`: full `npm.cmd run test:run` passed with 9 tests across 3 files.
 - `feature/combat-slot-machine`: `npm.cmd run build` passed.
 - `feature/combat-slot-machine`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
+- `feature/combat-resolution`: targeted `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts` failed first because `CombatSystem` did not exist, then passed with 4 tests after implementation.
+- `feature/combat-resolution`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because combat state and `RESOLVE_COMBAT_SLOT` did not exist, then passed with 4 tests after integration.
+- `feature/combat-resolution`: `npm.cmd run typecheck` passed.
+- `feature/combat-resolution`: full `npm.cmd run test:run` passed with 14 tests across 4 files.
+- `feature/combat-resolution`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
 - `feature/combat-slot-machine` is open as draft PR #3 and awaiting user review.
+- `feature/combat-resolution` is implemented locally on a stacked branch and ready for draft PR creation.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Wait for user review and merge approval for PR #3.
-2. After merge, start `feature/combat-resolution`.
+1. Open draft PR for `feature/combat-resolution` against `feature/combat-slot-machine`.
+2. Wait for user review and merge approval for PR #3.
+3. After PR #3 and combat resolution are merged, start `feature/build-reward-synergy`.
 
 ## Branch Log
 
@@ -111,3 +122,14 @@ Latest completed verification:
 - Verification: targeted RED/GREEN test run, `typecheck`, full `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
 - Remaining issues: waiting for user review and merge approval.
 - Next branch: `feature/combat-resolution`
+
+### feature/combat-resolution
+
+- Branch: `feature/combat-resolution`
+- Base: `feature/combat-slot-machine`
+- Commit: pending
+- PR: pending draft PR
+- Implemented: deterministic combat actors, curse state, enemy attack intent, slot result resolution for `bullet`/`shield`/`heart`, `enemy`/`self`/`all` targets, `x1`/`x2`/`x3` modifiers, block absorption, capped healing, victory/defeat outcomes, and `GameEngine` command integration.
+- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
+- Remaining issues: draft PR needs to be opened; no merge without user approval.
+- Next branch: `feature/build-reward-synergy`
