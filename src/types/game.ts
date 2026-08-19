@@ -109,6 +109,7 @@ export interface OriginData {
   startingGoldBonus: number;
   startingHpBonus: number;
   startingShieldBonus: number;
+  startingAugmentId: string;
   icon: string;
   symbolBiasText: string;
 }

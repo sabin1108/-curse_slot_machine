@@ -166,9 +166,13 @@ export class GameEngine {
     this.state.player.hp = this.state.player.maxHp;
     this.state.player.shield = origin.startingShieldBonus;
 
+    // Apply origin-specific starting augment
+    const startingAug = ALL_AUGMENTS.find((a) => a.id === origin.startingAugmentId) || ALL_AUGMENTS[0];
+    this.state.build.augments = [startingAug];
+
     this.state.screen = 'MAP';
     this.state.narrativeMicrocopy = `'${origin.name}' 기원을 선택했습니다: ${origin.tagline}`;
-    this.state.combatLogs.push(`[기원 선택] ${origin.name} (${origin.title}) - ${origin.symbolBiasText}`);
+    this.state.combatLogs.push(`[기원 선택] ${origin.name} (${origin.title}) - 시작 증강: '${startingAug.name}'`);
   }
 
   private handleNavigate(screen: GameState['screen']) {

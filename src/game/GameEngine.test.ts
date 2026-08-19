@@ -93,6 +93,7 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(state.selectedOrigin).toBe('GAMBLER');
     expect(state.player.gold).toBe(200); // 150 + 50
     expect(state.player.maxHp).toBe(85); // 100 - 15
+    expect(state.build.augments[0].id).toBe('aug_frenzy_core');
     expect(state.screen).toBe('MAP');
     expect(state.narrativeMicrocopy).toContain('빚진 도박사');
   });

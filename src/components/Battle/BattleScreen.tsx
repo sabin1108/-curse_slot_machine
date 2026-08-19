@@ -42,6 +42,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
         soundManager.playDefense();
       } else if (state.currentResult.action.type === 'BULLET' || state.currentResult.action.type === 'DAGGER') {
         soundManager.playSlashAttack();
+      } else if (state.currentResult.action.type === 'BOMB') {
+        soundManager.playBombExplosion();
       } else {
         soundManager.playHeavyPunch();
       }
