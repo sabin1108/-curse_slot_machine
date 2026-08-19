@@ -50,7 +50,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
 | `feature/combat-slot-machine` | `6edc91d` | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Merged |
 | `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
-| `feature/build-reward-synergy` | pending | pending draft PR | Local verification passed |
+| `feature/build-reward-synergy` | `f2edf57` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Draft PR opened |
 
 ## Verification Commands
 
@@ -88,15 +88,14 @@ Latest completed verification:
 
 ## Remaining Problems
 
-- `feature/build-reward-synergy` is implemented locally and ready for draft PR creation.
+- `feature/build-reward-synergy` is open as draft PR #7 and awaiting user review.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Open draft PR for `feature/build-reward-synergy` against `main`.
-2. Wait for user review and merge approval.
-3. After build reward synergy is merged, start `feature/augment-slot-machine`.
+1. Wait for user review and merge approval for PR #7.
+2. After build reward synergy is merged, start `feature/augment-slot-machine`.
 
 ## Branch Log
 
@@ -144,9 +143,9 @@ Latest completed verification:
 
 - Branch: `feature/build-reward-synergy`
 - Base: `main`
-- Commit: pending
-- PR: pending draft PR
+- Commit: `f2edf57` plus PR documentation updates.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/7
 - Implemented: pure build catalog, build state, synergy evaluation, reward application, reward scoring/candidate generation, and `GameEngine` reward phase integration after combat victory.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: draft PR needs to be opened; no merge without user approval.
+- Remaining issues: waiting for user review and merge approval; no merge without user approval.
 - Next branch: `feature/augment-slot-machine`

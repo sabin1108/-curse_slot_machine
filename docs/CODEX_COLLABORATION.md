@@ -195,5 +195,6 @@
 
 ### GitHub
 
-- Draft PR: pending.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/7
+- Implementation commit: `f2edf57`; PR documentation updates are included on the branch.
 - Merge policy: no merge without explicit user approval.
