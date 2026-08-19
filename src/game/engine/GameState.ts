@@ -1,8 +1,11 @@
+import { createBuildState } from '../build/BuildSystem'
+import type { BuildState } from '../build/BuildTypes'
+import type { RewardOption } from '../build/RewardSystem'
 import { createCombatState } from '../combat/CombatSystem'
 import type { CombatState } from '../combat/CombatTypes'
 import { createSeededRng, type RngSeed, type RngSnapshot } from './rng'
 
-export type GamePhase = 'idle' | 'battle' | 'victory' | 'defeat'
+export type GamePhase = 'idle' | 'battle' | 'reward' | 'victory' | 'defeat'
 
 export type GameState = {
   seed: RngSeed
@@ -11,6 +14,10 @@ export type GameState = {
   rng: RngSnapshot
   log: number[]
   combat: CombatState
+  build: BuildState
+  rewards: {
+    options: RewardOption[]
+  }
 }
 
 export function createInitialGameState(seed: RngSeed): GameState {
@@ -21,5 +28,9 @@ export function createInitialGameState(seed: RngSeed): GameState {
     rng: createSeededRng(seed).snapshot(),
     log: [],
     combat: createCombatState(),
+    build: createBuildState(),
+    rewards: {
+      options: [],
+    },
   }
 }
