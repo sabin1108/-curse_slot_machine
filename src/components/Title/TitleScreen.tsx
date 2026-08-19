@@ -5,12 +5,20 @@ import { soundManager } from '../../utils/soundManager';
 
 interface TitleScreenProps {
   onDispatch: (cmd: GameCommand) => void;
+  onOpenCurseLog?: () => void;
 }
 
-export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch }) => {
+export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurseLog }) => {
   const handleStartNormal = () => {
     soundManager.playClick();
     onDispatch({ type: 'START_RUN', mode: 'NORMAL' });
+  };
+
+  const handleOpenCurseLog = () => {
+    soundManager.playClick();
+    if (onOpenCurseLog) {
+      onOpenCurseLog();
+    }
   };
 
   return (
@@ -53,9 +61,12 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch }) => {
         <div className="logo-sub">릴을 당겨 던전을 돌파하라 — 저주받은 슬롯머신</div>
       </div>
 
-      <div className="title-btns">
+      <div className="title-btns" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
         <div className="k-btn big primary glow-pulse" onClick={handleStartNormal}>
           🎮 던전 탐사 시작 (START GAME)
+        </div>
+        <div className="k-btn sub-btn" onClick={handleOpenCurseLog} style={{ cursor: 'pointer', padding: '6px 16px', background: 'rgba(0,0,0,0.6)', border: '1px solid #7c6f50', borderRadius: '4px', color: '#e2d3a8', fontSize: '13px' }}>
+          📜 저주 일지 (Curse Log)
         </div>
       </div>
 

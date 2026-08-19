@@ -7,9 +7,10 @@ interface HUDHeaderProps {
   curse: CurseState;
   wave: number;
   totalWaves: number;
+  narrativeMicrocopy?: string;
 }
 
-export const HUDHeader: React.FC<HUDHeaderProps> = ({ player, curse, wave, totalWaves }) => {
+export const HUDHeader: React.FC<HUDHeaderProps> = ({ player, curse, wave, totalWaves, narrativeMicrocopy }) => {
   const hpPercent = Math.max(0, Math.min(100, Math.round((player.hp / player.maxHp) * 100)));
   const cursePercent = Math.max(0, Math.min(100, Math.round((curse.current / curse.max) * 100)));
   const [muted, setMuted] = React.useState(!soundManager.isEnabled());
@@ -20,57 +21,66 @@ export const HUDHeader: React.FC<HUDHeaderProps> = ({ player, curse, wave, total
   };
 
   return (
-    <header className="hud-bar-container">
-      <div className="hud-group hp-group">
-        <span className="hud-label">HP</span>
-        <div className="hp-bar-outer" title={`현재 체력: ${player.hp} / ${player.maxHp}`}>
-          <div className="hp-bar-ghost" style={{ width: `${hpPercent}%` }} />
-          <div className="hp-bar-inner" style={{ width: `${hpPercent}%` }} />
-          {player.shield > 0 && (
+    <div className="hud-header-wrapper" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px' }}>
+      <header className="hud-bar-container">
+        <div className="hud-group hp-group">
+          <span className="hud-label">HP</span>
+          <div className="hp-bar-outer" title={`현재 체력: ${player.hp} / ${player.maxHp}`}>
+            <div className="hp-bar-ghost" style={{ width: `${hpPercent}%` }} />
+            <div className="hp-bar-inner" style={{ width: `${hpPercent}%` }} />
+            {player.shield > 0 && (
+              <div
+                className="shield-bar-overlay"
+                style={{ width: `${Math.min(100, (player.shield / player.maxHp) * 100)}%` }}
+              />
+            )}
+            <div className="hp-text">
+              {player.hp} / {player.maxHp} {player.shield > 0 ? `(+${player.shield} 🛡️)` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div className="hud-group wave-group">
+          <span className="hud-label">WAVE</span>
+          <div className="wave-dots" aria-label={`웨이브 ${wave} / ${totalWaves}`}>
+            {Array.from({ length: totalWaves }).map((_, idx) => (
+              <span key={idx} className={`wave-dot ${idx < wave ? 'on' : ''}`} />
+            ))}
+          </div>
+        </div>
+
+        <div className="hud-group curse-group">
+          <span className="hud-label curse-label">☠️ 저주</span>
+          <div className="curse-bar-outer" title={`저주 수치: ${curse.current} / ${curse.max}`}>
             <div
-              className="shield-bar-overlay"
-              style={{ width: `${Math.min(100, (player.shield / player.maxHp) * 100)}%` }}
+              className={`curse-bar-inner ${curse.current >= 5 ? 'danger-pulse' : ''}`}
+              style={{ width: `${cursePercent}%` }}
             />
-          )}
-          <div className="hp-text">
-            {player.hp} / {player.maxHp} {player.shield > 0 ? `(+${player.shield} 🛡️)` : ''}
+            <div className="curse-text">
+              {curse.current} / {curse.max}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="hud-group wave-group">
-        <span className="hud-label">WAVE</span>
-        <div className="wave-dots" aria-label={`웨이브 ${wave} / ${totalWaves}`}>
-          {Array.from({ length: totalWaves }).map((_, idx) => (
-            <span key={idx} className={`wave-dot ${idx < wave ? 'on' : ''}`} />
-          ))}
+        <div className="hud-group right-group">
+          <div className="gold-count">🪙 {player.gold}</div>
+          <button
+            className="sound-toggle-btn"
+            onClick={handleToggleMute}
+            title={muted ? '음소거 해제' : '음소거'}
+            type="button"
+          >
+            {muted ? '🔇' : '🔊'}
+          </button>
         </div>
-      </div>
+      </header>
 
-      <div className="hud-group curse-group">
-        <span className="hud-label curse-label">☠️ 저주</span>
-        <div className="curse-bar-outer" title={`저주 수치: ${curse.current} / ${curse.max}`}>
-          <div
-            className={`curse-bar-inner ${curse.current >= 5 ? 'danger-pulse' : ''}`}
-            style={{ width: `${cursePercent}%` }}
-          />
-          <div className="curse-text">
-            {curse.current} / {curse.max}
-          </div>
+      {narrativeMicrocopy && (
+        <div className="hud-narrative-banner">
+          <span className="narrative-icon">📜</span>
+          <span className="narrative-text">{narrativeMicrocopy}</span>
         </div>
-      </div>
-
-      <div className="hud-group right-group">
-        <div className="gold-count">🪙 {player.gold}</div>
-        <button
-          className="sound-toggle-btn"
-          onClick={handleToggleMute}
-          title={muted ? '음소거 해제' : '음소거'}
-          type="button"
-        >
-          {muted ? '🔇' : '🔊'}
-        </button>
-      </div>
-    </header>
+      )}
+    </div>
   );
 };

@@ -79,4 +79,31 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     engine.dispatch({ type: 'NEXT_SHOWCASE_STEP' });
     expect(engine.getState().showcase.currentStep).toBe(1);
   });
+
+  it('should handle START_RUN -> PROLOGUE and SELECT_ORIGIN stat modifications', () => {
+    const engine = new GameEngine();
+    engine.dispatch({ type: 'START_RUN' });
+
+    expect(engine.getState().screen).toBe('PROLOGUE');
+
+    // Select Gambler origin (+50 Gold, -15 HP bonus)
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
+
+    const state = engine.getState();
+    expect(state.selectedOrigin).toBe('GAMBLER');
+    expect(state.player.gold).toBe(200); // 150 + 50
+    expect(state.player.maxHp).toBe(85); // 100 - 15
+    expect(state.screen).toBe('MAP');
+    expect(state.narrativeMicrocopy).toContain('빚진 도박사');
+  });
+
+  it('should attach context-sensitive narrative microcopy on NAVIGATE', () => {
+    const engine = new GameEngine();
+    engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' });
+    expect(engine.getState().narrativeMicrocopy).toBe('낯익은 그림자 — 떠돌이 상인이다.');
+
+    engine.dispatch({ type: 'NAVIGATE', screen: 'REST' });
+    expect(engine.getState().narrativeMicrocopy).toBe('잠시, 릴이 멈춘다.');
+  });
 });
+

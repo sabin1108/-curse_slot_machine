@@ -3,6 +3,9 @@ import { GameEngine } from '../game/GameEngine';
 import { GameCommand } from '../types/game';
 
 import { TitleScreen } from '../components/Title/TitleScreen';
+import { PrologueScreen } from '../components/Navigation/PrologueScreen';
+import { OriginSelectionScreen } from '../components/Navigation/OriginSelectionScreen';
+import { CurseLogModal } from '../components/Navigation/CurseLogModal';
 import { BattleScreen } from '../components/Battle/BattleScreen';
 import { RewardModal } from '../components/Reward/RewardModal';
 import { DungeonMapScreen } from '../components/Navigation/DungeonMapScreen';
@@ -15,6 +18,7 @@ import '../styles.css';
 export function App() {
   const engine = useMemo(() => new GameEngine(), []);
   const [gameState, setGameState] = useState(() => engine.getState());
+  const [isCurseLogOpen, setIsCurseLogOpen] = useState(false);
 
   const handleDispatch = (command: GameCommand) => {
     const updatedState = engine.dispatch(command);
@@ -37,6 +41,13 @@ export function App() {
             type="button"
           >
             타이틀
+          </button>
+          <button
+            className={`tab-btn ${gameState.screen === 'PROLOGUE' || gameState.screen === 'ORIGIN' ? 'active' : ''}`}
+            onClick={() => handleDispatch({ type: 'OPEN_PROLOGUE' })}
+            type="button"
+          >
+            프롤로그/기원
           </button>
           <button
             className={`tab-btn ${gameState.screen === 'BATTLE' ? 'active' : ''}`}
@@ -71,7 +82,16 @@ export function App() {
 
       {/* Main View Area */}
       <div className="view-stage">
-        {gameState.screen === 'TITLE' && <TitleScreen onDispatch={handleDispatch} />}
+        {gameState.screen === 'TITLE' && (
+          <TitleScreen
+            onDispatch={handleDispatch}
+            onOpenCurseLog={() => setIsCurseLogOpen(true)}
+          />
+        )}
+
+        {gameState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
+
+        {gameState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
 
         {gameState.screen === 'BATTLE' && <BattleScreen state={gameState} onDispatch={handleDispatch} />}
 
@@ -110,9 +130,17 @@ export function App() {
             onDispatch={handleDispatch}
           />
         )}
+
+        {isCurseLogOpen && (
+          <CurseLogModal
+            unlockedLogs={gameState.curseLogsUnlocked}
+            onClose={() => setIsCurseLogOpen(false)}
+          />
+        )}
       </div>
     </main>
   );
 }
 
 export default App;
+

@@ -93,8 +93,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
             </div>
           </div>
 
-          <div className="hud-group stage-theme-name">
-            🏰 <span>{theme.name}</span>
+          <div className="hud-group stage-theme-name" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <span>🏰 {theme.name}</span>
+            {state.narrativeMicrocopy && (
+              <span className="hud-narrative-tag" style={{ fontSize: '11px', color: '#e2d3a8', fontStyle: 'italic', marginTop: '2px' }}>
+                📜 {state.narrativeMicrocopy}
+              </span>
+            )}
           </div>
 
           <div className="wave-dots">
