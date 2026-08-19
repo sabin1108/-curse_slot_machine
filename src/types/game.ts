@@ -137,6 +137,8 @@ export interface GameState {
   turn: number;
   wave: number;
   totalWaves: number;
+  floor: number;
+  totalFloors: number;
   player: PlayerState;
   enemy: EnemyState;
   curse: CurseState;
@@ -147,6 +149,10 @@ export interface GameState {
   selectedOrigin?: OriginId;
   narrativeMicrocopy?: string;
   curseLogsUnlocked?: string[];
+
+  // Combat Motion Flags
+  isEnemyAttacking?: boolean;
+  isEnemyDefeated?: boolean;
   
   // Combat Slot Machine State
   reels: {

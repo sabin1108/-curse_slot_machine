@@ -84,17 +84,35 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
         <div className="hud-bar">
           <div className="hud-group" onClick={handleSelectSelfTarget} style={{ cursor: 'pointer' }}>
             <span className="hud-label">HP {selectedTarget === 'SELF' ? '🎯' : ''}</span>
-            <div className="hp-bar-outer">
+            <div className="hp-bar-outer" style={{ position: 'relative' }}>
               <div className="hp-bar-ghost" style={{ width: `${hpPercent}%` }} />
               <div className="hp-bar-inner" style={{ width: `${hpPercent}%` }} />
-              <div className="hp-text">
-                {state.player.hp} / {state.player.maxHp}
+              {state.player.shield > 0 && (
+                <div
+                  className="shield-bar-overlay"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    height: '100%',
+                    width: `${Math.min(100, Math.round((state.player.shield / state.player.maxHp) * 100))}%`,
+                    background: 'linear-gradient(90deg, rgba(50, 200, 255, 0.7), rgba(0, 150, 255, 0.9))',
+                    borderRight: '2px solid #7fd8ff',
+                    boxShadow: '0 0 10px #7fd8ff',
+                    zIndex: 2,
+                    pointerEvents: 'none'
+                  }}
+                  title={`수호 방벽: ${state.player.shield}`}
+                />
+              )}
+              <div className="hp-text" style={{ zIndex: 3 }}>
+                {state.player.hp} / {state.player.maxHp} {state.player.shield > 0 ? `(+${state.player.shield} 🛡️)` : ''}
               </div>
             </div>
           </div>
 
           <div className="hud-group stage-theme-name" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <span>🏰 {theme.name}</span>
+            <span>🏰 Stage {state.floor || 1}-{state.wave} ({theme.name})</span>
             {state.narrativeMicrocopy && (
               <span className="hud-narrative-tag" style={{ fontSize: '11px', color: '#e2d3a8', fontStyle: 'italic', marginTop: '2px' }}>
                 📜 {state.narrativeMicrocopy}
@@ -156,7 +174,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
           <div className="center-battle-stage">
             {/* Interactive Monster Target Zone */}
             <div
-              className={`mob-zone ${selectedTarget === 'ENEMY' ? 'target-selected' : ''}`}
+              className={`mob-zone ${selectedTarget === 'ENEMY' ? 'target-selected' : ''} ${state.isEnemyAttacking ? 'mob-lunge-attack' : ''} ${state.enemy.hp <= 0 || state.isEnemyDefeated ? 'mob-defeat-collapse' : ''}`}
               onClick={handleSelectEnemyTarget}
               title="클릭하여 공격 타겟 지정"
             >

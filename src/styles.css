@@ -1734,3 +1734,110 @@ html, body {
   font-style: italic;
 }
 
+/* ---------- 몬스터 공격/사망 애니메이션 & 화면 전환 커튼 연출 ---------- */
+.mob-lunge-attack {
+  animation: mobLungeAttack 0.45s ease-in-out;
+}
+
+@keyframes mobLungeAttack {
+  0% { transform: scale(1) translateY(0); }
+  30% { transform: scale(1.25) translateY(28px) rotate(-4deg); filter: brightness(1.4); }
+  60% { transform: scale(1.1) translateY(10px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+.mob-defeat-collapse {
+  animation: mobDefeatCollapse 0.8s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
+
+@keyframes mobDefeatCollapse {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1.5); }
+  40% { transform: scale(1.15) rotate(15deg); filter: contrast(2) hue-rotate(90deg); }
+  100% { transform: scale(0.1) rotate(60deg) translateY(60px); opacity: 0; filter: grayscale(1); }
+}
+
+.screen-transition-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.curtain-wipe-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.curtain-left, .curtain-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: radial-gradient(circle at center, #1c1410, #090503);
+  border-right: 3px solid #ffb703;
+}
+
+.curtain-left {
+  left: 0;
+  animation: curtainWipeLeft 0.75s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+.curtain-right {
+  right: 0;
+  border-right: none;
+  border-left: 3px solid #ffb703;
+  animation: curtainWipeRight 0.75s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes curtainWipeLeft {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes curtainWipeRight {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+
+.wipe-loader-content {
+  position: relative;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: wipeContentFade 0.75s ease forwards;
+}
+
+.wipe-spinner {
+  font-size: 32px;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.wipe-message {
+  font-size: 14px;
+  color: #ffd25a;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 210, 90, 0.8);
+}
+
+@keyframes wipeContentFade {
+  0% { opacity: 0; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+
