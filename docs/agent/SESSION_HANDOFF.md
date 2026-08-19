@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, and `feature/combat-resolution` are merged; current work is `feature/build-reward-synergy`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, and `feature/build-reward-synergy` are merged; current work is `feature/augment-slot-machine`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -26,7 +26,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Main checkout active branch: `feature/combat-slot-machine`.
 - Combat resolution worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_combat_resolution`.
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
-- Build reward synergy active branch: `feature/build-reward-synergy`.
+- Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
+- Augment slot active branch: `feature/augment-slot-machine`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -50,7 +51,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
 | `feature/combat-slot-machine` | `6edc91d` | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Merged |
 | `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
-| `feature/build-reward-synergy` | `f2edf57` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Draft PR opened |
+| `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
+| `feature/augment-slot-machine` | local branch | not opened yet | In progress |
 
 ## Verification Commands
 
@@ -85,17 +87,23 @@ Latest completed verification:
 - `feature/build-reward-synergy`: `npm.cmd run typecheck` passed.
 - `feature/build-reward-synergy`: full `npm.cmd run test:run` passed with 24 tests across 7 files.
 - `feature/build-reward-synergy`: `npm.cmd run build` passed.
+- `feature/augment-slot-machine`: targeted `npm.cmd run test:run -- src/game/slot/AugmentSlotMachine.test.ts` failed first because `AugmentSlotMachine` did not exist, then passed with 3 tests after implementation.
+- `feature/augment-slot-machine`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because reward events/state did not include augment slot presentation, then passed with 5 tests after integration.
+- `feature/augment-slot-machine`: `npm.cmd run typecheck` passed.
+- `feature/augment-slot-machine`: full `npm.cmd run test:run` passed with 27 tests across 8 files.
+- `feature/augment-slot-machine`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
-- `feature/build-reward-synergy` is open as draft PR #7 and awaiting user review.
+- `feature/augment-slot-machine` is implemented locally and needs commit, push, and a draft PR.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Wait for user review and merge approval for PR #7.
-2. After build reward synergy is merged, start `feature/augment-slot-machine`.
+1. Open a draft PR for `feature/augment-slot-machine`.
+2. Wait for user review and merge approval for the augment slot PR.
+3. After augment slot is merged, start `feature/showcase-mode`.
 
 ## Branch Log
 
@@ -143,9 +151,19 @@ Latest completed verification:
 
 - Branch: `feature/build-reward-synergy`
 - Base: `main`
-- Commit: `f2edf57` plus PR documentation updates.
+- Commit: `f2edf57` plus PR documentation updates; squash merge commit on `main`: `622f52f`.
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/7
 - Implemented: pure build catalog, build state, synergy evaluation, reward application, reward scoring/candidate generation, and `GameEngine` reward phase integration after combat victory.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: waiting for user review and merge approval; no merge without user approval.
+- Remaining issues: none.
 - Next branch: `feature/augment-slot-machine`
+
+### feature/augment-slot-machine
+
+- Branch: `feature/augment-slot-machine`
+- Base: `main` after PR #7 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Implemented: deterministic `AugmentSlotMachine` presentation types and pure functions, hidden three-reel reward presentation, immutable reveal helper, random API guard test, and `GameEngine` reward state/event integration.
+- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
+- Remaining issues: commit, push, and open draft PR.
+- Next branch: `feature/showcase-mode`

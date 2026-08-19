@@ -1,6 +1,7 @@
 import type { BuildEvent, RewardRef } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatEvent, CombatOutcome } from '../combat/CombatTypes'
+import type { AugmentSlotPresentation } from '../slot/AugmentSlotTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 
 export type GameEvent =
@@ -24,6 +25,7 @@ export type GameEvent =
   | {
       type: 'REWARDS_GENERATED'
       options: RewardOption[]
+      augmentSlot: AugmentSlotPresentation
     }
   | {
       type: 'REWARD_CHOSEN'

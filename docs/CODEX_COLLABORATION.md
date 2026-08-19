@@ -198,3 +198,40 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/7
 - Implementation commit: `f2edf57`; PR documentation updates are included on the branch.
 - Merge policy: no merge without explicit user approval.
+
+### Merge Result
+
+- User approved merging PR #7 on 2026-08-19.
+- PR #7 was marked ready, verified, and squash merged into `main`.
+- PR #7 squash merge commit: `622f52f`.
+
+## 2026-08-19 - Augment Slot Machine
+
+### Human Direction
+
+- After merging build reward synergy, proceed to the next branch.
+- Implement `feature/augment-slot-machine` with TDD.
+- Keep AugmentSlotMachine as a reveal/presentation system; reward generation remains owned by RewardSystem.
+
+### Codex Work
+
+- Created and used the isolated worktree `C:\Users\00\Documents\Codex\csm_augment_slot`.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `AugmentSlotMachine` tests before adding production slot modules.
+- Implemented deterministic three-reel reward presentation and immutable reveal behavior.
+- Added a random API guard test to keep augment slot presentation from deciding reward RNG.
+- Wrote failing `GameEngine` tests before adding reward presentation state and event fields.
+- Integrated combat victory reward generation with `rewards.augmentSlot`, and clear it on `CHOOSE_REWARD`.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/slot/AugmentSlotMachine.test.ts`: failed first because `AugmentSlotMachine` did not exist, then passed with 3 tests.
+- `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because reward state/events did not include augment slot presentation, then passed with 5 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 27 tests across 8 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR not opened yet.
+- Merge policy: no merge without explicit user approval.

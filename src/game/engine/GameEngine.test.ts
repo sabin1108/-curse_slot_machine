@@ -102,14 +102,29 @@ describe('GameEngine', () => {
         options: expect.arrayContaining([
           expect.objectContaining({ kind: 'augment', id: expect.any(String) }),
         ]),
+        augmentSlot: expect.objectContaining({
+          reels: [
+            expect.objectContaining({ id: 'primary-tag' }),
+            expect.objectContaining({ id: 'rarity' }),
+            expect.objectContaining({ id: 'reward-name' }),
+          ],
+          targetReward: expect.objectContaining({ id: expect.any(String) }),
+          isRevealed: false,
+        }),
       }),
     ])
+    const rewardState = engine.getState().rewards
+    expect(rewardState.augmentSlot?.targetReward).toEqual(rewardState.options[0])
     expect(engine.getState()).toMatchObject({
       phase: 'reward',
       rewards: {
         options: expect.arrayContaining([
           expect.objectContaining({ kind: 'augment', id: expect.any(String) }),
         ]),
+        augmentSlot: expect.objectContaining({
+          targetReward: expect.objectContaining({ id: expect.any(String) }),
+          isRevealed: false,
+        }),
       },
     })
 
@@ -134,6 +149,7 @@ describe('GameEngine', () => {
     expect(engine.getState().build[`${reward.kind}s`]).toContain(reward.id)
     expect(engine.getState().phase).toBe('battle')
     expect(engine.getState().rewards.options).toEqual([])
+    expect(engine.getState().rewards.augmentSlot).toBeNull()
   })
 })
 
