@@ -78,6 +78,63 @@ describe('GameEngine', () => {
       },
     })
   })
+
+  it('generates build rewards after combat victory and applies the chosen reward', () => {
+    const engine = new GameEngine('reward-table')
+
+    engine.dispatch({ type: 'START_RUN' })
+    const victoryEvents = engine.dispatch({
+      type: 'RESOLVE_COMBAT_SLOT',
+      result: {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x3',
+      },
+    })
+
+    expect(victoryEvents).toEqual([
+      expect.objectContaining({
+        type: 'COMBAT_SLOT_RESOLVED',
+        outcome: 'victory',
+      }),
+      expect.objectContaining({
+        type: 'REWARDS_GENERATED',
+        options: expect.arrayContaining([
+          expect.objectContaining({ kind: 'augment', id: expect.any(String) }),
+        ]),
+      }),
+    ])
+    expect(engine.getState()).toMatchObject({
+      phase: 'reward',
+      rewards: {
+        options: expect.arrayContaining([
+          expect.objectContaining({ kind: 'augment', id: expect.any(String) }),
+        ]),
+      },
+    })
+
+    const reward = engine.getState().rewards.options[0]
+    const rewardEvents = engine.dispatch({
+      type: 'CHOOSE_REWARD',
+      reward: {
+        kind: reward.kind,
+        id: reward.id,
+      },
+    })
+
+    expect(rewardEvents).toEqual([
+      expect.objectContaining({
+        type: 'REWARD_CHOSEN',
+        reward: {
+          kind: reward.kind,
+          id: reward.id,
+        },
+      }),
+    ])
+    expect(engine.getState().build[`${reward.kind}s`]).toContain(reward.id)
+    expect(engine.getState().phase).toBe('battle')
+    expect(engine.getState().rewards.options).toEqual([])
+  })
 })
 
 describe('createInitialGameState', () => {
@@ -99,5 +156,14 @@ describe('createInitialGameState', () => {
         value: 0,
       },
     })
+    expect(state.build).toMatchObject({
+      augments: [],
+      items: [],
+      synergies: {
+        active: [],
+        completed: [],
+      },
+    })
+    expect(state.rewards.options).toEqual([])
   })
 })

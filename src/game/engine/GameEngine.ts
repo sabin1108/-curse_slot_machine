@@ -1,3 +1,5 @@
+import { applyReward } from '../build/BuildSystem'
+import { generateRewardOptions } from '../build/RewardSystem'
 import { resolveCombatSlot } from '../combat/CombatSystem'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
@@ -22,6 +24,8 @@ export class GameEngine {
         return this.advanceTurn()
       case 'RESOLVE_COMBAT_SLOT':
         return this.resolveCombatSlot(command)
+      case 'CHOOSE_REWARD':
+        return this.chooseReward(command)
     }
   }
 
@@ -71,10 +75,11 @@ export class GameEngine {
   private resolveCombatSlot(command: Extract<GameCommand, { type: 'RESOLVE_COMBAT_SLOT' }>): GameEvent[] {
     const resolution = resolveCombatSlot(this.state.combat, command.result)
     const turn = this.state.turn + 1
+    const rewards = resolution.outcome === 'victory' ? generateRewardOptions(this.state.build) : []
 
     this.state = {
       ...this.state,
-      phase: resolution.outcome === 'ongoing' ? 'battle' : resolution.outcome,
+      phase: this.getPhaseAfterCombatOutcome(resolution.outcome),
       turn,
       combat: {
         player: resolution.player,
@@ -83,9 +88,12 @@ export class GameEngine {
         enemyIntent: resolution.enemyIntent,
         lastSlotResult: resolution.lastSlotResult,
       },
+      rewards: {
+        options: rewards,
+      },
     }
 
-    return [
+    const events: GameEvent[] = [
       {
         type: 'COMBAT_SLOT_RESOLVED',
         turn,
@@ -94,6 +102,48 @@ export class GameEngine {
         combatEvents: resolution.events,
       },
     ]
+
+    if (rewards.length > 0) {
+      events.push({
+        type: 'REWARDS_GENERATED',
+        options: rewards,
+      })
+    }
+
+    return events
+  }
+
+  private chooseReward(command: Extract<GameCommand, { type: 'CHOOSE_REWARD' }>): GameEvent[] {
+    const result = applyReward(this.state.build, command.reward)
+
+    this.state = {
+      ...this.state,
+      phase: 'battle',
+      build: result.build,
+      rewards: {
+        options: [],
+      },
+    }
+
+    return [
+      {
+        type: 'REWARD_CHOSEN',
+        reward: command.reward,
+        buildEvents: result.events,
+      },
+    ]
+  }
+
+  private getPhaseAfterCombatOutcome(outcome: 'ongoing' | 'victory' | 'defeat'): GameState['phase'] {
+    if (outcome === 'victory') {
+      return 'reward'
+    }
+
+    if (outcome === 'defeat') {
+      return 'defeat'
+    }
+
+    return 'battle'
   }
 
   private consumeRoll(): number {

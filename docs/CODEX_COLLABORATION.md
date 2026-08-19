@@ -156,3 +156,44 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/6
 - Implementation commit: `1be0afa`; PR documentation updates are included on the branch.
 - Merge policy: no merge without explicit user approval.
+
+### Merge Result
+
+- User approved merging PR #3 and PR #6 on 2026-08-19.
+- PR #3 was updated with a fast-forward merge of `origin/main` to resolve a documentation conflict, then squash merged into `main`.
+- PR #3 squash merge commit: `6edc91d`.
+- PR #6 was retargeted to `main` after PR #3 merged, verified, then squash merged into `main`.
+- PR #6 squash merge commit: `445265a`.
+
+## 2026-08-19 - Build Reward Synergy
+
+### Human Direction
+
+- After merging combat slot machine and combat resolution, start the next planned branch.
+- Implement `feature/build-reward-synergy` with TDD.
+- Keep AugmentSlotMachine reveal animation and Showcase scripted rewards out of this branch.
+
+### Codex Work
+
+- Created and used the isolated worktree `C:\Users\00\Documents\Codex\csm_reward_synergy`.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `BuildSystem` tests before adding build modules.
+- Implemented pure build state, reward catalog, multi-requirement synergy evaluation, immutable reward application, duplicate reward handling, and synergy completion events.
+- Wrote failing `RewardSystem` tests before adding reward scoring.
+- Implemented deterministic reward candidate generation that excludes owned rewards and prioritizes synergy completion.
+- Wrote failing `GameEngine` tests before adding reward state and commands.
+- Integrated combat victory into a `reward` phase with generated reward options and `CHOOSE_REWARD` build application.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/build/BuildSystem.test.ts`: failed first because `BuildSystem` did not exist, then passed with 3 tests.
+- `npm.cmd run test:run -- src/game/build/RewardSystem.test.ts`: failed first because `RewardSystem` did not exist, then passed with 2 tests.
+- `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because build/reward state and reward events did not exist, then passed with 5 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 24 tests across 7 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR: pending.
+- Merge policy: no merge without explicit user approval.
