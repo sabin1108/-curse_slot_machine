@@ -49,7 +49,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
 | `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
 | `feature/combat-slot-machine` | `4a2edb5` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Draft PR opened |
-| `feature/combat-resolution` | pending | pending draft PR | Local verification passed |
+| `feature/combat-resolution` | `1be0afa` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Draft PR opened |
 
 ## Verification Commands
 
@@ -82,14 +82,14 @@ Latest completed verification:
 ## Remaining Problems
 
 - `feature/combat-slot-machine` is open as draft PR #3 and awaiting user review.
-- `feature/combat-resolution` is implemented locally on a stacked branch and ready for draft PR creation.
+- `feature/combat-resolution` is open as draft PR #6 and stacked on PR #3.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Open draft PR for `feature/combat-resolution` against `feature/combat-slot-machine`.
-2. Wait for user review and merge approval for PR #3.
+1. Wait for user review and merge approval for PR #3.
+2. After PR #3 merges, retarget or rebase PR #6 as needed before merge approval.
 3. After PR #3 and combat resolution are merged, start `feature/build-reward-synergy`.
 
 ## Branch Log
@@ -127,9 +127,9 @@ Latest completed verification:
 
 - Branch: `feature/combat-resolution`
 - Base: `feature/combat-slot-machine`
-- Commit: pending
-- PR: pending draft PR
+- Commit: `1be0afa` plus PR documentation updates.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/6
 - Implemented: deterministic combat actors, curse state, enemy attack intent, slot result resolution for `bullet`/`shield`/`heart`, `enemy`/`self`/`all` targets, `x1`/`x2`/`x3` modifiers, block absorption, capped healing, victory/defeat outcomes, and `GameEngine` command integration.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: draft PR needs to be opened; no merge without user approval.
+- Remaining issues: waiting for PR #3 review/merge and then PR #6 review/retarget as needed; no merge without user approval.
 - Next branch: `feature/build-reward-synergy`
