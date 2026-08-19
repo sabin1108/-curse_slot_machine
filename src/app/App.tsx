@@ -3,6 +3,10 @@ import { GameEngine } from '../game/GameEngine';
 import { GameCommand } from '../types/game';
 
 import { TitleScreen } from '../components/Title/TitleScreen';
+import { PrologueScreen } from '../components/Navigation/PrologueScreen';
+import { OriginSelectionScreen } from '../components/Navigation/OriginSelectionScreen';
+import { CurseLogModal } from '../components/Navigation/CurseLogModal';
+import { ScreenTransitionOverlay } from '../components/Navigation/ScreenTransitionOverlay';
 import { BattleScreen } from '../components/Battle/BattleScreen';
 import { RewardModal } from '../components/Reward/RewardModal';
 import { DungeonMapScreen } from '../components/Navigation/DungeonMapScreen';
@@ -15,6 +19,7 @@ import '../styles.css';
 export function App() {
   const engine = useMemo(() => new GameEngine(), []);
   const [gameState, setGameState] = useState(() => engine.getState());
+  const [isCurseLogOpen, setIsCurseLogOpen] = useState(false);
 
   const handleDispatch = (command: GameCommand) => {
     const updatedState = engine.dispatch(command);
@@ -37,6 +42,13 @@ export function App() {
             type="button"
           >
             타이틀
+          </button>
+          <button
+            className={`tab-btn ${gameState.screen === 'PROLOGUE' || gameState.screen === 'ORIGIN' ? 'active' : ''}`}
+            onClick={() => handleDispatch({ type: 'OPEN_PROLOGUE' })}
+            type="button"
+          >
+            프롤로그/기원
           </button>
           <button
             className={`tab-btn ${gameState.screen === 'BATTLE' ? 'active' : ''}`}
@@ -69,50 +81,70 @@ export function App() {
         </div>
       </nav>
 
-      {/* Main View Area */}
-      <div className="view-stage">
-        {gameState.screen === 'TITLE' && <TitleScreen onDispatch={handleDispatch} />}
+      {/* Main View Area with Screen Transition Wipe */}
+      <ScreenTransitionOverlay screen={gameState.screen}>
+        <div className="view-stage">
+          {gameState.screen === 'TITLE' && (
+            <TitleScreen
+              onDispatch={handleDispatch}
+              onOpenCurseLog={() => setIsCurseLogOpen(true)}
+            />
+          )}
 
-        {gameState.screen === 'BATTLE' && <BattleScreen state={gameState} onDispatch={handleDispatch} />}
+          {gameState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
 
-        {gameState.screen === 'MAP' && (
-          <DungeonMapScreen
-            currentWave={gameState.wave}
-            totalWaves={gameState.totalWaves}
-            visitedNodePath={gameState.visitedNodePath}
-            onDispatch={handleDispatch}
-          />
-        )}
+          {gameState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
 
-        {gameState.screen === 'SHOP' && <ShopScreen player={gameState.player} onDispatch={handleDispatch} />}
+          {gameState.screen === 'BATTLE' && <BattleScreen state={gameState} onDispatch={handleDispatch} />}
 
-        {gameState.screen === 'REST' && (
-          <RestScreen
-            player={gameState.player}
-            curseCurrent={gameState.curse.current}
-            onDispatch={handleDispatch}
-          />
-        )}
+          {gameState.screen === 'MAP' && (
+            <DungeonMapScreen
+              currentWave={gameState.wave}
+              totalWaves={gameState.totalWaves}
+              visitedNodePath={gameState.visitedNodePath}
+              onDispatch={handleDispatch}
+            />
+          )}
 
-        {gameState.screen === 'REWARD' && (
-          <RewardModal
-            candidates={gameState.rewardCandidates}
-            augSlotPresentation={gameState.augSlotPresentation}
-            onDispatch={handleDispatch}
-          />
-        )}
+          {gameState.screen === 'SHOP' && <ShopScreen player={gameState.player} onDispatch={handleDispatch} />}
 
-        {(gameState.screen === 'GAMEOVER' || gameState.screen === 'VICTORY') && (
-          <GameOverVictoryModal
-            screen={gameState.screen}
-            wave={gameState.wave}
-            combatLogs={gameState.combatLogs}
-            onDispatch={handleDispatch}
-          />
-        )}
-      </div>
+          {gameState.screen === 'REST' && (
+            <RestScreen
+              player={gameState.player}
+              curseCurrent={gameState.curse.current}
+              onDispatch={handleDispatch}
+            />
+          )}
+
+          {gameState.screen === 'REWARD' && (
+            <RewardModal
+              candidates={gameState.rewardCandidates}
+              augSlotPresentation={gameState.augSlotPresentation}
+              onDispatch={handleDispatch}
+            />
+          )}
+
+          {(gameState.screen === 'GAMEOVER' || gameState.screen === 'VICTORY') && (
+            <GameOverVictoryModal
+              screen={gameState.screen}
+              wave={gameState.wave}
+              combatLogs={gameState.combatLogs}
+              onDispatch={handleDispatch}
+            />
+          )}
+
+          {isCurseLogOpen && (
+            <CurseLogModal
+              unlockedLogs={gameState.curseLogsUnlocked}
+              onClose={() => setIsCurseLogOpen(false)}
+            />
+          )}
+        </div>
+      </ScreenTransitionOverlay>
     </main>
   );
 }
 
 export default App;
+
+

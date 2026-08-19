@@ -128,12 +128,12 @@ class SoundManager {
   }
 
   public playDefense() {
-    this.playAudioFile('defense.mp3', 0.3);
+    this.playAudioFile('defense.mp3', 0.3, () => this.playOscillatorHit());
   }
 
   // 5. Slash Attack / Weapon Damage SFX (slash_attack1.mp3)
   public playSlashAttack() {
-    this.playAudioFile('slash_attack.mp3', 0.3);
+    this.playAudioFile('slash_attack.mp3', 0.3, () => this.playOscillatorHit());
   }
 
   // 6. Hit Impact SFX (damage4.mp3)
@@ -143,13 +143,38 @@ class SoundManager {
 
   // 7. Heavy Punch SFX (heavy_punch1.mp3)
   public playHeavyPunch() {
-    this.playAudioFile('heavy_punch.mp3', 0.3);
+    this.playAudioFile('heavy_punch.mp3', 0.3, () => this.playOscillatorHit());
   }
 
-  // 8. Gentle Retro Victory Chime (DO NOT USE final_attack.mp3 per user request)
+  // 8. BOMB / Explosion / 폭주 코어 SFX
+  public playBombExplosion() {
+    this.playAudioFile('final_attack.mp3', 0.3, () => this.playOscillatorBomb());
+  }
+
+  // 9. Gentle Retro Victory Chime (DO NOT USE final_attack.mp3 per user request)
   public playJackpotSound() {
     if (!this.enabled) return;
     this.playOscillatorJackpot();
+  }
+
+  private playOscillatorBomb() {
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.35);
+
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.35);
+    } catch {}
   }
 
   // ---------- Web Audio API Synthesizer Fallbacks ----------

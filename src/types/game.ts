@@ -98,7 +98,23 @@ export interface CurseState {
   threshold2Triggered: boolean;
 }
 
-export type GameScreen = 'TITLE' | 'BATTLE' | 'REWARD' | 'MAP' | 'SHOP' | 'REST' | 'GAMEOVER' | 'VICTORY';
+export type OriginId = 'SWORDSMAN' | 'GAMBLER' | 'PRIEST';
+
+export interface OriginData {
+  id: OriginId;
+  name: string;
+  title: string;
+  tagline: string;
+  narrative: string;
+  startingGoldBonus: number;
+  startingHpBonus: number;
+  startingShieldBonus: number;
+  startingAugmentId: string;
+  icon: string;
+  symbolBiasText: string;
+}
+
+export type GameScreen = 'TITLE' | 'PROLOGUE' | 'ORIGIN' | 'BATTLE' | 'REWARD' | 'MAP' | 'SHOP' | 'REST' | 'GAMEOVER' | 'VICTORY';
 
 export type GameMode = 'NORMAL' | 'SHOWCASE';
 
@@ -122,11 +138,22 @@ export interface GameState {
   turn: number;
   wave: number;
   totalWaves: number;
+  floor: number;
+  totalFloors: number;
   player: PlayerState;
   enemy: EnemyState;
   curse: CurseState;
   build: BuildState;
   visitedNodePath: number[]; // Persistent visited map node IDs
+  
+  // Narrative & Origin State
+  selectedOrigin?: OriginId;
+  narrativeMicrocopy?: string;
+  curseLogsUnlocked?: string[];
+
+  // Combat Motion Flags
+  isEnemyAttacking?: boolean;
+  isEnemyDefeated?: boolean;
   
   // Combat Slot Machine State
   reels: {
@@ -166,6 +193,8 @@ export interface GameState {
 
 export type GameCommand =
   | { type: 'START_RUN'; seed?: string; mode?: GameMode }
+  | { type: 'OPEN_PROLOGUE' }
+  | { type: 'SELECT_ORIGIN'; originId: OriginId }
   | { type: 'SELECT_MAP_NODE'; nodeId: number }
   | { type: 'SPIN_COMBAT_SLOT' }
   | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
@@ -177,3 +206,4 @@ export type GameCommand =
   | { type: 'NEXT_SHOWCASE_STEP' }
   | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
   | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
+

@@ -18,6 +18,8 @@ import {
 } from './data';
 import { SeededRNG } from './rng';
 
+import { ORIGINS, CURSE_LOGS } from './origins';
+
 export class GameEngine {
   private state: GameState;
   private rng: SeededRNG;
@@ -41,6 +43,8 @@ export class GameEngine {
       turn: 1,
       wave: 1,
       totalWaves: 7,
+      floor: 1,
+      totalFloors: 3,
       player: {
         hp: 100,
         maxHp: 100,
@@ -61,6 +65,11 @@ export class GameEngine {
         synergyProgress: JSON.parse(JSON.stringify(INITIAL_SYNERGIES))
       },
       visitedNodePath: [],
+      selectedOrigin: 'SWORDSMAN',
+      narrativeMicrocopy: '저주받은 슬롯머신이 침묵하고 있습니다.',
+      curseLogsUnlocked: ['log_01'],
+      isEnemyAttacking: false,
+      isEnemyDefeated: false,
       reels: {
         action: [...ACTION_SYMBOLS],
         target: [...TARGET_SYMBOLS],
@@ -92,6 +101,12 @@ export class GameEngine {
       case 'START_RUN':
         this.handleStartRun(command.seed, command.mode);
         break;
+      case 'OPEN_PROLOGUE':
+        this.state.screen = 'PROLOGUE';
+        break;
+      case 'SELECT_ORIGIN':
+        this.handleSelectOrigin(command.originId);
+        break;
       case 'SELECT_MAP_NODE':
         this.handleSelectMapNode(command.nodeId);
         break;
@@ -111,7 +126,7 @@ export class GameEngine {
         this.handleChooseReward(command.augmentId);
         break;
       case 'NAVIGATE':
-        this.state.screen = command.screen;
+        this.handleNavigate(command.screen);
         break;
       case 'START_SHOWCASE':
         this.handleStartShowcase();
@@ -136,8 +151,57 @@ export class GameEngine {
     this.rng = new SeededRNG(activeSeed);
     this.state = this.createInitialState(activeSeed);
     this.state.mode = mode;
+    this.state.screen = 'PROLOGUE';
+    this.state.narrativeMicrocopy = '폐성의 지하, 오래된 슬롯머신 하나가 웅웅거리고 있습니다.';
+    this.state.combatLogs.push(`[런 시작] 서사 프롤로그 진입 (모드: ${mode})`);
+  }
+
+  private handleSelectOrigin(originId: typeof ORIGINS[keyof typeof ORIGINS]['id']) {
+    const origin = ORIGINS[originId] || ORIGINS.SWORDSMAN;
+    this.state.selectedOrigin = originId;
+    
+    // Apply starting stat bonuses
+    this.state.player.gold += origin.startingGoldBonus;
+    this.state.player.maxHp = Math.max(50, 100 + origin.startingHpBonus);
+    this.state.player.hp = this.state.player.maxHp;
+    this.state.player.shield = origin.startingShieldBonus;
+
+    // Apply origin-specific starting augment
+    const startingAug = ALL_AUGMENTS.find((a) => a.id === origin.startingAugmentId) || ALL_AUGMENTS[0];
+    this.state.build.augments = [startingAug];
+
     this.state.screen = 'MAP';
-    this.state.combatLogs.push(`[런 시작] 모드: ${mode}, 던전 탐사 지도 진입`);
+    this.state.narrativeMicrocopy = `'${origin.name}' 기원을 선택했습니다: ${origin.tagline}`;
+    this.state.combatLogs.push(`[기원 선택] ${origin.name} (${origin.title}) - 시작 증강: '${startingAug.name}'`);
+  }
+
+  private handleNavigate(screen: GameState['screen']) {
+    this.state.screen = screen;
+    switch (screen) {
+      case 'SHOP':
+        this.state.narrativeMicrocopy = '낯익은 그림자 — 떠돌이 상인이다.';
+        break;
+      case 'REST':
+        this.state.narrativeMicrocopy = '잠시, 릴이 멈춘다.';
+        break;
+      case 'MAP':
+        this.state.narrativeMicrocopy = `다음 릴이 멈출 곳을 정한다. (${this.state.floor}층 ${this.state.wave}단계)`;
+        break;
+      case 'BATTLE':
+        this.state.narrativeMicrocopy = `저주가 한 걸음 더 조여온다. (${this.state.floor}-${this.state.wave} 전투)`;
+        break;
+      case 'REWARD':
+        this.state.narrativeMicrocopy = '쓰러진 자가 무언가를 흘렸다.';
+        break;
+      case 'GAMEOVER':
+        this.state.narrativeMicrocopy = '릴이 완전히 멈췄다. 하지만 처음으로 돌아갈 뿐, 끝은 아니다.';
+        break;
+      case 'VICTORY':
+        this.state.narrativeMicrocopy = '3층 최종 보스를 정복하고 저주의 구속에서 해방되었습니다!';
+        break;
+      default:
+        this.state.narrativeMicrocopy = '저주받은 슬롯머신의 톱니바퀴가 숨죽이고 있습니다.';
+    }
   }
 
   private handleSelectMapNode(nodeId: number) {
@@ -148,6 +212,8 @@ export class GameEngine {
     // Clear previous damage pop & result when entering a new room
     this.state.lastDamagePop = null;
     this.state.currentResult = null;
+    this.state.isEnemyDefeated = false;
+    this.state.isEnemyAttacking = false;
   }
 
   private handleSpinCombatSlot() {
@@ -307,18 +373,21 @@ export class GameEngine {
 
     // Check Enemy Victory/Defeat
     if (this.state.enemy.hp <= 0) {
+      this.state.isEnemyDefeated = true;
       this.state.combatLogs.push(`[전투 승리] ${this.state.enemy.name}을 처치했습니다!`);
       this.prepareRewardScreen();
       return;
     }
 
     // Enemy turn execution if enemy is alive
+    this.state.isEnemyAttacking = true;
     const intent = this.state.enemy.intent;
     let enemyDmg = intent.value;
     if (this.state.player.shield > 0) {
       const absorbed = Math.min(this.state.player.shield, enemyDmg);
       this.state.player.shield -= absorbed;
       enemyDmg -= absorbed;
+      this.state.combatLogs.push(`[수호 방벽 흡수] 보호막이 ${absorbed} 피해를 차단했습니다!`);
     }
     if (enemyDmg > 0) {
       this.state.player.hp = Math.max(0, this.state.player.hp - enemyDmg);
@@ -368,15 +437,27 @@ export class GameEngine {
       this.state.combatLogs.push(`[보상 획득] 증강 '${chosen.name}' 획득 (+40 골드)`);
     }
 
-    // Return to MAP for route selection!
+    // Check 3-Floor Progression (Wave 1~7 per Floor)
     if (this.state.wave >= this.state.totalWaves) {
-      this.state.screen = 'VICTORY';
+      if (this.state.floor >= this.state.totalFloors) {
+        this.state.screen = 'VICTORY';
+        this.state.narrativeMicrocopy = '3층 최종 보스를 정복하고 저주의 구속에서 해방되었습니다!';
+        return;
+      } else {
+        this.state.floor += 1;
+        this.state.wave = 1;
+        this.state.visitedNodePath = []; // reset map for next floor
+        this.state.narrativeMicrocopy = `${this.state.floor}층에 진입했습니다. 더욱 강력한 마물들이 등장합니다!`;
+      }
     } else {
       this.state.wave += 1;
-      const enemyIndex = Math.min(this.state.wave - 1, DEFAULT_ENEMIES.length - 1);
-      this.state.enemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[enemyIndex]));
-      this.state.screen = 'MAP';
     }
+
+    const enemyIndex = Math.min((this.state.floor - 1) * 2 + (this.state.wave - 1), DEFAULT_ENEMIES.length - 1);
+    this.state.enemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[enemyIndex]));
+    this.state.isEnemyDefeated = false;
+    this.state.isEnemyAttacking = false;
+    this.state.screen = 'MAP';
   }
 
   private checkCurseThresholds() {

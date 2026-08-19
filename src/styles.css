@@ -1444,3 +1444,505 @@ html, body {
   font-size: 13px;
   color: #fff;
 }
+
+/* ---------- 서사 프롤로그 및 기원(Origin) 선택 UI ---------- */
+.prologue-screen-overlay {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 40%, rgba(30, 20, 15, 0.95), rgba(10, 5, 2, 0.98));
+  padding: 24px;
+}
+
+.prologue-card-panel {
+  width: 680px;
+  background: rgba(16, 12, 10, 0.96);
+  border: 3px solid #7c6f50;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(255, 183, 3, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.prologue-header {
+  border-bottom: 2px solid rgba(124, 111, 80, 0.4);
+  padding-bottom: 12px;
+  text-align: center;
+}
+
+.prologue-badge {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #ffb703;
+  background: rgba(255, 183, 3, 0.15);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.prologue-title {
+  font-size: 24px;
+  color: #ffd25a;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.prologue-body {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 15px;
+  color: #f0e6d2;
+  line-height: 1.6;
+}
+
+.prologue-text-line {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 16px;
+  border-radius: 6px;
+  border-left: 3px solid #ffb703;
+}
+
+.fade-in-line {
+  animation: fadeInLine 0.6s ease forwards;
+}
+
+@keyframes fadeInLine {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.prologue-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+.origin-select-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 32px;
+  background: radial-gradient(circle at 50% 30%, rgba(26, 18, 12, 0.96), rgba(8, 4, 2, 0.99));
+}
+
+.origin-header-banner {
+  text-align: center;
+}
+
+.origin-screen-title {
+  font-size: 26px;
+  color: #ffd25a;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 210, 90, 0.5);
+}
+
+.origin-screen-subtitle {
+  font-size: 14px;
+  color: #c4b595;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.origin-cards-grid {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: stretch;
+  margin: 16px 0;
+}
+
+.origin-card {
+  width: 250px;
+  background: rgba(18, 14, 12, 0.94);
+  border: 3px solid #5a4835;
+  border-radius: 12px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+}
+
+.origin-card:hover {
+  transform: translateY(-6px);
+  border-color: #ffb703;
+}
+
+.origin-card.selected {
+  border-color: #ffd25a;
+  box-shadow: 0 0 26px rgba(255, 210, 90, 0.6);
+  background: rgba(32, 24, 18, 0.96);
+}
+
+.origin-card-badge {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.origin-name {
+  font-size: 19px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.origin-tagline {
+  font-size: 11.5px;
+  color: #ffd25a;
+  margin: 4px 0 10px;
+}
+
+.origin-narrative {
+  font-size: 12px;
+  color: #bbb;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.origin-stats-box {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #ddd;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.stat-val {
+  color: #ffd25a;
+  font-weight: bold;
+}
+
+.origin-bias-tag {
+  font-size: 11px;
+  color: #7fd8ff;
+  background: rgba(127, 216, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(127, 216, 255, 0.3);
+}
+
+.origin-confirm-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.origin-guide-hint {
+  font-size: 12.5px;
+  color: #aaa;
+}
+
+/* ---------- 서사 마이크로카피 배너 & 저주 일지 모달 ---------- */
+.hud-narrative-banner {
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 183, 3, 0.3);
+  border-radius: 4px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #e2d3a8;
+}
+
+.curse-log-modal {
+  width: 640px;
+  max-height: 80vh;
+}
+
+.curse-log-body {
+  padding: 16px 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.curse-log-intro {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.curse-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.curse-log-card {
+  background: rgba(20, 16, 14, 0.85);
+  border: 2px solid #5a4835;
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+.curse-log-card.unlocked {
+  border-color: #ffb703;
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.2);
+}
+
+.curse-log-card.locked {
+  opacity: 0.5;
+}
+
+.log-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.log-title {
+  font-size: 15px;
+  color: #ffd25a;
+  font-weight: bold;
+}
+
+.log-condition {
+  font-size: 11.5px;
+  color: #aaa;
+}
+
+.log-fragment {
+  font-size: 13px;
+  color: #e8ded0;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ---------- 몬스터 공격/사망 애니메이션 & 화면 전환 커튼 연출 ---------- */
+.mob-lunge-attack {
+  animation: mobLungeAttack 0.45s ease-in-out;
+}
+
+@keyframes mobLungeAttack {
+  0% { transform: scale(1) translateY(0); }
+  30% { transform: scale(1.25) translateY(28px) rotate(-4deg); filter: brightness(1.4); }
+  60% { transform: scale(1.1) translateY(10px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+.mob-defeat-collapse {
+  animation: mobDefeatCollapse 0.8s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
+
+@keyframes mobDefeatCollapse {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1.5); }
+  40% { transform: scale(1.15) rotate(15deg); filter: contrast(2) hue-rotate(90deg); }
+  100% { transform: scale(0.1) rotate(60deg) translateY(60px); opacity: 0; filter: grayscale(1); }
+}
+
+.screen-transition-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.curtain-wipe-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.curtain-left, .curtain-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: radial-gradient(circle at center, #1c1410, #090503);
+  border-right: 3px solid #ffb703;
+}
+
+.curtain-left {
+  left: 0;
+  animation: curtainWipeLeft 0.75s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+.curtain-right {
+  right: 0;
+  border-right: none;
+  border-left: 3px solid #ffb703;
+  animation: curtainWipeRight 0.75s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes curtainWipeLeft {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes curtainWipeRight {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+
+.wipe-loader-content {
+  position: relative;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: wipeContentFade 0.75s ease forwards;
+}
+
+.wipe-spinner {
+  font-size: 32px;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.wipe-message {
+  font-size: 14px;
+  color: #ffd25a;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 210, 90, 0.8);
+}
+
+@keyframes wipeContentFade {
+  0% { opacity: 0; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+/* ---------- 몬스터 대형 RED 위협 경고 배너 & 박진감 카메라 흔들림 연출 ---------- */
+.mob-intent-threat-banner {
+  background: linear-gradient(135deg, rgba(160, 20, 20, 0.95), rgba(70, 5, 5, 0.98));
+  border: 3px solid #ff3333;
+  border-radius: 10px;
+  padding: 8px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 0 25px rgba(255, 30, 30, 0.8), inset 0 0 15px rgba(255, 100, 100, 0.4);
+  animation: threatAlarmPulse 1.2s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes threatAlarmPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 30, 30, 0.7), inset 0 0 10px rgba(255, 100, 100, 0.3);
+    border-color: #ff3333;
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 60, 60, 1), inset 0 0 22px rgba(255, 180, 180, 0.6);
+    border-color: #ffaa00;
+    transform: scale(1.03);
+  }
+}
+
+.threat-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.threat-warning-tag {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #ffdd00;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 221, 0, 0.5);
+}
+
+.threat-intent-name {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.threat-damage-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.threat-icon {
+  font-size: 22px;
+}
+
+.threat-damage-val {
+  font-size: 26px;
+  color: #ffea00;
+  font-weight: 900;
+  text-shadow: 0 0 10px #ff3300, 2px 2px 0 #000;
+  letter-spacing: 1px;
+}
+
+.threat-damage-unit {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* 카메라 셰이크 타격 연출 */
+.screen-shake {
+  animation: screenShake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes screenShake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(3px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
+
+/* 던전 맵 상단 최종 보스 런 목표 배너 */
+.map-boss-goal-banner {
+  background: linear-gradient(90deg, rgba(80, 10, 10, 0.9), rgba(160, 30, 30, 0.95), rgba(80, 10, 10, 0.9));
+  border-bottom: 2px solid #ff3300;
+  color: #ffffff;
+  text-align: center;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(255, 51, 0, 0.4);
+  position: relative;
+  z-index: 5;
+}
+
+
+

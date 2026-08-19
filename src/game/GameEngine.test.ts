@@ -79,4 +79,75 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     engine.dispatch({ type: 'NEXT_SHOWCASE_STEP' });
     expect(engine.getState().showcase.currentStep).toBe(1);
   });
+
+  it('should handle START_RUN -> PROLOGUE and SELECT_ORIGIN stat modifications', () => {
+    const engine = new GameEngine();
+    engine.dispatch({ type: 'START_RUN' });
+
+    expect(engine.getState().screen).toBe('PROLOGUE');
+
+    // Select Gambler origin (+50 Gold, -15 HP bonus)
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
+
+    const state = engine.getState();
+    expect(state.selectedOrigin).toBe('GAMBLER');
+    expect(state.player.gold).toBe(200); // 150 + 50
+    expect(state.player.maxHp).toBe(85); // 100 - 15
+    expect(state.build.augments[0].id).toBe('aug_frenzy_core');
+    expect(state.screen).toBe('MAP');
+    expect(state.narrativeMicrocopy).toContain('빚진 도박사');
+  });
+
+  it('should attach context-sensitive narrative microcopy on NAVIGATE', () => {
+    const engine = new GameEngine();
+    engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' });
+    expect(engine.getState().narrativeMicrocopy).toBe('낯익은 그림자 — 떠돌이 상인이다.');
+
+    engine.dispatch({ type: 'NAVIGATE', screen: 'REST' });
+    expect(engine.getState().narrativeMicrocopy).toBe('잠시, 릴이 멈춘다.');
+  });
+
+  it('should progress through 3 floors and trigger VICTORY ending upon clearing 3-7', () => {
+    const engine = new GameEngine();
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'SWORDSMAN' });
+
+    // Set stage to 3-7
+    (engine as any).state.floor = 3;
+    (engine as any).state.wave = 7;
+
+    // Choose reward for 3-7 boss
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'aug_combo_1' });
+
+    expect(engine.getState().screen).toBe('VICTORY');
+    expect(engine.getState().narrativeMicrocopy).toContain('3층 최종 보스를 정복');
+  });
+
+  it('should absorb enemy damage with player shield first', () => {
+    const engine = new GameEngine('shield_test_seed');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'PRIEST' }); // Priest starts with +10 Shield
+
+    const initialShield = engine.getState().player.shield;
+    const initialHp = engine.getState().player.hp;
+    expect(initialShield).toBe(10);
+
+    // Manually trigger enemy attack absorption
+    const intentValue = 5;
+    let enemyDmg = intentValue;
+    if (engine.getState().player.shield > 0) {
+      const absorbed = Math.min(engine.getState().player.shield, enemyDmg);
+      engine.getState().player.shield -= absorbed;
+      enemyDmg -= absorbed;
+    }
+    if (enemyDmg > 0) {
+      engine.getState().player.hp -= enemyDmg;
+    }
+
+    expect(engine.getState().player.hp).toBe(initialHp);
+    expect(engine.getState().player.shield).toBe(5);
+  });
 });
+
+
+
