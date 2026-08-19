@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline` is merged; current work is `feature/game-engine-core`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline` and `feature/game-engine-core` are merged; current work is `feature/combat-slot-machine`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -23,7 +23,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 ## Environment Setup Results
 
 - Fresh clone created at `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh` because the requested `curse_slot_machine_repo` folder already existed with dirty changes.
-- Active branch: `feature/game-engine-core`.
+- Active branch: `feature/combat-slot-machine`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -35,7 +35,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/game-engine-core`
+- Current branch: `feature/combat-slot-machine`
 - Strategy: each feature branch starts from latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -44,7 +44,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | Branch | Commit | PR | Status |
 | --- | --- | --- | --- |
 | `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
-| `feature/game-engine-core` | `06b9cdc` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Draft PR opened |
+| `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
+| `feature/combat-slot-machine` | `4a2edb5` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Draft PR opened |
 
 ## Verification Commands
 
@@ -63,17 +64,22 @@ Latest completed verification:
 - `feature/game-engine-core`: full `npm.cmd run test:run` passed with 4 tests across 2 files.
 - `feature/game-engine-core`: `npm.cmd run build` passed.
 - `feature/game-engine-core`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
+- `feature/combat-slot-machine`: targeted `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts` failed first because slot modules did not exist, then passed with 5 tests after implementation.
+- `feature/combat-slot-machine`: `npm.cmd run typecheck` passed.
+- `feature/combat-slot-machine`: full `npm.cmd run test:run` passed with 9 tests across 3 files.
+- `feature/combat-slot-machine`: `npm.cmd run build` passed.
+- `feature/combat-slot-machine`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
 
 ## Remaining Problems
 
-- `feature/game-engine-core` is open as draft PR #2 and awaiting review.
+- `feature/combat-slot-machine` is open as draft PR #3 and awaiting user review.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Wait for user review and merge approval for PR #2.
-2. After merge, start `feature/combat-slot-machine`.
+1. Wait for user review and merge approval for PR #3.
+2. After merge, start `feature/combat-resolution`.
 
 ## Branch Log
 
@@ -89,9 +95,19 @@ Latest completed verification:
 ### feature/game-engine-core
 
 - Branch: `feature/game-engine-core`
-- Implementation commit: `06b9cdc`; PR documentation updates are included on the branch.
+- Implementation commit: `06b9cdc`; squash merge commit on `main`: `49f5eab`.
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/2
 - Implemented so far: seeded RNG, `GameCommand`, `GameEvent`, `GameState`, and minimal deterministic `GameEngine`.
 - Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: waiting for PR review and user merge approval.
+- Remaining issues: none for this branch.
 - Next branch: `feature/combat-slot-machine`
+
+### feature/combat-slot-machine
+
+- Branch: `feature/combat-slot-machine`
+- Commit: `4a2edb5` plus PR documentation updates.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/3
+- Implemented: weighted combat reels, one-payline `[action, target, modifier]` results, lock-aware rerolls, deterministic seeded spin sequences, and curse costs for 0/1/2 locks.
+- Verification: targeted RED/GREEN test run, `typecheck`, full `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
+- Remaining issues: waiting for user review and merge approval.
+- Next branch: `feature/combat-resolution`
