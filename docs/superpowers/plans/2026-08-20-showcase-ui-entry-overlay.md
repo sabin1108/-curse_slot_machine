@@ -28,7 +28,7 @@
 - Consumes: `GameCommand` variants `{ type: 'START_SHOWCASE' }` and `{ type: 'NEXT_SHOWCASE_STEP' }`.
 - Produces: a visible title-screen Showcase button and mounted `ShowcaseOverlay` while `gameState.showcase.active` is true.
 
-- [ ] **Step 1: Write failing App tests**
+- [x] **Step 1: Write failing App tests**
 
 Add tests to `src/app/App.test.tsx`:
 
@@ -57,13 +57,13 @@ it('advances showcase overlay steps through the existing command path', async ()
 })
 ```
 
-- [ ] **Step 2: Run tests to verify RED**
+- [x] **Step 2: Run tests to verify RED**
 
 Run: `npm.cmd run test:run -- src/app/App.test.tsx`
 
 Expected: FAIL because the Showcase button is not rendered and `App` does not mount `ShowcaseOverlay`.
 
-- [ ] **Step 3: Implement minimal UI wiring**
+- [x] **Step 3: Implement minimal UI wiring**
 
 In `TitleScreen`, add a `handleStartShowcase` handler:
 
@@ -94,7 +94,7 @@ In `App`, import and render:
 )}
 ```
 
-- [ ] **Step 4: Run targeted tests to verify GREEN**
+- [x] **Step 4: Run targeted tests to verify GREEN**
 
 Run: `npm.cmd run test:run -- src/app/App.test.tsx`
 
@@ -102,8 +102,8 @@ Expected: PASS.
 
 ### Task 2: Verification And Publish
 
-- [ ] Run `npm.cmd run typecheck`.
-- [ ] Run `npm.cmd run test:run`.
-- [ ] Run `npm.cmd run build`.
+- [x] Run `npm.cmd run typecheck`.
+- [x] Run `npm.cmd run test:run`.
+- [x] Run `npm.cmd run build`.
 - [ ] Update handoff/progress/collaboration docs.
 - [ ] Commit, push, and open a draft PR.
