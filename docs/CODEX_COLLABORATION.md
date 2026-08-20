@@ -657,3 +657,33 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/21
 - Head commit: `8ba4287`.
 - Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - Offline Font Fallback
+
+### Human Direction
+
+- User approved merging PR #21 and continuing with `SHOWCASE-QA-004`.
+- Remove the Google Fonts network failure/noise while preserving offline-safe typography.
+
+### Codex Work
+
+- Merged PR #21 after approval; squash merge commit on `main`: `605b62d`.
+- Created `feature/offline-font-fallback` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-offline-font-fallback.md`.
+- Wrote a failing offline browser asset policy test for externally hosted Google Fonts.
+- Removed the Google Fonts `@import` from `src/styles.css`.
+- Added `--font-display` with Korean/system font fallbacks and reused it for body, nav tabs, and buttons.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts`: failed first because `src/styles.css` imported `https://fonts.googleapis.com/css2?family=Jua&display=swap`, then passed after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 59 tests across 12 files.
+- `npm.cmd run build`: passed.
+- Focused Playwright browser check passed: title screen loaded with `failedCount: 0` and `fontFailures: []`.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/22
+- Head commit: `fe42c8a`.
+- Merge policy: no merge without explicit user approval.
