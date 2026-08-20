@@ -65,7 +65,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
 | `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | `5d1a89b` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Merged |
-| `feature/showcase-ui-entry-overlay` | `4846552` | not opened | In progress |
+| `feature/showcase-ui-entry-overlay` | `4846552` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Draft |
 
 ## Verification Commands
 
@@ -160,14 +160,14 @@ Latest completed verification:
 - `feature/ui-adapter-event-node-entry` was merged through PR #15.
 - `feature/ui-adapter-event-choice-command` was merged through PR #16.
 - `feature/ui-adapter-showcase-slot-guard` was merged through PR #17.
-- `feature/showcase-ui-entry-overlay` is local and verified; draft PR creation is pending.
+- `feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for `feature/showcase-ui-entry-overlay`.
+1. Review PR #18 and merge only after explicit user approval.
 2. After this branch lands, run a focused playable Showcase QA pass before broad structured-engine replacement.
 
 ## Branch Log
@@ -348,7 +348,7 @@ Latest completed verification:
 - Base: `main` after PR #17 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Commit: `4846552`
-- PR: not opened yet.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/18
 - Implemented: title-screen `Showcase Mode` entry dispatches `START_SHOWCASE`, and `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Remaining issues: draft PR creation is pending.
+- Remaining issues: review PR #18; do not merge without explicit user approval.

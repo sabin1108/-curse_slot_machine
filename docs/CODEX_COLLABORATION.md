@@ -556,5 +556,5 @@
 
 ### GitHub
 
-- Draft PR pending creation for `feature/showcase-ui-entry-overlay`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/18
 - Merge policy: no merge without explicit user approval.

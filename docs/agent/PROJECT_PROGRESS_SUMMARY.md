@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/showcase-ui-entry-overlay`
-- Current PR: pending draft PR creation
+- Current PR: draft PR #18 - https://github.com/sabin1108/-curse_slot_machine/pull/18
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -40,7 +40,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/showcase-ui-entry-overlay` is local and verified; draft PR creation is pending.
+`feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
 
 Implemented:
 
@@ -81,7 +81,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Commit, push, and open a draft PR for `feature/showcase-ui-entry-overlay`.
+1. Keep PR #18 draft until review and explicit merge approval.
 2. Continue with a small UI/UX review or seed-based playable Showcase QA after this branch lands.
 
 Do not merge later PRs without explicit user approval.
