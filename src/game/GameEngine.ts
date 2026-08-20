@@ -446,9 +446,9 @@ export class GameEngine {
     }
 
     // Dynamic Roguelike Level Design Scaling Formula
-    const hpScale = 1 + (floor - 1) * 0.70 + (wave - 1) * 0.08;
-    const dmgScale = 1 + (floor - 1) * 0.50 + (wave - 1) * 0.06;
-    const shieldBonus = (floor - 1) * 12 + (wave > 3 ? 6 : 0);
+    const hpScale = 1 + (floor - 1) * 0.78 + (wave - 1) * 0.11;
+    const dmgScale = 1 + (floor - 1) * 0.58 + (wave - 1) * 0.08;
+    const shieldBonus = (floor - 1) * 16 + (wave > 3 ? 8 : 0) + (isBoss ? 12 : 0);
 
     const scaledHp = Math.round(baseEnemy.maxHp * hpScale);
     const scaledDmg = Math.round(baseEnemy.intent.value * dmgScale);

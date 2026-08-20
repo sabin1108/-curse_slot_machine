@@ -123,6 +123,26 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(engine.getState().narrativeMicrocopy).toContain('3층 최종 보스를 정복');
   });
 
+  it('should keep the first encounter tense and scale the final boss as a hard check', () => {
+    const engine = new GameEngine();
+
+    const firstEnemy = (engine as any).generateEnemyForStage(1, 1);
+    const finalBoss = (engine as any).generateEnemyForStage(3, 7);
+
+    expect(firstEnemy).toMatchObject({
+      hp: 75,
+      maxHp: 75,
+      shield: 0,
+      intent: expect.objectContaining({ value: 11 })
+    });
+    expect(finalBoss).toMatchObject({
+      hp: 1224,
+      maxHp: 1224,
+      shield: 102,
+      intent: expect.objectContaining({ value: 111 })
+    });
+  });
+
   it('should absorb enemy damage with player shield first', () => {
     const engine = new GameEngine('shield_test_seed');
     engine.dispatch({ type: 'START_RUN' });
