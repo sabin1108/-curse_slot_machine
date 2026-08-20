@@ -55,10 +55,12 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
           {candidates.map((aug) => {
             const isSelected = selectedAug?.id === aug.id;
             return (
-              <div
+              <button
                 key={aug.id}
                 className={`reward-card-pixel ${isSelected ? 'selected' : ''}`}
                 style={{ backgroundImage: `url(${getCardFrame(aug.rarity)})` }}
+                type="button"
+                aria-label={`${aug.name} 선택`}
                 onClick={() => handleSelectReward(aug)}
               >
                 <div className="card-pixel-rarity">{aug.rarity}</div>
@@ -67,7 +69,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
                 <p className="card-pixel-desc">{aug.description}</p>
                 <div className="card-pixel-val">효과: {aug.effectValue}</div>
                 <div className="k-btn card-select-btn">선택하기</div>
-              </div>
+              </button>
             );
           })}
         </div>

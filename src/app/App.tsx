@@ -82,7 +82,7 @@ export function App() {
         </div>
       </nav>
 
-      {gameState.showcase.active && (
+      {gameState.showcase.active && gameState.screen !== 'REWARD' && (
         <ShowcaseOverlay
           currentStepIndex={gameState.showcase.currentStep}
           steps={gameState.showcase.steps}

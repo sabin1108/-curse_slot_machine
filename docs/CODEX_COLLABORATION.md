@@ -596,3 +596,34 @@
 
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/19
 - Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - Showcase Reward Modal Accessibility
+
+### Human Direction
+
+- User approved merging PR #19 and continuing with the accepted QA fixes.
+- Keep the fix small, TDD-protected, and limited to React display/input behavior.
+
+### Codex Work
+
+- Merged PR #19 after approval; squash merge commit on `main`: `f1145c6`.
+- Created `feature/showcase-reward-modal-accessibility` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-showcase-reward-modal-accessibility.md`.
+- Wrote failing App tests for `SHOWCASE-QA-001` and `SHOWCASE-QA-002`.
+- Updated `App` so `ShowcaseOverlay` is not rendered while the reward modal owns input on `REWARD`.
+- Updated `RewardModal` so reward cards are semantic `button type="button"` controls with accessible reward-name labels.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/App.test.tsx`: failed first for each accepted QA issue, then passed with 5 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 57 tests across 10 files.
+- `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
+- Focused Playwright browser check passed: reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/20
+- Head commit: `428b1ca`.
+- Merge policy: no merge without explicit user approval.
