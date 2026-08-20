@@ -291,3 +291,56 @@
 ### Remaining Gap
 
 - The visible React app imports `src/game/engine/UiGameEngine.ts`, which preserves the current UI state contract and delegates ordinary legacy commands while exposing a narrow structured combo-effect combat path. Full legacy engine retirement remains out of scope for this branch.
+
+### Merge Result
+
+- User approved merging PR #10 on 2026-08-20.
+- PR #10 was marked ready and squash merged into `main`.
+- PR #10 squash merge commit: `8be060c`.
+
+## 2026-08-20 - UI Adapter Confirm Result
+
+### Human Direction
+
+- Merge PR #10 and continue the next adapter slice.
+
+### Codex Work
+
+- Created `feature/ui-adapter-confirm-result` from updated `main` after PR #10 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving `CONFIRM_SLOT_RESULT` still trusted mutable UI `currentResult`.
+- Updated `CONFIRM_SLOT_RESULT` to prefer the adapter-owned pure `currentStructuredSlot`.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because mutated UI presentation prevented enemy damage, then passed with 5 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 41 tests across 9 files.
+- `npm.cmd run build`: passed.
+
+## 2026-08-20 - UI Projection Helper Extraction
+
+### Human Direction
+
+- Continue the next adapter cleanup on draft PR #11 after approval.
+- Keep the work small, TDD-protected, and avoid broad engine/UI migration in this slice.
+
+### Codex Work
+
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiProjection` tests before adding the production projection module.
+- Extracted reusable UI projection helpers from `UiGameEngine` into `src/game/engine/UiProjection.ts`.
+- Kept `UiGameEngine` focused on command orchestration, adapter-owned combat slot state, and structured state projection.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: failed first because `UiProjection.ts` did not exist.
+- `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts`: passed, 7 tests across 2 files.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 43 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR remains open: https://github.com/sabin1108/-curse_slot_machine/pull/11
+- Merge policy: no merge without explicit user approval.

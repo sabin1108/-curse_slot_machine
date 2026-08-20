@@ -7,9 +7,10 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/content-effect-schema-pilot`
-- Current PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft)
+- Current branch: `feature/ui-adapter-confirm-result`
+- Current PR: #11 draft, https://github.com/sabin1108/-curse_slot_machine/pull/11
 - PR #8 status: merged into `main` with squash commit `ca51454`.
+- PR #10 status: merged into `main` with squash commit `8be060c`.
 
 ## Completed Branches
 
@@ -21,48 +22,39 @@ Last updated: 2026-08-20
 | `feature/combat-resolution` | #6 | `445265a` | Merged |
 | `feature/build-reward-synergy` | #7 | `622f52f` | Merged |
 | `feature/augment-slot-machine` | #8 | `ca51454` | Merged |
+| `feature/content-effect-schema-pilot` | #10 | `8be060c` | Merged |
 
 ## Current Branch
 
-`feature/content-effect-schema-pilot` is pushed and has draft PR #10 open.
+`feature/ui-adapter-confirm-result` is pushed and open as draft PR #11.
 
 Implemented:
 
-- Content logic analysis and MVP schema/design documents under `docs/agent` and `docs/design`.
-- Agent feedback documents and cumulative feedback index under `docs/agent/feedback`.
-- Bounded `EffectDefinition` and `EffectCondition` types under `src/game/effects`.
-- `BuildSystem.getActiveEffects(build, catalog)` for owned reward effects and completed synergy effects.
-- Optional combat effect context in `CombatSystem`.
-- Initial supported combat effects: `combat.action_amount.add`, `combat.action_amount.add_pct`, `combat.bullet.extra_hit`, and `combat.curse_gain.add`.
-- Default `combo_engine` now has a bounded `combo_extra_hit` structured effect.
-- Pure `GameEngine` passes active build effects into combat resolution.
-- UI adapter `src/game/engine/UiGameEngine.ts` bridges structured reward/combat results into the current React-facing state contract for a narrow combo-effect path.
-- `src/app/App.tsx` now imports the UI adapter while unsupported UI commands continue to delegate to the legacy engine.
-- UI adapter now projects structured victory reward options and augment-slot presentation into `rewardCandidates` and `augSlotPresentation` for the current RewardModal contract.
-- UI adapter now routes `SPIN_COMBAT_SLOT` and lock-aware `REROLL_UNLOCKED` through pure `CombatSlotMachine` functions and projects the result into UI `currentResult`.
+- `CONFIRM_SLOT_RESULT` now prefers the adapter-owned pure combat slot result over mutable UI `currentResult`.
+- `UiGameEngine` structured confirm tests now spin through the adapter instead of mutating presentation state.
+- UI projection helpers for structured slot results, rewards, augments, synergies, and reel indexes now live in `src/game/engine/UiProjection.ts`.
+- `UiGameEngine` now keeps orchestration and adapter state projection code while delegating reusable UI shape conversion to the pure projection module.
 
 Current branch commits:
 
-- `5ba1851` - `feat: add bounded content effect pilot`
-- `a261089` - `feat: project structured rewards to ui adapter`
-- `b4532a3` - `feat: route ui slot spin through pure slot machine`
+- `1b68c65` - `fix: confirm adapter-owned slot result`
+- follow-up UI projection extraction changes are verified for draft PR #11.
 
 ## Verification
 
-Latest verification on `feature/content-effect-schema-pilot`:
+Latest verification on `feature/ui-adapter-confirm-result`:
 
+- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because confirm used mutable UI `currentResult`, then passed with 5 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: failed first because `UiProjection.ts` did not exist.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts`: passed, 7 tests across 2 files after helper extraction.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 40 tests across 9 files.
+- `npm.cmd run test:run`: passed, 43 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/build/BuildSystem.test.ts` failed first because `getActiveEffects` did not exist, then passed after implementation.
-- `src/game/combat/CombatSystem.test.ts` failed first because combat effects were ignored, then passed after implementation.
-- `src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed after integration.
-- `src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed after adding the adapter.
-- `src/game/engine/UiGameEngine.test.ts` failed first because victory reward projection left `rewardCandidates` empty, then passed after projection implementation.
-- `src/game/engine/UiGameEngine.test.ts` failed first because spin/reroll still used legacy slot output, then passed after routing through pure slot functions.
+- `src/game/engine/UiGameEngine.test.ts` failed first because confirm used mutable UI `currentResult`, then passed after using adapter-owned `currentStructuredSlot`.
+- `src/game/engine/UiProjection.test.ts` failed first because the projection module did not exist, then passed after extracting pure projection helpers.
 
 ## Architecture Decisions Preserved
 
@@ -79,6 +71,6 @@ TDD evidence:
 Next planned work:
 
 1. Keep map/shop/rest/showcase migration as separate TDD slices.
-2. Keep PR #10 draft until human review/approval.
+2. Keep PR #11 draft until review/merge approval.
 
 Do not merge later PRs without explicit user approval.
