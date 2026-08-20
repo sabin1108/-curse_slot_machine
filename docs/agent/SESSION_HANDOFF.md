@@ -59,7 +59,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
 | `feature/content-effect-schema-pilot` | `8be060c` | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Merged |
 | `feature/ui-adapter-confirm-result` | `e8c5884` | https://github.com/sabin1108/-curse_slot_machine/pull/11 | Merged |
-| `feature/ui-adapter-map-node` | local changes | not opened | In progress |
+| `feature/ui-adapter-map-node` | `e897a7e` | https://github.com/sabin1108/-curse_slot_machine/pull/12 | Draft |
 
 ## Verification Commands
 
@@ -124,14 +124,14 @@ Latest completed verification:
 
 - `feature/content-effect-schema-pilot` was merged through PR #10.
 - `feature/ui-adapter-confirm-result` was merged through PR #11.
-- `feature/ui-adapter-map-node` is local and verified; draft PR creation is pending.
+- `feature/ui-adapter-map-node` is pushed and open as draft PR #12; do not merge without explicit user approval.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-map-node`.
+1. Keep PR #12 draft until review/merge approval.
 2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
 
 ## Branch Log
@@ -233,8 +233,8 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-map-node`
 - Base: `main` after PR #11 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `e897a7e`.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/12 (draft).
 - Implemented: structured reward selection now returns the visible UI to `MAP`, clears reward candidates and augment slot presentation, advances legacy map/wave/enemy shell state, and preserves projected structured build ownership.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: deeper map node semantics, shop/rest/showcase migration remain future slices.
