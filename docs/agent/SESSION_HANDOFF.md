@@ -63,7 +63,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-select-map-node` | `1877c21` | https://github.com/sabin1108/-curse_slot_machine/pull/13 | Merged |
 | `feature/ui-adapter-node-type-routing` | `d4ea1bd` | https://github.com/sabin1108/-curse_slot_machine/pull/14 | Merged |
 | `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
-| `feature/ui-adapter-event-choice-command` | local changes | not opened | In progress |
+| `feature/ui-adapter-event-choice-command` | `8b0f42f` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Draft |
 
 ## Verification Commands
 
@@ -148,14 +148,14 @@ Latest completed verification:
 - `feature/ui-adapter-select-map-node` was merged through PR #13.
 - `feature/ui-adapter-node-type-routing` was merged through PR #14.
 - `feature/ui-adapter-event-node-entry` was merged through PR #15.
-- `feature/ui-adapter-event-choice-command` is local and verified; draft PR creation is pending.
+- `feature/ui-adapter-event-choice-command` is pushed and open as draft PR #16.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-event-choice-command`.
+1. Keep PR #16 draft until review and explicit merge approval.
 2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until showcase state is covered.
 
 ## Branch Log
@@ -309,8 +309,8 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-event-choice-command`
 - Base: `main` after PR #15 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `8b0f42f`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/16
 - Implemented: `RESOLVE_EVENT_CHOICE` maps `OPEN`, `REST`, and `SKIP` through `UiGameEngine` into existing TypeScript engine behavior, while `DungeonMapScreen` only dispatches the selected event choice.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: showcase migration remains a future slice.
