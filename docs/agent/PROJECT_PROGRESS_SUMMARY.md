@@ -7,11 +7,12 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-map-node`
-- Current PR: #12 draft, https://github.com/sabin1108/-curse_slot_machine/pull/12
+- Current branch: `feature/ui-adapter-select-map-node`
+- Current PR: pending draft PR creation
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
+- PR #12 status: merged into `main` with squash commit `9955372`.
 
 ## Completed Branches
 
@@ -25,33 +26,34 @@ Last updated: 2026-08-20
 | `feature/augment-slot-machine` | #8 | `ca51454` | Merged |
 | `feature/content-effect-schema-pilot` | #10 | `8be060c` | Merged |
 | `feature/ui-adapter-confirm-result` | #11 | `e8c5884` | Merged |
+| `feature/ui-adapter-map-node` | #12 | `9955372` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-map-node` is pushed and open as draft PR #12.
+`feature/ui-adapter-select-map-node` is local and verified; draft PR creation is pending.
 
 Implemented:
 
-- Structured reward selection in `UiGameEngine` now returns the visible UI to the map progression shell when the player chooses from the reward screen.
-- Structured build ownership is preserved while the legacy presentation engine temporarily advances wave/enemy/map UI state.
-- Reward candidates and augment slot presentation clear after the structured reward is chosen.
+- `SELECT_MAP_NODE` in `UiGameEngine` now prepares a clean battle-entry UI state.
+- Map node selection clears stale adapter-owned structured slot results before the next battle.
+- Invalid confirm without a new spin no longer re-resolves a stale previous slot result.
 
 Current branch commits:
 
-- `e897a7e` - `fix: return structured rewards to map`
+- none yet; local changes are verified and pending commit/push/PR.
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-map-node`:
+Latest verification on `feature/ui-adapter-select-map-node`:
 
-- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because structured reward selection left the UI on `REWARD`, then passed with 6 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `SELECT_MAP_NODE` left the UI on `MAP`, then passed with 7 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 44 tests across 10 files.
+- `npm.cmd run test:run`: passed, 45 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/engine/UiGameEngine.test.ts` failed first because structured reward selection returned `screen: 'REWARD'` instead of `screen: 'MAP'`.
+- `src/game/engine/UiGameEngine.test.ts` failed first because `SELECT_MAP_NODE` returned `screen: 'MAP'` instead of `screen: 'BATTLE'`.
 
 ## Architecture Decisions Preserved
 
@@ -67,7 +69,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #12 draft until review/merge approval.
-2. Continue map/shop/rest/showcase migration as separate TDD slices.
+1. Commit, push, and open a draft PR for `feature/ui-adapter-select-map-node`.
+2. Continue shop/rest/showcase migration as separate TDD slices.
 
 Do not merge later PRs without explicit user approval.

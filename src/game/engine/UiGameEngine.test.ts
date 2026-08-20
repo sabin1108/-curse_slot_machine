@@ -90,6 +90,30 @@ describe('UiGameEngine', () => {
     ]).toContain(chosenRewardId)
   })
 
+  it('selects a map node into clean battle entry without resolving a stale slot', () => {
+    const engine = new GameEngine('lethal-ui-24')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    const chosenRewardId = rewardState.rewardCandidates[0].id
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    const battleState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1 })
+    const enemyHpBeforeConfirm = battleState.enemy.hp
+
+    expect(battleState.screen).toBe('BATTLE')
+    expect(battleState.visitedNodePath).toContain(1)
+    expect(battleState.currentResult).toBeNull()
+    expect(battleState.hasSpunThisTurn).toBe(false)
+    expect(battleState.lockedReels.size).toBe(0)
+
+    const afterInvalidConfirm = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(afterInvalidConfirm.enemy.hp).toBe(enemyHpBeforeConfirm)
+  })
+
   it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
     const engine = new GameEngine('slot-ui')
 
