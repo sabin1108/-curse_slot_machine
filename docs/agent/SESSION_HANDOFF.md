@@ -70,7 +70,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/showcase-reward-modal-accessibility` | `428b1ca` | https://github.com/sabin1108/-curse_slot_machine/pull/20 | Merged |
 | `feature/showcase-step-header-spacing` | `605b62d` | https://github.com/sabin1108/-curse_slot_machine/pull/21 | Merged |
 | `feature/offline-font-fallback` | `00a810c` | https://github.com/sabin1108/-curse_slot_machine/pull/22 | Merged |
-| `feature/ui-adapter-synergy-progress` | `4d44cda` | https://github.com/sabin1108/-curse_slot_machine/pull/23 | Draft |
+| `feature/ui-adapter-synergy-progress` | see PR #23 | https://github.com/sabin1108/-curse_slot_machine/pull/23 | Draft |
 
 ## Verification Commands
 
@@ -441,7 +441,7 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-synergy-progress`
 - Base: `main` after PR #22 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `4d44cda`
+- Commit: see PR #23 branch head after PR #22 merge reconciliation.
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/23
 - Implemented: `UiGameEngine` projects structured `BuildState.synergies.progress` values into legacy UI `build.synergyProgress`; `toUiSynergyProgress` now accepts structured progress.
 - Verification: targeted RED/GREEN `UiGameEngine` test, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed on 2026-08-20.

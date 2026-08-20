@@ -715,5 +715,5 @@
 ### GitHub
 
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/23
-- Head commit: `b0811e6`.
+- Head commit: updated after PR #22 merge; see PR #23.
 - Merge policy: no merge without explicit user approval.

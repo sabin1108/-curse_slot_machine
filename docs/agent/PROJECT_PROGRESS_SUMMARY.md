@@ -63,6 +63,7 @@ Current branch commits:
 - `4742591` - `docs: plan ui synergy progress projection`
 - `4d44cda` - `fix: project structured synergy progress`
 - `b0811e6` - `docs: update ui synergy progress pr handoff`
+- latest branch head: see PR #23 after PR #22 merge reconciliation.
 
 ## Verification
 
