@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/showcase-step-header-spacing`
-- Current PR: draft PR #21 - https://github.com/sabin1108/-curse_slot_machine/pull/21
+- Current branch: `feature/offline-font-fallback`
+- Current PR: draft PR #22 - https://github.com/sabin1108/-curse_slot_machine/pull/22
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -21,6 +21,7 @@ Last updated: 2026-08-20
 - PR #18 status: merged into `main` with squash commit `fed924e`.
 - PR #19 status: merged into `main` with squash commit `f1145c6`.
 - PR #20 status: merged into `main` with squash commit `61744f1`.
+- PR #21 status: merged into `main` with squash commit `605b62d`.
 
 ## Completed Branches
 
@@ -43,35 +44,36 @@ Last updated: 2026-08-20
 | `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
 | `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
 | `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
+| `feature/showcase-step-header-spacing` | #21 | `605b62d` | Merged |
 
 ## Current Branch
 
-`feature/showcase-step-header-spacing` is pushed and open as draft PR #21.
+`feature/offline-font-fallback` is pushed and open as draft PR #22.
 
 Implemented:
 
-- `ShowcaseOverlay` separates the step counter, separator, and Korean step title into dedicated DOM elements.
-- `src/styles.css` adds spacing hooks so `STEP 4 / 4` cannot visually run into the title.
-- Focused component regression coverage now protects `SHOWCASE-QA-003`.
+- Removed the Google Fonts `@import` that caused failed network requests in restricted/offline review.
+- Added `--font-display` with Korean/system font fallbacks.
+- Added an offline browser asset policy test to prevent reintroducing Google Fonts URLs.
 
 Current branch commits:
 
-- `f758f60` - `docs: plan showcase step header spacing`
-- `8ba4287` - `fix: separate showcase step heading`
+- `cc52bad` - `docs: plan offline font fallback`
+- `fe42c8a` - `fix: remove external font dependency`
 
 ## Verification
 
-Latest verification on `feature/showcase-step-header-spacing`:
+Latest verification on `feature/offline-font-fallback`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 58 tests across 11 files.
+- `npm.cmd run test:run`: passed, 59 tests across 12 files.
 - `npm.cmd run build`: passed.
-- Focused Playwright browser check: passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
+- Focused Playwright browser check: passed; title screen loaded with `failedCount: 0` and `fontFailures: []`.
 
 TDD evidence:
 
-- RED: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` failed because `.showcase-step-heading` did not exist.
-- GREEN: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` passed after adding the dedicated heading/separator/title structure.
+- RED: `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` failed because `src/styles.css` imported `https://fonts.googleapis.com/css2?family=Jua&display=swap`.
+- GREEN: `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` passed after removing the import and adding the fallback stack.
 
 ## Architecture Decisions Preserved
 
@@ -87,7 +89,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #21 draft until review and explicit merge approval.
-2. Next recommended slice after PR #21: address `SHOWCASE-QA-004` font fallback/network noise or continue structured-engine UI migration.
+1. Keep PR #22 draft until review and explicit merge approval.
+2. Next recommended slice after PR #22: continue structured-engine UI migration.
 
 Do not merge later PRs without explicit user approval.

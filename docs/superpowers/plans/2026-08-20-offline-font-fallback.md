@@ -98,7 +98,7 @@ Expected: no failed request URL contains `fonts.googleapis.com` or `fonts.gstati
 
 Actual: focused Playwright browser check loaded the title screen with `failedCount: 0` and `fontFailures: []`.
 
-- [ ] **Step 7: Update docs, commit, push, and open draft PR**
+- [x] **Step 7: Update docs, commit, push, and open draft PR**
 
 Update:
 - `docs/agent/PROJECT_PROGRESS_SUMMARY.md`
