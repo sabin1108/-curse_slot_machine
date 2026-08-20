@@ -8,7 +8,7 @@ import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import type {
   BuildRewardDefinition,
   SynergyDefinition,
-  SynergyProgress as BuildSynergyProgress,
+  SynergyProgress as StructuredSynergyProgress,
   SynergyTag,
 } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
@@ -63,9 +63,9 @@ export function getReelIndex(symbols: ReelSymbol[], id: string): number {
 
 export function toUiSynergyProgress(
   synergy: SynergyDefinition,
-  progress?: BuildSynergyProgress,
+  progress?: StructuredSynergyProgress,
 ): UiSynergyProgress {
-  const required = getSynergyRequired(synergy)
+  const required = progress?.required ?? getSynergyRequired(synergy)
   const current = progress?.current ?? 0
   const activeTier = [...(synergy.tiers ?? [])]
     .sort((left, right) => right.count - left.count)

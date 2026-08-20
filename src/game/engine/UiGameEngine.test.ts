@@ -83,6 +83,35 @@ describe('UiGameEngine', () => {
     expect(resolvedState.build.activeSynergies).toContain('Combo Engine I')
   })
 
+  it('projects structured synergy progress values into the UI build panel', () => {
+    const engine = new GameEngine('structured-progress-ui')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'structured-progress-ui' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    const partialState = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'split_blade' })
+
+    expect(partialState.build.synergyProgress).toContainEqual(
+      expect.objectContaining({
+        synergyId: 'combo_engine',
+        current: 2,
+        required: 4,
+        completed: false,
+      }),
+    )
+
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_finisher' })
+    const completedState = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'lucky_receipt' })
+
+    expect(completedState.build.synergyProgress).toContainEqual(
+      expect.objectContaining({
+        synergyId: 'combo_engine',
+        current: 4,
+        required: 4,
+        completed: true,
+      }),
+    )
+  })
+
   it('projects structured victory rewards into the UI reward modal state', () => {
     const engine = new GameEngine('lethal-ui-24')
 
