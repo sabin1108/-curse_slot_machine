@@ -28,7 +28,7 @@
 - Consumes: `BuildState.synergies.progress` from `src/game/build/BuildTypes.ts`.
 - Produces: UI `build.synergyProgress` entries whose `current`, `required`, and `completed` match the structured build state.
 
-- [ ] **Step 1: Write the failing adapter test**
+- [x] **Step 1: Write the failing adapter test**
 
 Add this expectation-focused test to `src/game/engine/UiGameEngine.test.ts`:
 
@@ -62,13 +62,15 @@ it('projects structured synergy progress values into the UI build panel', () => 
 })
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`
 
 Expected: FAIL because UI synergy progress currently stays at `current: 0` and `completed: false`.
 
-- [ ] **Step 3: Update projection helper signature**
+Actual: FAIL because `combo_engine` UI progress stayed at `current: 0` while the expected partial progress was `2`.
+
+- [x] **Step 3: Update projection helper signature**
 
 In `src/game/engine/UiProjection.ts`, import structured progress as a type alias:
 
@@ -101,7 +103,7 @@ export function toUiSynergyProgress(
 }
 ```
 
-- [ ] **Step 4: Pass structured progress from adapter**
+- [x] **Step 4: Pass structured progress from adapter**
 
 In `src/game/engine/UiGameEngine.ts`, update `projectStructuredBuild()`:
 
@@ -114,13 +116,15 @@ synergyProgress: DEFAULT_BUILD_CATALOG.synergies.map((synergy) =>
 ),
 ```
 
-- [ ] **Step 5: Run targeted GREEN**
+- [x] **Step 5: Run targeted GREEN**
 
 Run: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 6: Full verification**
+Actual: PASS with 16 tests.
+
+- [x] **Step 6: Full verification**
 
 Run:
 
@@ -131,6 +135,8 @@ npm.cmd run build
 ```
 
 Expected: all pass.
+
+Actual: `typecheck`, full `test:run` with 59 tests, and `build` passed.
 
 - [ ] **Step 7: Update docs, commit, push, and open draft PR**
 

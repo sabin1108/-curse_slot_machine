@@ -203,7 +203,12 @@ export class GameEngine {
       augments: build.augments.map((id) => toUiAugment(getRequiredStructuredReward(id, 'augment'))),
       items: build.items,
       activeSynergies: build.synergies.active.map((synergy) => synergy.name),
-      synergyProgress: DEFAULT_BUILD_CATALOG.synergies.map((synergy) => toUiSynergyProgress(synergy)),
+      synergyProgress: DEFAULT_BUILD_CATALOG.synergies.map((synergy) =>
+        toUiSynergyProgress(
+          synergy,
+          build.synergies.progress.find((progress) => progress.synergyId === synergy.id),
+        ),
+      ),
     }
   }
 

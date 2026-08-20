@@ -5,7 +5,12 @@ import type {
   SynergyProgress as UiSynergyProgress,
 } from '../../types/game'
 import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
-import type { BuildRewardDefinition, SynergyDefinition, SynergyTag } from '../build/BuildTypes'
+import type {
+  BuildRewardDefinition,
+  SynergyDefinition,
+  SynergyProgress as StructuredSynergyProgress,
+  SynergyTag,
+} from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 
@@ -53,14 +58,17 @@ export function getReelIndex(symbols: ReelSymbol[], id: string): number {
   return Math.max(0, symbols.findIndex((symbol) => symbol.id === id))
 }
 
-export function toUiSynergyProgress(synergy: SynergyDefinition): UiSynergyProgress {
+export function toUiSynergyProgress(
+  synergy: SynergyDefinition,
+  progress?: StructuredSynergyProgress,
+): UiSynergyProgress {
   return {
     synergyId: synergy.id,
     name: synergy.name,
     tag: synergy.requiredTags[0]?.tag ?? ('COMBO' satisfies SynergyTag),
-    current: 0,
-    required: synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
-    completed: false,
+    current: progress?.current ?? 0,
+    required: progress?.required ?? synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
+    completed: progress?.completed ?? false,
     effectDescription: synergy.description,
   }
 }

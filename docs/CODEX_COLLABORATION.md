@@ -657,3 +657,60 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/21
 - Head commit: `8ba4287`.
 - Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - Offline Font Fallback
+
+### Human Direction
+
+- User approved merging PR #21 and continuing with `SHOWCASE-QA-004`.
+- Keep the change scoped to Google Fonts network failure/noise and preserve offline review behavior.
+
+### Codex Work
+
+- Merged PR #21 after approval; squash merge commit on `main`: `605b62d`.
+- Created `feature/offline-font-fallback` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-offline-font-fallback.md`.
+- Wrote a failing offline asset policy test proving browser assets still referenced Google Fonts.
+- Removed the external Google Fonts import from `src/styles.css`.
+- Added an offline-safe Korean/system display font stack through `--font-display`.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts`: failed first because `src/styles.css` imported `fonts.googleapis.com`, then passed after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 59 tests.
+- `npm.cmd run build`: passed.
+- Focused browser network check passed with no Google Fonts failures.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/22
+- Head commit: `51822c8`.
+- Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - UI Adapter Synergy Progress
+
+### Human Direction
+
+- Continue structured-engine UI migration after fixing `SHOWCASE-QA-004`.
+- Keep React as display/input only and keep synergy calculation in pure TypeScript systems.
+
+### Codex Work
+
+- Created `feature/ui-adapter-synergy-progress` from `main`.
+- Added `docs/superpowers/plans/2026-08-20-ui-adapter-synergy-progress.md`.
+- Wrote a failing `UiGameEngine` adapter test proving legacy UI synergy progress stayed at zero.
+- Updated `toUiSynergyProgress` to accept structured progress values.
+- Updated `UiGameEngine.projectStructuredBuild()` to pass `build.synergies.progress` into the UI projection helper.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `combo_engine` progress stayed at `current: 0`, then passed with 16 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 59 tests.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending.
+- Merge policy: no merge without explicit user approval.

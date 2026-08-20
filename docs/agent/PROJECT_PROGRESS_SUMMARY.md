@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/showcase-step-header-spacing`
-- Current PR: draft PR #21 - https://github.com/sabin1108/-curse_slot_machine/pull/21
+- Current branch: `feature/ui-adapter-synergy-progress`
+- Current PR: draft PR pending for `feature/ui-adapter-synergy-progress`
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -21,6 +21,8 @@ Last updated: 2026-08-20
 - PR #18 status: merged into `main` with squash commit `fed924e`.
 - PR #19 status: merged into `main` with squash commit `f1145c6`.
 - PR #20 status: merged into `main` with squash commit `61744f1`.
+- PR #21 status: merged into `main` with squash commit `605b62d`.
+- PR #22 status: open draft PR for `feature/offline-font-fallback` - https://github.com/sabin1108/-curse_slot_machine/pull/22.
 
 ## Completed Branches
 
@@ -43,35 +45,34 @@ Last updated: 2026-08-20
 | `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
 | `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
 | `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
+| `feature/showcase-step-header-spacing` | #21 | `605b62d` | Merged |
 
 ## Current Branch
 
-`feature/showcase-step-header-spacing` is pushed and open as draft PR #21.
+`feature/ui-adapter-synergy-progress` is verified locally and pending draft PR creation.
 
 Implemented:
 
-- `ShowcaseOverlay` separates the step counter, separator, and Korean step title into dedicated DOM elements.
-- `src/styles.css` adds spacing hooks so `STEP 4 / 4` cannot visually run into the title.
-- Focused component regression coverage now protects `SHOWCASE-QA-003`.
+- `UiGameEngine` now projects real structured `BuildState.synergies.progress` values into the legacy UI build panel state.
+- `toUiSynergyProgress` accepts structured progress while preserving catalog-derived fallback values.
+- React remains display/input only; synergy calculation stays in the pure TypeScript build system.
 
 Current branch commits:
 
-- `f758f60` - `docs: plan showcase step header spacing`
-- `8ba4287` - `fix: separate showcase step heading`
+- `4742591` - `docs: plan ui synergy progress projection`
 
 ## Verification
 
-Latest verification on `feature/showcase-step-header-spacing`:
+Latest verification on `feature/ui-adapter-synergy-progress`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 58 tests across 11 files.
+- `npm.cmd run test:run`: passed, 59 tests across 11 files.
 - `npm.cmd run build`: passed.
-- Focused Playwright browser check: passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
 
 TDD evidence:
 
-- RED: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` failed because `.showcase-step-heading` did not exist.
-- GREEN: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` passed after adding the dedicated heading/separator/title structure.
+- RED: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed because `combo_engine` UI progress stayed at `current: 0`.
+- GREEN: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` passed with 16 tests after passing structured progress through the adapter projection.
 
 ## Architecture Decisions Preserved
 
@@ -87,7 +88,8 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #21 draft until review and explicit merge approval.
-2. Next recommended slice after PR #21: address `SHOWCASE-QA-004` font fallback/network noise or continue structured-engine UI migration.
+1. Keep PR #22 draft/open until explicit merge approval.
+2. Open a draft PR for `feature/ui-adapter-synergy-progress`.
+3. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
 
 Do not merge later PRs without explicit user approval.
