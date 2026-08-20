@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/ui-item-card-projection`
-- Current PR: draft PR pending for `feature/ui-item-card-projection`
+- Current PR: draft PR #24 - https://github.com/sabin1108/-curse_slot_machine/pull/24
 - PR #21 status: merged into `main` with squash commit `605b62d`.
 - PR #22 status: merged into `main` with squash commit `00a810c`.
 - PR #23 status: merged into `main` with squash commit `1ae1850`.
@@ -40,7 +40,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/ui-item-card-projection` is verified locally and pending draft PR creation.
+`feature/ui-item-card-projection` is pushed and open as draft PR #24.
 
 Implemented:
 
@@ -53,6 +53,7 @@ Implemented:
 Current branch commits:
 
 - `1bdb3df` - `docs: plan ui item card projection`
+- `9a2fe0b` - `fix: project item reward cards distinctly`
 
 ## Verification
 
@@ -81,7 +82,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Open a draft PR for `feature/ui-item-card-projection`.
+1. Keep PR #24 draft/open until explicit merge approval.
 2. Next structured-engine UI migration slice: rename command payload/UI fields from augment-specific names (`augmentId`, `targetAugment`) to reward-neutral aliases while preserving backward compatibility.
 
 Do not merge later PRs without explicit user approval.

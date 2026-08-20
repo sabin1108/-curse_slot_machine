@@ -189,7 +189,7 @@ Expected: all pass.
 
 Actual: `typecheck`, full `test:run` with 63 tests, and `build` passed.
 
-- [ ] **Step 9: Update docs, commit, push, and open draft PR**
+- [x] **Step 9: Update docs, commit, push, and open draft PR**
 
 Update:
 - `docs/agent/PROJECT_PROGRESS_SUMMARY.md`
@@ -197,3 +197,5 @@ Update:
 - `docs/CODEX_COLLABORATION.md`
 
 Commit, push, and open a draft PR against `main`.
+
+Actual: branch pushed and draft PR #24 opened at https://github.com/sabin1108/-curse_slot_machine/pull/24.
