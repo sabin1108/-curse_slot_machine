@@ -372,5 +372,35 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/12
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/12
+- User approved merging PR #12 on 2026-08-20.
+- PR #12 was marked ready and squash merged into `main`.
+- PR #12 squash merge commit: `9955372`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Select Map Node Adapter
+
+### Human Direction
+
+- Merge PR #12 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-select-map-node` from updated `main` after PR #12 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving `SELECT_MAP_NODE` left the UI on `MAP`.
+- Updated `SELECT_MAP_NODE` handling to delegate map path bookkeeping to the legacy presentation engine, then prepare a clean `BATTLE` entry state.
+- Cleared adapter-owned structured slot state on map node selection so `CONFIRM_SLOT_RESULT` cannot re-resolve a previous slot before the next spin.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `screen` stayed `MAP`, then passed with 7 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 45 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/13
 - Merge policy: no merge without explicit user approval.

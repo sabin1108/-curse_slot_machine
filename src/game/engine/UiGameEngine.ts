@@ -102,6 +102,17 @@ export class GameEngine {
       }
     }
 
+    if (command.type === 'SELECT_MAP_NODE') {
+      this.presentation = this.legacy.dispatch(command)
+      this.presentation.screen = 'BATTLE'
+      this.currentStructuredSlot = null
+      this.presentation.currentResult = null
+      this.presentation.hasSpunThisTurn = false
+      this.presentation.isSpinning = false
+      this.presentation.lockedReels.clear()
+      return this.presentation
+    }
+
     if (command.type === 'CONFIRM_SLOT_RESULT' && this.hasStructuredBuild()) {
       const slotResult = this.currentStructuredSlot ?? mapUiSlotResult(this.presentation)
       if (slotResult) {
