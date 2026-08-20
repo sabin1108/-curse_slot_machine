@@ -45,8 +45,8 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(6)
-    expect(resolvedState.build.activeSynergies).toContain('Combo Engine')
+    expect(resolvedState.enemy.hp).toBe(8)
+    expect(resolvedState.build.activeSynergies).toContain('Combo Engine I')
   })
 
   it('projects structured victory rewards into the UI reward modal state', () => {

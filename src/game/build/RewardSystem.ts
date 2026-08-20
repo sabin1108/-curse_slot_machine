@@ -86,9 +86,13 @@ function scoreReward(
 ): RewardScore {
   const result = applyReward(build, reward, catalog)
   const completedNow = result.events.filter((event) => event.type === 'SYNERGY_COMPLETED').length
+  const activeBefore = new Set(build.synergies.active.map((synergy) => synergy.synergyId))
+  const tierActivatedNow = result.build.synergies.active.filter(
+    (synergy) => synergy.synergyId.includes(':') && !activeBefore.has(synergy.synergyId),
+  ).length
   const immediatePower = RARITY_VALUE[definition.rarity]
   const synergyValue = getSynergyValue(build, definition, catalog)
-  const completionValue = completedNow * 100
+  const completionValue = completedNow * 100 + tierActivatedNow * 35
   const futureValue = getFutureValue(build, definition, catalog)
 
   return {

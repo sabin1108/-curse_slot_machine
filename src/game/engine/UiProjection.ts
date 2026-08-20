@@ -5,7 +5,12 @@ import type {
   SynergyProgress as UiSynergyProgress,
 } from '../../types/game'
 import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
-import type { BuildRewardDefinition, SynergyDefinition, SynergyTag } from '../build/BuildTypes'
+import type {
+  BuildRewardDefinition,
+  SynergyDefinition,
+  SynergyProgress as BuildSynergyProgress,
+  SynergyTag,
+} from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import { getAsset } from '../../assets/assetHelper'
@@ -56,16 +61,34 @@ export function getReelIndex(symbols: ReelSymbol[], id: string): number {
   return Math.max(0, symbols.findIndex((symbol) => symbol.id === id))
 }
 
-export function toUiSynergyProgress(synergy: SynergyDefinition): UiSynergyProgress {
+export function toUiSynergyProgress(
+  synergy: SynergyDefinition,
+  progress?: BuildSynergyProgress,
+): UiSynergyProgress {
+  const required = getSynergyRequired(synergy)
+  const current = progress?.current ?? 0
+  const activeTier = [...(synergy.tiers ?? [])]
+    .sort((left, right) => right.count - left.count)
+    .find((tier) => current >= tier.count)
+
   return {
     synergyId: synergy.id,
     name: synergy.name,
-    tag: synergy.requiredTags[0]?.tag ?? ('COMBO' satisfies SynergyTag),
-    current: 0,
-    required: synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
-    completed: false,
-    effectDescription: synergy.description,
+    tag: synergy.tierTag ?? synergy.requiredTags[0]?.tag ?? ('COMBO' satisfies SynergyTag),
+    current,
+    required,
+    completed: progress?.completed ?? current >= required,
+    effectDescription: activeTier
+      ? `${activeTier.effectLabel} / ${activeTier.description}`
+      : synergy.description,
   }
+}
+
+function getSynergyRequired(synergy: SynergyDefinition): number {
+  const tierRequired = Math.max(0, ...(synergy.tiers ?? []).map((tier) => tier.count))
+  const baseRequired = synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0)
+
+  return Math.max(tierRequired, baseRequired)
 }
 
 function getUiActionSymbol(action: CombatSlotResult['action']): ReelSymbol {

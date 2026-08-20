@@ -543,14 +543,14 @@ export class GameEngine {
     });
 
     this.state.build.activeSynergies = this.state.build.synergyProgress
-      .filter((s) => s.completed)
-      .map((s) => s.name);
+      .flatMap((s) => this.getLegacyActiveSynergyNames(s));
   }
 
   private getLegacyActionFlatBonus(actionType: ReelSymbol['type']): number {
     if (actionType === 'BULLET' || actionType === 'DAGGER' || actionType === 'BOMB') {
       return this.countLegacyTags('BURN') * 3
         + this.countLegacyTags('COMBO') * 2
+        + (this.countLegacyTags('BURN') >= 2 ? 4 : 0)
         + (this.hasLegacyReward('aug_fire_sword') ? 6 : 0)
         + (this.hasLegacyReward('safe_cracker') ? 2 : 0)
         + (this.hasLegacyReward('thorn_shell') ? 4 : 0);
@@ -558,12 +558,14 @@ export class GameEngine {
 
     if (actionType === 'SHIELD') {
       return this.countLegacyTags('DEFENSE') * 3
+        + (this.countLegacyTags('DEFENSE') >= 2 ? 5 : 0)
         + (this.hasLegacyReward('aug_barrier') ? 3 : 0)
         + (this.hasLegacyReward('green_vial') ? 2 : 0);
     }
 
     if (actionType === 'HEART') {
       return this.countLegacyTags('RESOURCE') * 2
+        + (this.countLegacyTags('RESOURCE') >= 2 ? 4 : 0)
         + (this.hasLegacyReward('aug_regen') ? 2 : 0)
         + (this.hasLegacyReward('red_coin') ? 3 : 0)
         + (this.hasLegacyReward('green_vial') ? 4 : 0);
@@ -578,9 +580,14 @@ export class GameEngine {
     if (actionType === 'BULLET' || actionType === 'DAGGER' || actionType === 'BOMB') {
       pct += this.countLegacyTags('CRITICAL') * 12;
       pct += this.countLegacyTags('RISK') * 8;
-      if (this.isLegacySynergyCompleted('burn_pressure')) pct += 45;
-      if (this.isLegacySynergyCompleted('curse_engine') && this.state.curse.current >= 5) pct += 65;
-      if (this.isLegacySynergyCompleted('jackpot_engine') && modifierId === 'x3') pct += 100;
+      if (this.countLegacyTags('COMBO') >= 2) pct += 15;
+      if (this.countLegacyTags('COMBO') >= 4 && modifierId === 'x3') pct += 75;
+      if (this.countLegacyTags('BURN') >= 3) pct += 30;
+      if (this.countLegacyTags('BURN') >= 4 && this.state.curse.current >= 3) pct += 60;
+      if (this.countLegacyTags('CURSE') >= 2 && this.state.curse.current >= 3) pct += 25;
+      if (this.countLegacyTags('CURSE') >= 4 && this.state.curse.current >= 7) pct += 90;
+      if (this.countLegacyTags('CRITICAL') >= 2 && (modifierId === 'x2' || modifierId === 'x3')) pct += 25;
+      if (this.countLegacyTags('CRITICAL') >= 4 && modifierId === 'x3') pct += 100;
       if (this.hasLegacyReward('glass_cannon')) pct += 45;
       if (this.hasLegacyReward('cursed_lens') && this.state.curse.current >= 5) pct += 50;
       if (this.hasLegacyReward('furnace_heart') && this.state.curse.current >= 4) pct += 40;
@@ -593,14 +600,15 @@ export class GameEngine {
 
     if (actionType === 'SHIELD') {
       pct += this.countLegacyTags('DEFENSE') * 8;
-      if (this.isLegacySynergyCompleted('fortress_loop')) pct += 50;
+      if (this.countLegacyTags('DEFENSE') >= 3) pct += 40;
       if (this.hasLegacyReward('mirror_buckler')) pct += 25;
       if (this.hasLegacyReward('fortress_oath')) pct += 60;
     }
 
     if (actionType === 'HEART') {
       pct += this.countLegacyTags('RESOURCE') * 8;
-      if (this.isLegacySynergyCompleted('sustain_engine')) pct += 70;
+      if (this.countLegacyTags('RESOURCE') >= 3) pct += 45;
+      if (this.countLegacyTags('RESOURCE') >= 4 && this.getPlayerHpPct() <= 45) pct += 90;
       if (this.hasLegacyReward('blue_vial')) pct += 30;
       if (this.hasLegacyReward('panic_button') && this.getPlayerHpPct() <= 45) pct += 80;
     }
@@ -611,7 +619,9 @@ export class GameEngine {
   private getLegacyExtraHitDamage(baseDamage: number, modifierId: string): number {
     let pct = this.countLegacyTags('MULTI_HIT') * 20;
 
-    if (this.isLegacySynergyCompleted('combo_engine')) pct += 50;
+    if (this.countLegacyTags('COMBO') >= 3) pct += 30;
+    if (this.countLegacyTags('CURSE') >= 3 && this.state.curse.current >= 5) pct += 40;
+    if (this.countLegacyTags('CRITICAL') >= 3 && modifierId === 'x3') pct += 50;
     if (this.hasLegacyReward('aug_frenzy_core')) pct += 35;
     if (this.hasLegacyReward('multi_hit_charm')) pct += 35;
     if (this.hasLegacyReward('split_blade')) pct += 45;
@@ -629,6 +639,15 @@ export class GameEngine {
     return Math.max(1, Math.floor(absorbedDamage * (defenseTags >= 3 ? 0.5 : 0.3)));
   }
 
+  private getLegacyActiveSynergyNames(synergy: SynergyProgress): string[] {
+    const tierNames: string[] = [];
+    if (synergy.current >= 2) tierNames.push(`${synergy.name} I`);
+    if (synergy.current >= 3) tierNames.push(`${synergy.name} II`);
+    if (synergy.current >= 4) tierNames.push(`${synergy.name} III`);
+
+    return tierNames.length > 0 ? tierNames : synergy.completed ? [synergy.name] : [];
+  }
+
   private countLegacyTags(tag: AugmentItem['tags'][number]): number {
     return this.state.build.augments.reduce((count, augment) => (
       augment.tags.includes(tag) ? count + 1 : count
@@ -637,10 +656,6 @@ export class GameEngine {
 
   private hasLegacyReward(id: string): boolean {
     return this.state.build.augments.some((augment) => augment.id === id);
-  }
-
-  private isLegacySynergyCompleted(synergyId: string): boolean {
-    return this.state.build.synergyProgress.some((synergy) => synergy.synergyId === synergyId && synergy.completed);
   }
 
   private getPlayerHpPct(): number {
