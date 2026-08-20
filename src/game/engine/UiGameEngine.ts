@@ -1,4 +1,4 @@
-import type { GameCommand as UiGameCommand, GameState as UiGameState } from '../../types/game'
+import type { GameCommand as UiGameCommand, GameState as UiGameState, MapNodeType } from '../../types/game'
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
 import type { BuildRewardDefinition } from '../build/BuildTypes'
@@ -104,7 +104,7 @@ export class GameEngine {
 
     if (command.type === 'SELECT_MAP_NODE') {
       this.presentation = this.legacy.dispatch(command)
-      this.presentation.screen = 'BATTLE'
+      this.presentation.screen = getMapNodeDestinationScreen(command.nodeType)
       this.currentStructuredSlot = null
       this.presentation.currentResult = null
       this.presentation.hasSpunThisTurn = false
@@ -238,6 +238,18 @@ export class GameEngine {
       this.presentation.combatLogs.push(`[Curse] +${event.amount}`)
     }
   }
+}
+
+function getMapNodeDestinationScreen(nodeType: MapNodeType | undefined): UiGameState['screen'] {
+  if (nodeType === 'SHOP') {
+    return 'SHOP'
+  }
+
+  if (nodeType === 'REST') {
+    return 'REST'
+  }
+
+  return 'BATTLE'
 }
 
 function getStructuredReward(id: string): BuildRewardDefinition | undefined {

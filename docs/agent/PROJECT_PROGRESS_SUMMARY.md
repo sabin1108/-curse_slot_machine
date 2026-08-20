@@ -7,12 +7,13 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-select-map-node`
-- Current PR: draft PR #13 - https://github.com/sabin1108/-curse_slot_machine/pull/13
+- Current branch: `feature/ui-adapter-node-type-routing`
+- Current PR: draft PR #14 - https://github.com/sabin1108/-curse_slot_machine/pull/14
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
 - PR #12 status: merged into `main` with squash commit `9955372`.
+- PR #13 status: merged into `main` with squash commit `1877c21`.
 
 ## Completed Branches
 
@@ -27,33 +28,35 @@ Last updated: 2026-08-20
 | `feature/content-effect-schema-pilot` | #10 | `8be060c` | Merged |
 | `feature/ui-adapter-confirm-result` | #11 | `e8c5884` | Merged |
 | `feature/ui-adapter-map-node` | #12 | `9955372` | Merged |
+| `feature/ui-adapter-select-map-node` | #13 | `1877c21` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-select-map-node` is pushed and open as draft PR #13.
+`feature/ui-adapter-node-type-routing` is pushed and open as draft PR #14.
 
 Implemented:
 
-- `SELECT_MAP_NODE` in `UiGameEngine` now prepares a clean battle-entry UI state.
-- Map node selection clears stale adapter-owned structured slot results before the next battle.
-- Invalid confirm without a new spin no longer re-resolves a stale previous slot result.
+- `SELECT_MAP_NODE` accepts optional `nodeType` command data.
+- `UiGameEngine` routes battle-like map nodes to `BATTLE`, shop nodes to `SHOP`, and rest nodes to `REST`.
+- Map node selection still clears stale adapter-owned structured slot results before the destination screen.
+- `DungeonMapScreen` no longer dispatches extra `NAVIGATE` commands for battle/shop/rest node selections.
 
 Current branch commits:
 
-- `3a97e93` - `fix: prepare map node battle entry`
+- `723e0c1` - `fix: route typed map nodes in ui adapter`
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-select-map-node`:
+Latest verification on `feature/ui-adapter-node-type-routing`:
 
-- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `SELECT_MAP_NODE` left the UI on `MAP`, then passed with 7 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `SHOP` and `REST` node selections returned `screen: 'BATTLE'`, then passed with 9 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 45 tests across 10 files.
+- `npm.cmd run test:run`: passed, 47 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/engine/UiGameEngine.test.ts` failed first because `SELECT_MAP_NODE` returned `screen: 'MAP'` instead of `screen: 'BATTLE'`.
+- `src/game/engine/UiGameEngine.test.ts` failed first because `SELECT_MAP_NODE` returned `screen: 'BATTLE'` instead of `SHOP` or `REST` for typed map nodes.
 
 ## Architecture Decisions Preserved
 
@@ -69,7 +72,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #13 draft until review and explicit merge approval.
-2. Continue shop/rest/showcase migration as separate TDD slices.
+1. Keep PR #14 draft until review and explicit merge approval.
+2. Continue event/showcase migration as separate TDD slices.
 
 Do not merge later PRs without explicit user approval.

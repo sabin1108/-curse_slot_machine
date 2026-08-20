@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GameCommand } from '../../types/game';
+import { GameCommand, MapNodeType } from '../../types/game';
 import { getAsset } from '../../assets/assetHelper';
 import { soundManager } from '../../utils/soundManager';
 
@@ -7,7 +7,7 @@ interface MapNodeData {
   id: number;
   floor: number;
   name: string;
-  type: 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
+  type: MapNodeType;
   icon: string;
   x: number; // 0..100 Percentage X
   y: number; // 0..100 Percentage Y
@@ -109,17 +109,12 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
 
   const handleSelectNode = (node: MapNodeData) => {
     soundManager.playClick();
-    onDispatch({ type: 'SELECT_MAP_NODE', nodeId: node.id });
-
-    if (node.type === 'SHOP') {
-      onDispatch({ type: 'NAVIGATE', screen: 'SHOP' });
-    } else if (node.type === 'REST') {
-      onDispatch({ type: 'NAVIGATE', screen: 'REST' });
-    } else if (node.type === 'EVENT') {
+    if (node.type === 'EVENT') {
       setActiveEventNode(node);
-    } else {
-      onDispatch({ type: 'NAVIGATE', screen: 'BATTLE' });
+      return;
     }
+
+    onDispatch({ type: 'SELECT_MAP_NODE', nodeId: node.id, nodeType: node.type });
   };
 
   const handleEventChoice = (action: 'OPEN' | 'REST' | 'SKIP') => {

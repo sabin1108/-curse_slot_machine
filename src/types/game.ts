@@ -118,6 +118,8 @@ export type GameScreen = 'TITLE' | 'PROLOGUE' | 'ORIGIN' | 'BATTLE' | 'REWARD' |
 
 export type GameMode = 'NORMAL' | 'SHOWCASE';
 
+export type MapNodeType = 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
+
 export interface ShowcaseStep {
   stepIndex: number;
   title: string;
@@ -195,7 +197,7 @@ export type GameCommand =
   | { type: 'START_RUN'; seed?: string; mode?: GameMode }
   | { type: 'OPEN_PROLOGUE' }
   | { type: 'SELECT_ORIGIN'; originId: OriginId }
-  | { type: 'SELECT_MAP_NODE'; nodeId: number }
+  | { type: 'SELECT_MAP_NODE'; nodeId: number; nodeType?: MapNodeType }
   | { type: 'SPIN_COMBAT_SLOT' }
   | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
   | { type: 'REROLL_UNLOCKED' }
