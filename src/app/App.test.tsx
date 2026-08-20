@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { App } from './App';
 
@@ -6,9 +7,8 @@ describe('App', () => {
   it('renders the cursed slot machine UI shell', () => {
     render(<App />);
 
-    expect(screen.getAllByText(/저주받은 슬롯머신/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/START/i)).toBeInTheDocument();
-    expect(screen.getByText(/던전 탐사 시작/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /showcase mode/i })).toBeInTheDocument();
   });
 
   it('starts showcase mode from the title screen and shows the overlay', () => {
@@ -51,6 +51,13 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
 
-    expect(screen.getByRole('button', { name: /방벽 코어/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /\uBC29\uBCBD \uCF54\uC5B4 \uC120\uD0DD/ })).toBeInTheDocument();
+  });
+
+  it('uses local font fallbacks instead of external Google Fonts', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).not.toContain('fonts.googleapis.com');
+    expect(css).toContain('--font-display');
   });
 });

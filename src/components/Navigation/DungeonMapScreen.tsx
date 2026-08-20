@@ -39,12 +39,12 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
 
     // Floor 2 (x: 23%)
     { id: 4, floor: 2, name: '2-A: 암시장 상점', type: 'SHOP', icon: getAsset('dg_coin_anim_f0'), x: 23, y: 20, description: '희귀 무기와 물약을 구매합니다.' },
-    { id: 5, floor: 2, name: '2-B: 모닥불 쉼터', type: 'REST', icon: getAsset('fx_campfire_strip_f0'), x: 23, y: 50, description: 'HP 회복 또는 저주 정화 의식을 진행합니다.' },
+    { id: 5, floor: 2, name: '2-B: 모닥불 쉼터', type: 'REST', icon: getAsset('rest_campfire'), x: 23, y: 50, description: 'HP 회복 또는 저주 정화 의식을 진행합니다.' },
     { id: 6, floor: 2, name: '2-C: 비밀 궤짝', type: 'EVENT', icon: getAsset('dg_crate'), x: 23, y: 80, description: '저주받은 보물상자를 엽니다.' },
 
     // Floor 3 (x: 38%)
     { id: 7, floor: 3, name: '3-A: 고블린 군단', type: 'BATTLE', icon: getAsset('skull_white'), x: 38, y: 20, description: '그림자 고블린 전사들과 슬롯 전투!' },
-    { id: 8, floor: 3, name: '3-B: 중간 쉼터', type: 'REST', icon: getAsset('fx_campfire_strip_f0'), x: 38, y: 50, description: '엘리트전에 대비하여 체력을 정비합니다.' },
+    { id: 8, floor: 3, name: '3-B: 중간 쉼터', type: 'REST', icon: getAsset('rest_shrine'), x: 38, y: 50, description: '엘리트전에 대비하여 체력을 정비합니다.' },
     { id: 9, floor: 3, name: '3-C: 수금원 기습', type: 'BATTLE', icon: getAsset('skull_white'), x: 38, y: 80, description: '저주 수금원 해골들과 대결합니다.' },
 
     // Floor 4 (x: 53% - Elites)
@@ -53,7 +53,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
 
     // Floor 5 (x: 68%)
     { id: 12, floor: 5, name: '5-A: 비밀 암시장', type: 'SHOP', icon: getAsset('dg_coin_anim_f0'), x: 68, y: 20, description: '최종 보스 대비 고급 장비를 세팅합니다.' },
-    { id: 13, floor: 5, name: '5-B: 대형 모닥불', type: 'REST', icon: getAsset('fx_campfire_strip_f0'), x: 68, y: 50, description: '체력 +35 대량 회복!' },
+    { id: 13, floor: 5, name: '5-B: 대형 모닥불', type: 'REST', icon: getAsset('rest_shelter'), x: 68, y: 50, description: '체력 +35 대량 회복!' },
     { id: 14, floor: 5, name: '5-C: 행운의 기계', type: 'EVENT', icon: getAsset('orb_gold'), x: 68, y: 80, description: '골드를 넣고 무작위 잭팟 아이템을 뽑습니다.' },
 
     // Floor 6 (x: 82% - Gate)

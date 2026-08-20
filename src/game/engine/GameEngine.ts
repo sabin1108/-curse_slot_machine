@@ -76,6 +76,7 @@ export class GameEngine {
   private resolveCombatSlot(command: Extract<GameCommand, { type: 'RESOLVE_COMBAT_SLOT' }>): GameEvent[] {
     const resolution = resolveCombatSlot(this.state.combat, command.result, {
       effects: getActiveEffects(this.state.build),
+      originTrait: command.originTrait,
     })
     const turn = this.state.turn + 1
     const rewards = resolution.outcome === 'victory' ? generateRewardOptions(this.state.build) : []

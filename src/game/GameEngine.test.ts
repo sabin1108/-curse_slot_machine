@@ -98,6 +98,110 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(state.narrativeMicrocopy).toContain('빚진 도박사');
   });
 
+  it('gives Gambler one curse-free reroll per turn', () => {
+    const engine = new GameEngine('gambler_free_reroll');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1 });
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' });
+    engine.dispatch({ type: 'TOGGLE_LOCK_REEL', reelId: 'action' });
+
+    engine.dispatch({ type: 'REROLL_UNLOCKED' });
+    expect(engine.getState().curse.current).toBe(0);
+    expect(engine.getState().originTraitState.freeRerollAvailable).toBe(false);
+
+    engine.dispatch({ type: 'REROLL_UNLOCKED' });
+    expect(engine.getState().curse.current).toBe(2);
+
+    const state = engine.getState();
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action: state.reels.action.find((symbol) => symbol.type === 'SHIELD')!,
+      target: state.reels.target.find((symbol) => symbol.type === 'SELF')!,
+      modifier: state.reels.modifier.find((symbol) => symbol.id === 'x1')!,
+      isMiss: false,
+      calculatedValue: 8,
+      finalEffectText: 'test next turn'
+    };
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+    expect(engine.getState().originTraitState.freeRerollAvailable).toBe(true);
+  });
+
+  it('adds a half-power Swordsman follow-up when attack damage reaches the threshold', () => {
+    const engine = new GameEngine('swordsman_follow_up');
+    const state = engine.getState();
+    const action = state.reels.action.find((symbol) => symbol.type === 'BULLET')!;
+    const target = state.reels.target.find((symbol) => symbol.type === 'ENEMY')!;
+    const modifier = state.reels.modifier.find((symbol) => symbol.id === 'x1')!;
+
+    state.enemy.hp = 100;
+    state.enemy.maxHp = 100;
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action,
+      target,
+      modifier,
+      isMiss: false,
+      calculatedValue: 17,
+      finalEffectText: 'test attack'
+    };
+
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+
+    expect(engine.getState().enemy.hp).toBe(74);
+  });
+
+  it('rewards Gambler jackpot on x3 results', () => {
+    const engine = new GameEngine('gambler_jackpot');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
+    const state = engine.getState();
+    const action = state.reels.action.find((symbol) => symbol.type === 'SHIELD')!;
+    const target = state.reels.target.find((symbol) => symbol.type === 'SELF')!;
+    const modifier = state.reels.modifier.find((symbol) => symbol.id === 'x3')!;
+
+    state.curse.current = 3;
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action,
+      target,
+      modifier,
+      isMiss: false,
+      calculatedValue: 20,
+      finalEffectText: 'test jackpot'
+    };
+
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+
+    expect(engine.getState().player.gold).toBe(225);
+    expect(engine.getState().curse.current).toBe(2);
+  });
+
+  it('purifies curse when Priest confirms shield or heart results', () => {
+    const engine = new GameEngine('priest_purify');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'PRIEST' });
+    const state = engine.getState();
+    const action = state.reels.action.find((symbol) => symbol.type === 'SHIELD')!;
+    const target = state.reels.target.find((symbol) => symbol.type === 'SELF')!;
+    const modifier = state.reels.modifier.find((symbol) => symbol.id === 'x1')!;
+
+    state.curse.current = 3;
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action,
+      target,
+      modifier,
+      isMiss: false,
+      calculatedValue: 12,
+      finalEffectText: 'test shield'
+    };
+
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+
+    expect(engine.getState().curse.current).toBe(2);
+  });
+
   it('should attach context-sensitive narrative microcopy on NAVIGATE', () => {
     const engine = new GameEngine();
     engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' });
@@ -121,6 +225,26 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
 
     expect(engine.getState().screen).toBe('VICTORY');
     expect(engine.getState().narrativeMicrocopy).toContain('3층 최종 보스를 정복');
+  });
+
+  it('should keep the first encounter tense and scale the final boss as a hard check', () => {
+    const engine = new GameEngine();
+
+    const firstEnemy = (engine as any).generateEnemyForStage(1, 1);
+    const finalBoss = (engine as any).generateEnemyForStage(3, 7);
+
+    expect(firstEnemy).toMatchObject({
+      hp: 75,
+      maxHp: 75,
+      shield: 0,
+      intent: expect.objectContaining({ value: 11 })
+    });
+    expect(finalBoss).toMatchObject({
+      hp: 1224,
+      maxHp: 1224,
+      shield: 102,
+      intent: expect.objectContaining({ value: 111 })
+    });
   });
 
   it('should absorb enemy damage with player shield first', () => {

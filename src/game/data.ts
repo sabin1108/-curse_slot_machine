@@ -1,5 +1,6 @@
 import { ReelSymbol, AugmentItem, SynergyProgress, EnemyState, ShowcaseStep } from '../types/game';
 import { getAsset } from '../assets/assetHelper';
+import { DEFAULT_BUILD_CATALOG } from './build/BuildCatalog';
 
 export const ACTION_SYMBOLS: ReelSymbol[] = [
   {
@@ -226,7 +227,17 @@ export const ALL_AUGMENTS: AugmentItem[] = [
     icon: '🔮',
     imgUrl: getAsset('orb_purple'),
     effectValue: 'NEW'
-  }
+  },
+  ...DEFAULT_BUILD_CATALOG.rewards.map((reward): AugmentItem => ({
+    id: reward.id,
+    name: reward.name,
+    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    tags: reward.tags,
+    description: reward.description,
+    icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
+    imgUrl: reward.assetKey ? getAsset(reward.assetKey) : getAsset('sword_gold'),
+    effectValue: reward.effectLabel ?? reward.effectId ?? 'EFFECT'
+  }))
 ];
 
 export const INITIAL_SYNERGIES: SynergyProgress[] = [
@@ -247,61 +258,70 @@ export const INITIAL_SYNERGIES: SynergyProgress[] = [
     required: 3,
     completed: false,
     effectDescription: 'COMBO 태그 3개 완성 시 모든 타격 피해 2배 증폭'
-  }
+  },
+  ...DEFAULT_BUILD_CATALOG.synergies.map((synergy): SynergyProgress => ({
+    synergyId: synergy.id,
+    name: synergy.name,
+    tag: synergy.requiredTags[0]?.tag ?? 'COMBO',
+    current: 0,
+    required: synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
+    completed: false,
+    effectDescription: synergy.description
+  }))
 ];
 
 export const DEFAULT_ENEMIES: EnemyState[] = [
-  // Stage 1
+  // Stage 1 Base Monster
   {
     id: 'skull_sentinel',
     name: '1층: 해골 수금원',
-    hp: 55,
-    maxHp: 55,
+    hp: 75,
+    maxHp: 75,
     shield: 0,
     statuses: [],
     intent: {
       id: 'hook',
       name: '저주 갈고리',
       type: 'ATTACK',
-      value: 8,
+      value: 11,
       icon: '⚓',
-      description: '다음 턴 8 갈고리 피해 예고'
+      description: '다음 턴 11 갈고리 피해 예고'
     },
     spriteUrl: getAsset('skull_red')
   },
-  // Stage 2
+  // Stage 2 Base Monster
   {
     id: 'shadow_goblin',
     name: '2층: 그림자 고블린',
-    hp: 75,
-    maxHp: 75,
+    hp: 85,
+    maxHp: 85,
     shield: 5,
     statuses: [],
     intent: {
       id: 'curse_strik',
       name: '저주 단검',
       type: 'CURSE',
-      value: 10,
+      value: 12,
       icon: '☠️',
-      description: '다음 턴 10 피해 및 저주 +1'
+      description: '다음 턴 12 피해 및 저주 +1'
     },
     spriteUrl: getAsset('goblin')
   },
-  // Stage 3
+  // Stage 3 Base Monster
   {
     id: 'mummy_sorcerer',
     name: '3층: 미라 주술사',
     hp: 95,
     maxHp: 95,
-    shield: 10,
+    shield: 8,
     statuses: [{ type: '중독', duration: 2, value: 2 }],
     intent: {
       id: 'curse_spell',
       name: '저주 주술',
       type: 'CURSE',
-      value: 12,
+      value: 13,
       icon: '🔮',
-      description: '다음 턴 12 독주술 피해'
+      description: '다음 턴 13 독주술 피해'
     },
     spriteUrl: getAsset('potion_red')
   },
@@ -309,9 +329,9 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
   {
     id: 'ogre_chief',
     name: '4층: 오우거 집행관 (ELITE)',
-    hp: 130,
-    maxHp: 130,
-    shield: 15,
+    hp: 125,
+    maxHp: 125,
+    shield: 12,
     statuses: [{ type: '화상', duration: 2, value: 3 }],
     intent: {
       id: 'smash',
@@ -327,17 +347,17 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
   {
     id: 'cursed_knight',
     name: '5층: 저주받은 흑기사 (ELITE)',
-    hp: 150,
-    maxHp: 150,
+    hp: 155,
+    maxHp: 155,
     shield: 20,
     statuses: [],
     intent: {
       id: 'thorn_slash',
       name: '가시 수호검',
       type: 'ATTACK',
-      value: 18,
+      value: 20,
       icon: '🛡️',
-      description: '다음 턴 18 강철 강타 예고'
+      description: '다음 턴 20 강철 강타 예고'
     },
     spriteUrl: getAsset('shield_blue')
   },
@@ -345,17 +365,17 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
   {
     id: 'fortress_golem',
     name: '6층: 성채 문지기 골렘',
-    hp: 180,
-    maxHp: 180,
+    hp: 195,
+    maxHp: 195,
     shield: 25,
     statuses: [],
     intent: {
       id: 'rock_crush',
       name: '성채 암석',
       type: 'ATTACK',
-      value: 20,
+      value: 24,
       icon: '🪨',
-      description: '다음 턴 20 바위 둔기 강타'
+      description: '다음 턴 24 바위 둔기 강타'
     },
     spriteUrl: getAsset('orb_purple')
   },
@@ -363,17 +383,17 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
   {
     id: 'house_dealer_boss',
     name: '7층: 하우스 딜러 (FINAL BOSS)',
-    hp: 240,
-    maxHp: 240,
-    shield: 30,
+    hp: 380,
+    maxHp: 380,
+    shield: 50,
     statuses: [],
     intent: {
       id: 'jackpot_crush',
       name: '올인 분쇄 잭팟',
       type: 'ATTACK',
-      value: 28,
+      value: 42,
       icon: '🎰',
-      description: '다음 턴 28 보스 대형 분쇄 피해'
+      description: '다음 턴 42 보스 대형 분쇄 피해'
     },
     spriteUrl: getAsset('skull_red')
   }

@@ -4,7 +4,7 @@ import { applyReward, createBuildState, evaluateSynergies, getActiveEffects } fr
 import type { BuildCatalog } from './BuildTypes'
 
 describe('BuildSystem', () => {
-  it('tracks multi-requirement synergy progress across augments and items', () => {
+  it('tracks tiered synergy progress across augments and items', () => {
     const build = createBuildState({
       augments: ['combo_starter', 'combo_finisher'],
       items: ['multi_hit_charm'],
@@ -12,33 +12,33 @@ describe('BuildSystem', () => {
 
     const result = evaluateSynergies(build)
 
-    expect(result.completed).toEqual(['combo_engine'])
+    expect(result.completed).toEqual([])
     expect(result.progress).toContainEqual({
       synergyId: 'combo_engine',
-      current: 3,
-      required: 3,
-      completed: true,
+      current: 2,
+      required: 4,
+      completed: false,
     })
     expect(result.active).toContainEqual({
-      synergyId: 'combo_engine',
-      name: 'Combo Engine',
-      effectId: 'combo_damage_bonus',
+      synergyId: 'combo_engine:tier_2',
+      name: 'Combo Engine I',
+      effectId: '2 COMBO: bullet +15%',
+      tier: 2,
     })
   })
 
-  it('applies an augment reward once and reports newly completed synergies', () => {
+  it('applies a reward once and reports newly completed full synergies', () => {
     const build = createBuildState({
-      augments: ['combo_starter'],
-      items: ['multi_hit_charm'],
+      augments: ['combo_starter', 'combo_finisher', 'split_blade'],
     })
 
-    const result = applyReward(build, { kind: 'augment', id: 'combo_finisher' })
+    const result = applyReward(build, { kind: 'item', id: 'lucky_receipt' })
 
-    expect(result.build.augments).toEqual(['combo_starter', 'combo_finisher'])
+    expect(result.build.items).toEqual(['lucky_receipt'])
     expect(result.build.synergies.completed).toEqual(['combo_engine'])
     expect(result.events).toContainEqual({
       type: 'REWARD_ADDED',
-      reward: { kind: 'augment', id: 'combo_finisher' },
+      reward: { kind: 'item', id: 'lucky_receipt' },
     })
     expect(result.events).toContainEqual({
       type: 'SYNERGY_COMPLETED',

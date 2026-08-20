@@ -9,6 +9,7 @@ import type {
   BuildStateOverrides,
   RewardKind,
   RewardRef,
+  SynergyDefinition,
   SynergyRequirement,
   SynergyState,
   SynergyTag,
@@ -58,6 +59,18 @@ export function evaluateSynergies(
       })
     }
 
+    const tierProgress = getTierProgress(synergy, build, catalog)
+    for (const tier of synergy.tiers ?? []) {
+      if (tierProgress >= tier.count) {
+        active.push({
+          synergyId: `${synergy.id}:${tier.id}`,
+          name: `${synergy.name} ${tier.name}`,
+          effectId: tier.effectLabel,
+          tier: tier.count,
+        })
+      }
+    }
+
     return {
       synergyId: synergy.id,
       current,
@@ -69,7 +82,9 @@ export function evaluateSynergies(
   return {
     active,
     progress,
-    completed: active.map((synergy) => synergy.synergyId),
+    completed: progress
+      .filter((synergy) => synergy.completed)
+      .map((synergy) => synergy.synergyId),
   }
 }
 
@@ -147,8 +162,15 @@ export function getActiveEffects(
   const completedSynergyEffects = catalog.synergies
     .filter((synergy) => synergies.completed.includes(synergy.id))
     .flatMap((synergy) => synergy.effects ?? [])
+  const tierSynergyEffects = catalog.synergies.flatMap((synergy) => {
+    const tierProgress = getTierProgress(synergy, build, catalog)
 
-  return [...ownedRewardEffects, ...completedSynergyEffects]
+    return (synergy.tiers ?? [])
+      .filter((tier) => tierProgress >= tier.count)
+      .flatMap((tier) => tier.effects)
+  })
+
+  return [...ownedRewardEffects, ...completedSynergyEffects, ...tierSynergyEffects]
 }
 
 function getRequirementProgress(
@@ -163,6 +185,17 @@ function getRequirementProgress(
   })
 
   return Math.min(requirement.count, matchingRewards.length)
+}
+
+function getTierProgress(
+  synergy: Pick<SynergyDefinition, 'requiredTags' | 'tierTag'>,
+  build: Pick<BuildState, 'augments' | 'items'>,
+  catalog: BuildCatalog,
+): number {
+  const tierTag = synergy.tierTag ?? synergy.requiredTags[0]?.tag
+  if (!tierTag) return 0
+
+  return getOwnedRewardDefinitions(build, catalog).filter((reward) => reward.tags.includes(tierTag)).length
 }
 
 function getOwnedRewardDefinitions(

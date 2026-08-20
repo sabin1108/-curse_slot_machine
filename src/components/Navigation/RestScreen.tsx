@@ -69,7 +69,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
           className={`rest-option-card ${selectedAction === 'HEAL' ? 'active' : ''}`}
           onClick={() => handleRestAction('HEAL')}
         >
-          <img className="rest-card-icon" src={getAsset('potion_red')} alt="heal potion" />
+          <img className="rest-card-icon" src={getAsset('rest_heal')} alt="heal rest choice" />
           <div className="rest-card-title">🧪 모닥불 휴식</div>
           <div className="rest-card-desc">
             장작불 곁에서 지친 몸을 달래고<br />
@@ -84,7 +84,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
           className={`rest-option-card ${selectedAction === 'UPGRADE' ? 'active' : ''}`}
           onClick={() => handleRestAction('UPGRADE')}
         >
-          <img className="rest-card-icon" src={getAsset('orb_purple')} alt="purify ritual" />
+          <img className="rest-card-icon" src={getAsset('rest_purify')} alt="purify rest choice" />
           <div className="rest-card-title">🔮 저주 정화 의식</div>
           <div className="rest-card-desc">
             신성한 정화 기도를 올려<br />

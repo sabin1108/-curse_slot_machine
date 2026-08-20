@@ -34,6 +34,40 @@ describe('UiGameEngine', () => {
     })
   })
 
+  it('projects Gambler origin free reroll into structured slot rerolls', () => {
+    const engine = new GameEngine('slot-ui-gambler')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui-gambler' })
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1 })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    engine.dispatch({ type: 'TOGGLE_LOCK_REEL', reelId: 'action' })
+    const firstReroll = engine.dispatch({ type: 'REROLL_UNLOCKED' })
+
+    expect(firstReroll.curse.current).toBe(0)
+    expect(firstReroll.originTraitState.freeRerollAvailable).toBe(false)
+
+    const secondReroll = engine.dispatch({ type: 'REROLL_UNLOCKED' })
+    expect(secondReroll.curse.current).toBe(2)
+  })
+
+  it('projects Gambler x3 jackpots into UI gold rewards', () => {
+    const engine = new GameEngine('slot-ui-gambler-jackpot')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui-gambler-jackpot' })
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    ;(engine as any).currentStructuredSlot = {
+      action: 'shield',
+      target: 'self',
+      modifier: 'x3',
+    }
+
+    const state = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(state.player.gold).toBe(225)
+  })
+
   it('projects structured combo combat effects into UI-visible state', () => {
     const engine = new GameEngine('structured-spin-ui')
 
@@ -45,8 +79,8 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(9)
-    expect(resolvedState.build.activeSynergies).toContain('Combo Engine')
+    expect(resolvedState.enemy.hp).toBe(8)
+    expect(resolvedState.build.activeSynergies).toContain('Combo Engine I')
   })
 
   it('projects structured synergy progress values into the UI build panel', () => {
@@ -54,24 +88,25 @@ describe('UiGameEngine', () => {
 
     engine.dispatch({ type: 'START_RUN', seed: 'structured-progress-ui' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
-    const partialState = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'multi_hit_charm' })
+    const partialState = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'split_blade' })
 
     expect(partialState.build.synergyProgress).toContainEqual(
       expect.objectContaining({
         synergyId: 'combo_engine',
         current: 2,
-        required: 3,
+        required: 4,
         completed: false,
       }),
     )
 
-    const completedState = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_finisher' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_finisher' })
+    const completedState = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'lucky_receipt' })
 
     expect(completedState.build.synergyProgress).toContainEqual(
       expect.objectContaining({
         synergyId: 'combo_engine',
-        current: 3,
-        required: 3,
+        current: 4,
+        required: 4,
         completed: true,
       }),
     )
@@ -301,6 +336,6 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(6)
+    expect(resolvedState.enemy.hp).toBe(4)
   })
 })

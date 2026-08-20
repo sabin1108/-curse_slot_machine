@@ -21,6 +21,7 @@ interface CombatSlotMachineViewProps {
   onToggleLock: (reelId: ReelId) => void;
   onReroll: () => void;
   onConfirm: () => void;
+  isFreeRerollAvailable?: boolean;
 }
 
 export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
@@ -32,7 +33,8 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
   onSpin,
   onToggleLock,
   onReroll,
-  onConfirm
+  onConfirm,
+  isFreeRerollAvailable = false
 }) => {
   const [leverPulled, setLeverPulled] = useState(false);
   const [reelSpinStates, setReelSpinStates] = useState({
@@ -143,7 +145,7 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
   const currentTarget = reels.target[displayIndexes.target % reels.target.length] || reels.target[0];
   const currentModifier = reels.modifier[displayIndexes.modifier % reels.modifier.length] || reels.modifier[0];
 
-  const rerollCurseCost = lockedReels.size + 1;
+  const rerollCurseCost = isFreeRerollAvailable ? 0 : lockedReels.size + 1;
 
   const renderReelWindow = (symbol: ReelSymbol, isSpinningReel: boolean, reelId: ReelId, label: string) => {
     const isLocked = lockedReels.has(reelId);
@@ -197,7 +199,7 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
         ) : (
           <div className="reroll-bar">
             <button className="k-btn warning" onClick={handlePullLever} type="button">
-              🎲 재회전 (저주 +{rerollCurseCost})
+              🎲 {isFreeRerollAvailable ? '무료 재회전 (저주 영향 없음)' : `재회전 (저주 +${rerollCurseCost})`}
             </button>
             <button className="k-btn success" onClick={onConfirm} type="button">
               ⚔️ 결과 확정 (EXECUTE)

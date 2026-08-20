@@ -56,6 +56,10 @@ export const OriginSelectionScreen: React.FC<OriginSelectionScreenProps> = ({ on
               <div className="origin-bias-tag">
                 {orig.symbolBiasText}
               </div>
+
+              <div className="origin-bias-tag">
+                {orig.rouletteTraitText}
+              </div>
             </div>
           );
         })}

@@ -5,7 +5,8 @@ import {
   SlotResult,
   ReelSymbol,
   AugmentItem,
-  SynergyProgress
+  SynergyProgress,
+  EnemyState
 } from '../types/game';
 import {
   ACTION_SYMBOLS,
@@ -34,7 +35,7 @@ export class GameEngine {
   }
 
   private createInitialState(seed: string): GameState {
-    const enemyCopy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[0]));
+    const enemyCopy = this.generateEnemyForStage(1, 1);
 
     return {
       mode: 'NORMAL',
@@ -66,6 +67,9 @@ export class GameEngine {
       },
       visitedNodePath: [],
       selectedOrigin: 'SWORDSMAN',
+      originTraitState: {
+        freeRerollAvailable: false
+      },
       narrativeMicrocopy: '저주받은 슬롯머신이 침묵하고 있습니다.',
       curseLogsUnlocked: ['log_01'],
       isEnemyAttacking: false,
@@ -159,6 +163,7 @@ export class GameEngine {
   private handleSelectOrigin(originId: typeof ORIGINS[keyof typeof ORIGINS]['id']) {
     const origin = ORIGINS[originId] || ORIGINS.SWORDSMAN;
     this.state.selectedOrigin = originId;
+    this.resetOriginTraitState();
     
     // Apply starting stat bonuses
     this.state.player.gold += origin.startingGoldBonus;
@@ -214,6 +219,7 @@ export class GameEngine {
     this.state.currentResult = null;
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
+    this.resetOriginTraitState();
   }
 
   private handleSpinCombatSlot() {
@@ -267,10 +273,13 @@ export class GameEngine {
     if (!this.state.hasSpunThisTurn || this.state.isSpinning) return;
 
     const lockedCount = this.state.lockedReels.size;
-    const curseDelta = lockedCount + 1;
+    const hasFreeReroll = this.consumeFreeRerollIfAvailable();
+    const curseDelta = hasFreeReroll ? 0 : lockedCount + 1;
 
-    this.state.curse.current = Math.min(this.state.curse.max, this.state.curse.current + curseDelta);
-    this.checkCurseThresholds();
+    if (curseDelta > 0) {
+      this.state.curse.current = Math.min(this.state.curse.max, this.state.curse.current + curseDelta);
+      this.checkCurseThresholds();
+    }
 
     // Reroll non-locked reels
     let { action: actionIdx, target: targetIdx, modifier: modifierIdx } = this.state.reelIndexes;
@@ -293,7 +302,9 @@ export class GameEngine {
 
     this.state.currentResult = this.calculateSlotResult(actionSym, targetSym, modifierSym);
     this.state.combatLogs.push(
-      `[재회전] (잠금: ${lockedCount}개, 저주 +${curseDelta}) => ${actionSym.name} + ${targetSym.name} × ${modifierSym.name}`
+      hasFreeReroll
+        ? `[Origin:Gambler] free reroll, locks ${lockedCount}, curse +0 => ${actionSym.name} + ${targetSym.name} x ${modifierSym.name}`
+        : `[재회전] (잠금: ${lockedCount}개, 저주 +${curseDelta}) => ${actionSym.name} + ${targetSym.name} × ${modifierSym.name}`
     );
   }
 
@@ -308,7 +319,11 @@ export class GameEngine {
 
     let multiplier = modifier.baseValue;
     const baseValueSum = action.baseValue + target.baseValue;
-    const calculatedValue = isMiss ? 0 : Math.round(baseValueSum * multiplier);
+    const actionFlatBonus = this.getLegacyActionFlatBonus(action.type);
+    const actionPctBonus = this.getLegacyActionPctBonus(action.type, modifier.id);
+    const calculatedValue = isMiss
+      ? 0
+      : Math.round((baseValueSum * multiplier + actionFlatBonus) * (1 + actionPctBonus / 100));
 
     let text = `[${action.name}] + [${target.name}] × [${modifier.name}]: `;
     if (isMiss) {
@@ -349,6 +364,8 @@ export class GameEngine {
           id: Date.now()
         };
         this.state.combatLogs.push(`[보호] 보호막 +${res.calculatedValue} (총: ${this.state.player.shield})`);
+        this.applyPriestPurifyTrait(act);
+        this.applyGamblerJackpotTrait(res.modifier.id);
       } else if (act === 'HEART') {
         const heal = res.calculatedValue;
         this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + heal);
@@ -358,6 +375,8 @@ export class GameEngine {
           id: Date.now()
         };
         this.state.combatLogs.push(`[회복] HP +${heal} 회복`);
+        this.applyPriestPurifyTrait(act);
+        this.applyGamblerJackpotTrait(res.modifier.id);
       } else {
         // Attack Enemy
         const dmg = res.calculatedValue;
@@ -368,6 +387,18 @@ export class GameEngine {
           id: Date.now()
         };
         this.state.combatLogs.push(`[타격] ${this.state.enemy.name}에게 ${dmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
+        const extraDmg = this.getLegacyExtraHitDamage(dmg, res.modifier.id);
+        if (extraDmg > 0 && this.state.enemy.hp > 0) {
+          this.state.enemy.hp = Math.max(0, this.state.enemy.hp - extraDmg);
+          this.state.lastDamagePop = {
+            value: extraDmg,
+            type: 'ENEMY_DMG',
+            id: Date.now()
+          };
+          this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
+        }
+        this.applySwordsmanBonusStrike(dmg);
+        this.applyGamblerJackpotTrait(res.modifier.id);
       }
     }
 
@@ -383,11 +414,18 @@ export class GameEngine {
     this.state.isEnemyAttacking = true;
     const intent = this.state.enemy.intent;
     let enemyDmg = intent.value;
+    let absorbedTotal = 0;
     if (this.state.player.shield > 0) {
       const absorbed = Math.min(this.state.player.shield, enemyDmg);
       this.state.player.shield -= absorbed;
       enemyDmg -= absorbed;
+      absorbedTotal += absorbed;
       this.state.combatLogs.push(`[수호 방벽 흡수] 보호막이 ${absorbed} 피해를 차단했습니다!`);
+    }
+    const thornDamage = this.getLegacyThornDamage(absorbedTotal);
+    if (thornDamage > 0) {
+      this.state.enemy.hp = Math.max(0, this.state.enemy.hp - thornDamage);
+      this.state.combatLogs.push(`[Thorns] 방어막 반격 ${thornDamage} 피해!`);
     }
     if (enemyDmg > 0) {
       this.state.player.hp = Math.max(0, this.state.player.hp - enemyDmg);
@@ -409,6 +447,61 @@ export class GameEngine {
     // Prepare next turn
     this.state.turn += 1;
     this.state.hasSpunThisTurn = false;
+    this.resetOriginTraitState();
+  }
+
+  private resetOriginTraitState() {
+    this.state.originTraitState = {
+      freeRerollAvailable: this.state.selectedOrigin === 'GAMBLER'
+    };
+  }
+
+  private consumeFreeRerollIfAvailable(): boolean {
+    if (this.state.selectedOrigin !== 'GAMBLER' || !this.state.originTraitState.freeRerollAvailable) {
+      return false;
+    }
+
+    this.state.originTraitState.freeRerollAvailable = false;
+    return true;
+  }
+
+  private applySwordsmanBonusStrike(baseDamage: number) {
+    if (this.state.selectedOrigin !== 'SWORDSMAN' || baseDamage < 16 || this.state.enemy.hp <= 0) {
+      return;
+    }
+
+    const bonusDamage = Math.max(1, Math.round(baseDamage * 0.5));
+    this.state.enemy.hp = Math.max(0, this.state.enemy.hp - bonusDamage);
+    this.state.lastDamagePop = {
+      value: bonusDamage,
+      type: 'ENEMY_DMG',
+      id: Date.now()
+    };
+    this.state.combatLogs.push(`[Origin:Swordsman] half-power follow-up ${bonusDamage} damage! (enemy HP: ${this.state.enemy.hp})`);
+  }
+
+  private applyPriestPurifyTrait(actionType: ReelSymbol['type']) {
+    if (this.state.selectedOrigin !== 'PRIEST' || (actionType !== 'SHIELD' && actionType !== 'HEART') || this.state.curse.current <= 0) {
+      return;
+    }
+
+    this.state.curse.current = Math.max(0, this.state.curse.current - 1);
+    this.state.combatLogs.push('[Origin:Priest] shield/heart result purified curse -1');
+  }
+
+  private applyGamblerJackpotTrait(modifierId: string) {
+    if (this.state.selectedOrigin !== 'GAMBLER' || modifierId !== 'x3') {
+      return;
+    }
+
+    this.state.player.gold += 25;
+    const purifiedCurse = this.state.curse.current > 0;
+    this.state.curse.current = Math.max(0, this.state.curse.current - 1);
+    this.state.combatLogs.push(
+      purifiedCurse
+        ? `[Origin:Gambler] x3 jackpot: gold +25, curse -1`
+        : `[Origin:Gambler] x3 jackpot: gold +25`
+    );
   }
 
   private prepareRewardScreen() {
@@ -426,6 +519,44 @@ export class GameEngine {
       reels: [targetAug.tags[0] || 'COMBO', targetAug.rarity, targetAug.name],
       targetAugment: targetAug,
       isRevealed: true
+    };
+  }
+
+  private generateEnemyForStage(floor: number, wave: number): EnemyState {
+    const isBoss = wave === 7 && floor === 3;
+    const isElite = wave === 4;
+
+    let baseEnemy: EnemyState;
+    if (isBoss) {
+      baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[6])); // Final Boss
+    } else if (isElite) {
+      const eliteIdx = floor === 1 ? 3 : floor === 2 ? 4 : 5;
+      baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[eliteIdx]));
+    } else {
+      const idx = (wave - 1) % 3;
+      baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[idx]));
+    }
+
+    // Dynamic Roguelike Level Design Scaling Formula
+    const hpScale = 1 + (floor - 1) * 0.78 + (wave - 1) * 0.11;
+    const dmgScale = 1 + (floor - 1) * 0.58 + (wave - 1) * 0.08;
+    const shieldBonus = (floor - 1) * 16 + (wave > 3 ? 8 : 0) + (isBoss ? 12 : 0);
+
+    const scaledHp = Math.round(baseEnemy.maxHp * hpScale);
+    const scaledDmg = Math.round(baseEnemy.intent.value * dmgScale);
+    const scaledShield = Math.round(baseEnemy.shield + shieldBonus);
+
+    return {
+      ...baseEnemy,
+      name: `${floor}층 ${wave}단계: ${baseEnemy.name.split(': ')[1] || baseEnemy.name}`,
+      hp: scaledHp,
+      maxHp: scaledHp,
+      shield: scaledShield,
+      intent: {
+        ...baseEnemy.intent,
+        value: scaledDmg,
+        description: `다음 턴 ${scaledDmg} 피해 예고`
+      }
     };
   }
 
@@ -453,10 +584,10 @@ export class GameEngine {
       this.state.wave += 1;
     }
 
-    const enemyIndex = Math.min((this.state.floor - 1) * 2 + (this.state.wave - 1), DEFAULT_ENEMIES.length - 1);
-    this.state.enemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[enemyIndex]));
+    this.state.enemy = this.generateEnemyForStage(this.state.floor, this.state.wave);
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
+    this.resetOriginTraitState();
     this.state.screen = 'MAP';
   }
 
@@ -484,8 +615,123 @@ export class GameEngine {
     });
 
     this.state.build.activeSynergies = this.state.build.synergyProgress
-      .filter((s) => s.completed)
-      .map((s) => s.name);
+      .flatMap((s) => this.getLegacyActiveSynergyNames(s));
+  }
+
+  private getLegacyActionFlatBonus(actionType: ReelSymbol['type']): number {
+    if (actionType === 'BULLET' || actionType === 'DAGGER' || actionType === 'BOMB') {
+      return this.countLegacyTags('BURN') * 3
+        + this.countLegacyTags('COMBO') * 2
+        + (this.countLegacyTags('BURN') >= 2 ? 4 : 0)
+        + (this.hasLegacyReward('aug_fire_sword') ? 6 : 0)
+        + (this.hasLegacyReward('safe_cracker') ? 2 : 0)
+        + (this.hasLegacyReward('thorn_shell') ? 4 : 0);
+    }
+
+    if (actionType === 'SHIELD') {
+      return this.countLegacyTags('DEFENSE') * 3
+        + (this.countLegacyTags('DEFENSE') >= 2 ? 5 : 0)
+        + (this.hasLegacyReward('aug_barrier') ? 3 : 0)
+        + (this.hasLegacyReward('green_vial') ? 2 : 0);
+    }
+
+    if (actionType === 'HEART') {
+      return this.countLegacyTags('RESOURCE') * 2
+        + (this.countLegacyTags('RESOURCE') >= 2 ? 4 : 0)
+        + (this.hasLegacyReward('aug_regen') ? 2 : 0)
+        + (this.hasLegacyReward('red_coin') ? 3 : 0)
+        + (this.hasLegacyReward('green_vial') ? 4 : 0);
+    }
+
+    return 0;
+  }
+
+  private getLegacyActionPctBonus(actionType: ReelSymbol['type'], modifierId: string): number {
+    let pct = 0;
+
+    if (actionType === 'BULLET' || actionType === 'DAGGER' || actionType === 'BOMB') {
+      pct += this.countLegacyTags('CRITICAL') * 12;
+      pct += this.countLegacyTags('RISK') * 8;
+      if (this.countLegacyTags('COMBO') >= 2) pct += 15;
+      if (this.countLegacyTags('COMBO') >= 4 && modifierId === 'x3') pct += 75;
+      if (this.countLegacyTags('BURN') >= 3) pct += 30;
+      if (this.countLegacyTags('BURN') >= 4 && this.state.curse.current >= 3) pct += 60;
+      if (this.countLegacyTags('CURSE') >= 2 && this.state.curse.current >= 3) pct += 25;
+      if (this.countLegacyTags('CURSE') >= 4 && this.state.curse.current >= 7) pct += 90;
+      if (this.countLegacyTags('CRITICAL') >= 2 && (modifierId === 'x2' || modifierId === 'x3')) pct += 25;
+      if (this.countLegacyTags('CRITICAL') >= 4 && modifierId === 'x3') pct += 100;
+      if (this.hasLegacyReward('glass_cannon')) pct += 45;
+      if (this.hasLegacyReward('cursed_lens') && this.state.curse.current >= 5) pct += 50;
+      if (this.hasLegacyReward('furnace_heart') && this.state.curse.current >= 4) pct += 40;
+      if (this.hasLegacyReward('black_candle') && this.state.curse.current >= 3) pct += 35;
+      if (this.hasLegacyReward('blood_price') && this.getPlayerHpPct() <= 40) pct += 65;
+      if (this.hasLegacyReward('royal_joker') && modifierId === 'x3') pct += 80;
+      if (this.hasLegacyReward('house_mark') && modifierId === 'x2') pct += 40;
+      if (this.hasLegacyReward('crit_die') && modifierId === 'x3') pct += 45;
+    }
+
+    if (actionType === 'SHIELD') {
+      pct += this.countLegacyTags('DEFENSE') * 8;
+      if (this.countLegacyTags('DEFENSE') >= 3) pct += 40;
+      if (this.hasLegacyReward('mirror_buckler')) pct += 25;
+      if (this.hasLegacyReward('fortress_oath')) pct += 60;
+    }
+
+    if (actionType === 'HEART') {
+      pct += this.countLegacyTags('RESOURCE') * 8;
+      if (this.countLegacyTags('RESOURCE') >= 3) pct += 45;
+      if (this.countLegacyTags('RESOURCE') >= 4 && this.getPlayerHpPct() <= 45) pct += 90;
+      if (this.hasLegacyReward('blue_vial')) pct += 30;
+      if (this.hasLegacyReward('panic_button') && this.getPlayerHpPct() <= 45) pct += 80;
+    }
+
+    return Math.min(220, pct);
+  }
+
+  private getLegacyExtraHitDamage(baseDamage: number, modifierId: string): number {
+    let pct = this.countLegacyTags('MULTI_HIT') * 20;
+
+    if (this.countLegacyTags('COMBO') >= 3) pct += 30;
+    if (this.countLegacyTags('CURSE') >= 3 && this.state.curse.current >= 5) pct += 40;
+    if (this.countLegacyTags('CRITICAL') >= 3 && modifierId === 'x3') pct += 50;
+    if (this.hasLegacyReward('aug_frenzy_core')) pct += 35;
+    if (this.hasLegacyReward('multi_hit_charm')) pct += 35;
+    if (this.hasLegacyReward('split_blade')) pct += 45;
+    if (this.hasLegacyReward('jackpot_debt')) pct += 90;
+    if (this.hasLegacyReward('echo_trigger') && modifierId === 'x3') pct += 75;
+
+    return pct > 0 ? Math.floor(baseDamage * Math.min(150, pct) / 100) : 0;
+  }
+
+  private getLegacyThornDamage(absorbedDamage: number): number {
+    if (absorbedDamage <= 0) return 0;
+    const defenseTags = this.countLegacyTags('DEFENSE');
+    if (defenseTags < 2 && !this.hasLegacyReward('thorn_shell')) return 0;
+
+    return Math.max(1, Math.floor(absorbedDamage * (defenseTags >= 3 ? 0.5 : 0.3)));
+  }
+
+  private getLegacyActiveSynergyNames(synergy: SynergyProgress): string[] {
+    const tierNames: string[] = [];
+    if (synergy.current >= 2) tierNames.push(`${synergy.name} I`);
+    if (synergy.current >= 3) tierNames.push(`${synergy.name} II`);
+    if (synergy.current >= 4) tierNames.push(`${synergy.name} III`);
+
+    return tierNames.length > 0 ? tierNames : synergy.completed ? [synergy.name] : [];
+  }
+
+  private countLegacyTags(tag: AugmentItem['tags'][number]): number {
+    return this.state.build.augments.reduce((count, augment) => (
+      augment.tags.includes(tag) ? count + 1 : count
+    ), 0);
+  }
+
+  private hasLegacyReward(id: string): boolean {
+    return this.state.build.augments.some((augment) => augment.id === id);
+  }
+
+  private getPlayerHpPct(): number {
+    return (this.state.player.hp / this.state.player.maxHp) * 100;
   }
 
   private handleStartShowcase() {

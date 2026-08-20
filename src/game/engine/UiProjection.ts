@@ -13,6 +13,7 @@ import type {
 } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import { getAsset } from '../../assets/assetHelper'
 
 export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   return {
@@ -22,7 +23,8 @@ export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
     tags: reward.tags,
     description: reward.description,
     icon: 'AUG',
-    effectValue: reward.effectId ?? reward.effects?.[0]?.id ?? 'EFFECT',
+    imgUrl: reward.assetKey ? getAsset(reward.assetKey) : undefined,
+    effectValue: reward.effectLabel ?? reward.effectId ?? reward.effects?.[0]?.id ?? 'EFFECT',
   }
 }
 
@@ -34,7 +36,8 @@ export function toUiReward(reward: RewardOption): AugmentItem {
     tags: reward.tags,
     description: reward.description,
     icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
-    effectValue: `score ${reward.score.total}`,
+    imgUrl: reward.assetKey ? getAsset(reward.assetKey) : undefined,
+    effectValue: reward.effectLabel ?? `score ${reward.score.total}`,
   }
 }
 
@@ -62,15 +65,30 @@ export function toUiSynergyProgress(
   synergy: SynergyDefinition,
   progress?: StructuredSynergyProgress,
 ): UiSynergyProgress {
+  const required = progress?.required ?? getSynergyRequired(synergy)
+  const current = progress?.current ?? 0
+  const activeTier = [...(synergy.tiers ?? [])]
+    .sort((left, right) => right.count - left.count)
+    .find((tier) => current >= tier.count)
+
   return {
     synergyId: synergy.id,
     name: synergy.name,
-    tag: synergy.requiredTags[0]?.tag ?? ('COMBO' satisfies SynergyTag),
-    current: progress?.current ?? 0,
-    required: progress?.required ?? synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
-    completed: progress?.completed ?? false,
-    effectDescription: synergy.description,
+    tag: synergy.tierTag ?? synergy.requiredTags[0]?.tag ?? ('COMBO' satisfies SynergyTag),
+    current,
+    required,
+    completed: progress?.completed ?? current >= required,
+    effectDescription: activeTier
+      ? `${activeTier.effectLabel} / ${activeTier.description}`
+      : synergy.description,
   }
+}
+
+function getSynergyRequired(synergy: SynergyDefinition): number {
+  const tierRequired = Math.max(0, ...(synergy.tiers ?? []).map((tier) => tier.count))
+  const baseRequired = synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0)
+
+  return Math.max(tierRequired, baseRequired)
 }
 
 function getUiActionSymbol(action: CombatSlotResult['action']): ReelSymbol {

@@ -112,6 +112,11 @@ export interface OriginData {
   startingAugmentId: string;
   icon: string;
   symbolBiasText: string;
+  rouletteTraitText: string;
+}
+
+export interface OriginTraitState {
+  freeRerollAvailable: boolean;
 }
 
 export type GameScreen = 'TITLE' | 'PROLOGUE' | 'ORIGIN' | 'BATTLE' | 'REWARD' | 'MAP' | 'SHOP' | 'REST' | 'GAMEOVER' | 'VICTORY';
@@ -152,6 +157,7 @@ export interface GameState {
   
   // Narrative & Origin State
   selectedOrigin?: OriginId;
+  originTraitState: OriginTraitState;
   narrativeMicrocopy?: string;
   curseLogsUnlocked?: string[];
 

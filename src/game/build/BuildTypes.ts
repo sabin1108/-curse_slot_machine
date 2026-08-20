@@ -26,6 +26,8 @@ export type BuildRewardDefinition = {
   rarity: Rarity
   tags: SynergyTag[]
   effectId?: string
+  effectLabel?: string
+  assetKey?: string
   effects?: EffectDefinition[]
   description: string
 }
@@ -36,11 +38,22 @@ export type SynergyRequirement = {
   source?: RewardKind | 'any'
 }
 
+export type SynergyTier = {
+  id: string
+  name: string
+  count: number
+  effectLabel: string
+  description: string
+  effects: EffectDefinition[]
+}
+
 export type SynergyDefinition = {
   id: string
   name: string
   description: string
   requiredTags: SynergyRequirement[]
+  tierTag?: SynergyTag
+  tiers?: SynergyTier[]
   effectId?: string
   effects?: EffectDefinition[]
 }
@@ -56,6 +69,7 @@ export type ActiveSynergy = {
   synergyId: string
   name: string
   effectId: string
+  tier?: number
 }
 
 export type SynergyState = {
