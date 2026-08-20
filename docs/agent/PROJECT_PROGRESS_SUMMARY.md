@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/ui-adapter-showcase-slot-guard`
-- Current PR: pending draft PR creation
+- Current PR: draft PR #17 - https://github.com/sabin1108/-curse_slot_machine/pull/17
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -38,7 +38,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/ui-adapter-showcase-slot-guard` is local and verified; draft PR creation is pending.
+`feature/ui-adapter-showcase-slot-guard` is pushed and open as draft PR #17.
 
 Implemented:
 
@@ -48,7 +48,7 @@ Implemented:
 
 Current branch commits:
 
-- none yet; local changes are verified and pending commit/push/PR.
+- `16c54a3` - `fix: preserve showcase slot path in ui adapter`
 
 ## Verification
 
@@ -77,7 +77,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-showcase-slot-guard`.
+1. Keep PR #17 draft until review and explicit merge approval.
 2. Continue Showcase UI entry/overlay wiring as a separate TDD slice.
 
 Do not merge later PRs without explicit user approval.

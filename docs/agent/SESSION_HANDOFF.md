@@ -64,7 +64,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-node-type-routing` | `d4ea1bd` | https://github.com/sabin1108/-curse_slot_machine/pull/14 | Merged |
 | `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
 | `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
-| `feature/ui-adapter-showcase-slot-guard` | local changes | not opened | In progress |
+| `feature/ui-adapter-showcase-slot-guard` | `16c54a3` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Draft |
 
 ## Verification Commands
 
@@ -154,14 +154,14 @@ Latest completed verification:
 - `feature/ui-adapter-node-type-routing` was merged through PR #14.
 - `feature/ui-adapter-event-node-entry` was merged through PR #15.
 - `feature/ui-adapter-event-choice-command` was merged through PR #16.
-- `feature/ui-adapter-showcase-slot-guard` is local and verified; draft PR creation is pending.
+- `feature/ui-adapter-showcase-slot-guard` is pushed and open as draft PR #17.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-showcase-slot-guard`.
+1. Review PR #17 and merge only after explicit user approval.
 2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until Showcase UI entry/overlay wiring is covered.
 
 ## Branch Log
@@ -328,8 +328,8 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-showcase-slot-guard`
 - Base: `main` after PR #16 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `16c54a3`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/17
 - Implemented: `START_SHOWCASE` clears adapter-owned structured slot state and showcase active `SPIN_COMBAT_SLOT` delegates to legacy presentation forced results instead of structured slot RNG.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: Showcase UI entry/overlay wiring remains a future slice.

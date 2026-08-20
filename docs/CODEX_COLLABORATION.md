@@ -525,5 +525,5 @@
 
 ### GitHub
 
-- Draft PR pending creation for `feature/ui-adapter-showcase-slot-guard`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/17
 - Merge policy: no merge without explicit user approval.
