@@ -189,6 +189,43 @@ describe('UiGameEngine', () => {
     expect(afterInvalidConfirm.screen).toBe('MAP')
   })
 
+  it('resolves event open choice through the adapter command', () => {
+    const engine = new GameEngine('event-choice-open')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'event-choice-open' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
+    const before = engine.getState().build.items.length
+
+    const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'OPEN' })
+
+    expect(state.build.items).toHaveLength(before + 1)
+    expect(state.screen).toBe('MAP')
+  })
+
+  it('resolves event rest choice through the adapter command', () => {
+    const engine = new GameEngine('event-choice-rest')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'event-choice-rest' })
+    const eventState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
+    eventState.player.hp = 60
+
+    const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'REST' })
+
+    expect(state.player.hp).toBe(95)
+    expect(state.screen).toBe('MAP')
+  })
+
+  it('resolves event skip choice through the adapter command', () => {
+    const engine = new GameEngine('event-choice-skip')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'event-choice-skip' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
+
+    const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'SKIP' })
+
+    expect(state.screen).toBe('BATTLE')
+  })
+
   it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
     const engine = new GameEngine('slot-ui')
 

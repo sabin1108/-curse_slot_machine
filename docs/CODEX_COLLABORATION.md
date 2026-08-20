@@ -464,5 +464,36 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/15
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/15
+- User approved merging PR #15 on 2026-08-20.
+- PR #15 was marked ready and squash merged into `main`.
+- PR #15 squash merge commit: `eae8337`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Event Choice Command
+
+### Human Direction
+
+- Merge PR #15 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-event-choice-command` from updated `main` after PR #15 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiGameEngine` tests proving `RESOLVE_EVENT_CHOICE` did not yet affect open/rest/skip outcomes.
+- Added `EventChoice` and `RESOLVE_EVENT_CHOICE`.
+- Updated `UiGameEngine` to map event choices to existing TypeScript engine commands.
+- Updated `DungeonMapScreen` so event buttons dispatch one event choice command instead of branching into outcome-specific commands.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `RESOLVE_EVENT_CHOICE` left outcomes unchanged, then passed with 13 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 51 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/16
 - Merge policy: no merge without explicit user approval.

@@ -1,4 +1,4 @@
-import type { GameCommand as UiGameCommand, GameState as UiGameState, MapNodeType } from '../../types/game'
+import type { EventChoice, GameCommand as UiGameCommand, GameState as UiGameState, MapNodeType } from '../../types/game'
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
 import type { BuildRewardDefinition } from '../build/BuildTypes'
@@ -110,6 +110,11 @@ export class GameEngine {
       this.presentation.hasSpunThisTurn = false
       this.presentation.isSpinning = false
       this.presentation.lockedReels.clear()
+      return this.presentation
+    }
+
+    if (command.type === 'RESOLVE_EVENT_CHOICE') {
+      this.presentation = this.legacy.dispatch(getEventChoiceCommand(command.choice))
       return this.presentation
     }
 
@@ -254,6 +259,18 @@ function getMapNodeDestinationScreen(nodeType: MapNodeType | undefined): UiGameS
   }
 
   return 'BATTLE'
+}
+
+function getEventChoiceCommand(choice: EventChoice): UiGameCommand {
+  if (choice === 'OPEN') {
+    return { type: 'BUY_SHOP_ITEM', itemId: '보물상자 획득', price: 0 }
+  }
+
+  if (choice === 'REST') {
+    return { type: 'REST_ACTION', actionType: 'HEAL' }
+  }
+
+  return { type: 'NAVIGATE', screen: 'BATTLE' }
 }
 
 function getStructuredReward(id: string): BuildRewardDefinition | undefined {
