@@ -1,3 +1,5 @@
+import type { EffectDefinition } from '../effects/EffectTypes'
+
 export type SynergyTag =
   | 'COMBO'
   | 'MULTI_HIT'
@@ -23,7 +25,8 @@ export type BuildRewardDefinition = {
   name: string
   rarity: Rarity
   tags: SynergyTag[]
-  effectId: string
+  effectId?: string
+  effects?: EffectDefinition[]
   description: string
 }
 
@@ -38,7 +41,8 @@ export type SynergyDefinition = {
   name: string
   description: string
   requiredTags: SynergyRequirement[]
-  effectId: string
+  effectId?: string
+  effects?: EffectDefinition[]
 }
 
 export type SynergyProgress = {

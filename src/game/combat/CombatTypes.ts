@@ -1,4 +1,5 @@
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import type { EffectDefinition } from '../effects/EffectTypes'
 
 export type CombatActorId = 'player' | 'enemy'
 
@@ -67,6 +68,10 @@ export type CombatEvent =
 export type CombatResolution = CombatState & {
   events: CombatEvent[]
   outcome: CombatOutcome
+}
+
+export type CombatEffectContext = {
+  effects?: EffectDefinition[]
 }
 
 export type CombatStateOverrides = {

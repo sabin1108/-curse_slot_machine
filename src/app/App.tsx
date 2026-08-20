@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { GameEngine } from '../game/GameEngine';
+import { GameEngine } from '../game/engine/UiGameEngine';
 import { GameCommand } from '../types/game';
 
 import { TitleScreen } from '../components/Title/TitleScreen';

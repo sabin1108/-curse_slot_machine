@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, and `feature/build-reward-synergy` are merged; current work is `feature/augment-slot-machine`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, and `feature/augment-slot-machine` are merged; current work is `feature/content-effect-schema-pilot`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -19,6 +19,9 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Augment slot animation displays a preselected reward result and must not call `Math.random()` to decide rewards.
 - Normal Game and Showcase Mode stay separate. Showcase uses scripted rewards/scenarios and must not inject direct combat cheats such as `if (showcase) damage *= 100000`.
 - MVP content should favor extensible data structures over hardcoded augment, item, or synergy names.
+- Content effects should use bounded typed effect modules rather than free-form scripts.
+- The visible React app now imports `src/game/engine/UiGameEngine.ts`, a thin adapter. The adapter delegates ordinary legacy UI commands to `src/game/GameEngine.ts` but can project structured reward/combat results from `src/game/engine/*` into the current UI state shape.
+- `UiGameEngine` owns adapter-local pure combat slot RNG for `SPIN_COMBAT_SLOT` and lock-aware `REROLL_UNLOCKED`; React still only dispatches commands and renders projected state.
 
 ## Environment Setup Results
 
@@ -27,7 +30,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Combat resolution worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_combat_resolution`.
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
-- Augment slot active branch: `feature/augment-slot-machine`.
+- Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
+- Current content effect branch: `feature/content-effect-schema-pilot`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -39,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/augment-slot-machine`
+- Current branch: `feature/content-effect-schema-pilot`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -52,7 +56,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/combat-slot-machine` | `6edc91d` | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Merged |
 | `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
 | `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
-| `feature/augment-slot-machine` | `e57b615` plus PR doc updates | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Draft PR opened |
+| `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
+| `feature/content-effect-schema-pilot` | `a261089` | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Draft PR open |
 
 ## Verification Commands
 
@@ -92,17 +97,29 @@ Latest completed verification:
 - `feature/augment-slot-machine`: `npm.cmd run typecheck` passed.
 - `feature/augment-slot-machine`: full `npm.cmd run test:run` passed with 27 tests across 8 files.
 - `feature/augment-slot-machine`: `npm.cmd run build` passed.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/build/BuildSystem.test.ts` failed first because `getActiveEffects` did not exist, then passed with 4 tests after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts` failed first because combat effects were ignored, then passed with 7 tests after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed with 6 tests after implementation.
+- `feature/content-effect-schema-pilot`: `npm.cmd run typecheck` passed.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed with 1 test after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured victory rewards were not projected to UI `rewardCandidates`, then passed with 2 tests after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured slot spin/reroll still used legacy output, then passed with 4 tests after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` passed before and after switching `App.tsx` to the adapter import.
+- `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 40 tests across 9 files.
+- `feature/content-effect-schema-pilot`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
-- `feature/augment-slot-machine` is open as draft PR #8 and awaiting user review.
+- `feature/content-effect-schema-pilot` has draft PR #10 open.
+- The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Wait for user review and merge approval for PR #8.
-2. After augment slot is merged, start `feature/showcase-mode`.
+1. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+2. Keep PR #10 draft until review and explicit human merge approval.
+3. Continue `feature/showcase-mode` after the effect pilot decision.
 
 ## Branch Log
 
@@ -166,5 +183,19 @@ Latest completed verification:
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/8
 - Implemented: deterministic `AugmentSlotMachine` presentation types and pure functions, hidden three-reel reward presentation, immutable reveal helper, random API guard test, and `GameEngine` reward state/event integration.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: waiting for user review and merge approval; no merge without user approval.
-- Next branch: `feature/showcase-mode`
+- Merge result: user approved merging PR #8 on 2026-08-20; PR #8 was marked ready and squash merged into `main`.
+- Squash merge commit: `ca51454`.
+- Remaining issues: none for augment slot.
+- Next branch: `feature/content-effect-schema-pilot`
+
+### feature/content-effect-schema-pilot
+
+- Branch: `feature/content-effect-schema-pilot`
+- Base: `main` after PR #8 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `b4532a3`.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft).
+- Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, structured victory reward projection for the RewardModal contract, and pure combat slot spin/reroll routing.
+- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
+- Remaining issues: adapter coverage is narrow; map/shop/rest/showcase migration remain future slices.
+- Next branch candidate after PR: `feature/showcase-mode` or a legacy/pure engine integration adapter.

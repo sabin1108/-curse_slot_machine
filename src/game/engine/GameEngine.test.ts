@@ -151,6 +151,35 @@ describe('GameEngine', () => {
     expect(engine.getState().rewards.options).toEqual([])
     expect(engine.getState().rewards.augmentSlot).toBeNull()
   })
+
+  it('passes completed build synergy effects into combat resolution', () => {
+    const engine = new GameEngine('combo-effects')
+
+    engine.dispatch({ type: 'START_RUN' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', reward: { kind: 'augment', id: 'combo_starter' } })
+    engine.dispatch({ type: 'CHOOSE_REWARD', reward: { kind: 'item', id: 'multi_hit_charm' } })
+    engine.dispatch({ type: 'CHOOSE_REWARD', reward: { kind: 'augment', id: 'combo_finisher' } })
+
+    const events = engine.dispatch({
+      type: 'RESOLVE_COMBAT_SLOT',
+      result: {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x1',
+      },
+    })
+
+    expect(engine.getState().combat.enemy.health).toBe(9)
+    expect(events).toEqual([
+      expect.objectContaining({
+        type: 'COMBAT_SLOT_RESOLVED',
+        combatEvents: expect.arrayContaining([
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 6 }),
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 3 }),
+        ]),
+      }),
+    ])
+  })
 })
 
 describe('createInitialGameState', () => {
