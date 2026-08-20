@@ -120,13 +120,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
 
   const handleEventChoice = (action: 'OPEN' | 'REST' | 'SKIP') => {
     soundManager.playClick();
-    if (action === 'OPEN') {
-      onDispatch({ type: 'BUY_SHOP_ITEM', itemId: '보물상자 획득', price: 0 });
-    } else if (action === 'REST') {
-      onDispatch({ type: 'REST_ACTION', actionType: 'HEAL' });
-    } else {
-      onDispatch({ type: 'NAVIGATE', screen: 'BATTLE' });
-    }
+    onDispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: action });
     setActiveEventNode(null);
   };
 

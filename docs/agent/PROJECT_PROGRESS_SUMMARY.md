@@ -7,14 +7,15 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-event-node-entry`
-- Current PR: draft PR #15 - https://github.com/sabin1108/-curse_slot_machine/pull/15
+- Current branch: `feature/ui-adapter-event-choice-command`
+- Current PR: pending draft PR creation
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
 - PR #12 status: merged into `main` with squash commit `9955372`.
 - PR #13 status: merged into `main` with squash commit `1877c21`.
 - PR #14 status: merged into `main` with squash commit `d4ea1bd`.
+- PR #15 status: merged into `main` with squash commit `eae8337`.
 
 ## Completed Branches
 
@@ -31,34 +32,34 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-map-node` | #12 | `9955372` | Merged |
 | `feature/ui-adapter-select-map-node` | #13 | `1877c21` | Merged |
 | `feature/ui-adapter-node-type-routing` | #14 | `d4ea1bd` | Merged |
+| `feature/ui-adapter-event-node-entry` | #15 | `eae8337` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-event-node-entry` is pushed and open as draft PR #15.
+`feature/ui-adapter-event-choice-command` is local and verified; draft PR creation is pending.
 
 Implemented:
 
-- `SELECT_MAP_NODE` now routes `EVENT` nodes to clean map event entry instead of battle entry.
-- Event node selection records the visited node path and clears stale adapter-owned structured slot state.
-- `DungeonMapScreen` dispatches `SELECT_MAP_NODE` before opening the existing local event choice modal.
-- Event choice reward/rest/skip resolution remains a future slice.
+- Added `RESOLVE_EVENT_CHOICE` as a single event choice command.
+- `UiGameEngine` maps `OPEN`, `REST`, and `SKIP` to the existing TypeScript presentation engine behavior.
+- `DungeonMapScreen` now dispatches the event choice command instead of selecting `BUY_SHOP_ITEM`, `REST_ACTION`, or `NAVIGATE` directly.
 
 Current branch commits:
 
-- `b7d1d9f` - `fix: enter event nodes through ui adapter`
+- none yet; local changes are verified and pending commit/push/PR.
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-event-node-entry`:
+Latest verification on `feature/ui-adapter-event-choice-command`:
 
-- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `EVENT` node selection returned `screen: 'BATTLE'`, then passed with 10 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `RESOLVE_EVENT_CHOICE` did not affect `OPEN`, `REST`, or `SKIP`, then passed with 13 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 48 tests across 10 files.
+- `npm.cmd run test:run`: passed, 51 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/engine/UiGameEngine.test.ts` failed first because `SELECT_MAP_NODE` returned `screen: 'BATTLE'` instead of `MAP` for typed event nodes.
+- `src/game/engine/UiGameEngine.test.ts` failed first because `RESOLVE_EVENT_CHOICE` left items, HP, and screen unchanged.
 
 ## Architecture Decisions Preserved
 
@@ -74,7 +75,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #15 draft until review and explicit merge approval.
-2. Continue event choice resolution/showcase migration as separate TDD slices.
+1. Commit, push, and open a draft PR for `feature/ui-adapter-event-choice-command`.
+2. Continue showcase migration as a separate TDD slice.
 
 Do not merge later PRs without explicit user approval.

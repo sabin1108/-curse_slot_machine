@@ -120,6 +120,8 @@ export type GameMode = 'NORMAL' | 'SHOWCASE';
 
 export type MapNodeType = 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
 
+export type EventChoice = 'OPEN' | 'REST' | 'SKIP';
+
 export interface ShowcaseStep {
   stepIndex: number;
   title: string;
@@ -206,6 +208,7 @@ export type GameCommand =
   | { type: 'NAVIGATE'; screen: GameScreen }
   | { type: 'START_SHOWCASE'; scenarioId?: string }
   | { type: 'NEXT_SHOWCASE_STEP' }
+  | { type: 'RESOLVE_EVENT_CHOICE'; choice: EventChoice }
   | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
   | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
 
