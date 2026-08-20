@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/ui-adapter-select-map-node`
-- Current PR: pending draft PR creation
+- Current PR: draft PR #13 - https://github.com/sabin1108/-curse_slot_machine/pull/13
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -30,7 +30,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/ui-adapter-select-map-node` is local and verified; draft PR creation is pending.
+`feature/ui-adapter-select-map-node` is pushed and open as draft PR #13.
 
 Implemented:
 
@@ -40,7 +40,7 @@ Implemented:
 
 Current branch commits:
 
-- none yet; local changes are verified and pending commit/push/PR.
+- `3a97e93` - `fix: prepare map node battle entry`
 
 ## Verification
 
@@ -69,7 +69,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-select-map-node`.
+1. Keep PR #13 draft until review and explicit merge approval.
 2. Continue shop/rest/showcase migration as separate TDD slices.
 
 Do not merge later PRs without explicit user approval.
