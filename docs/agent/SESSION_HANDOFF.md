@@ -62,7 +62,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-map-node` | `9955372` | https://github.com/sabin1108/-curse_slot_machine/pull/12 | Merged |
 | `feature/ui-adapter-select-map-node` | `1877c21` | https://github.com/sabin1108/-curse_slot_machine/pull/13 | Merged |
 | `feature/ui-adapter-node-type-routing` | `d4ea1bd` | https://github.com/sabin1108/-curse_slot_machine/pull/14 | Merged |
-| `feature/ui-adapter-event-node-entry` | local changes | not opened | In progress |
+| `feature/ui-adapter-event-node-entry` | `b7d1d9f` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Draft |
 
 ## Verification Commands
 
@@ -142,14 +142,14 @@ Latest completed verification:
 - `feature/ui-adapter-map-node` was merged through PR #12.
 - `feature/ui-adapter-select-map-node` was merged through PR #13.
 - `feature/ui-adapter-node-type-routing` was merged through PR #14.
-- `feature/ui-adapter-event-node-entry` is local and verified; draft PR creation is pending.
+- `feature/ui-adapter-event-node-entry` is pushed and open as draft PR #15.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-event-node-entry`.
+1. Keep PR #15 draft until review and explicit merge approval.
 2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until event choice/showcase state is covered.
 
 ## Branch Log
@@ -290,8 +290,8 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-event-node-entry`
 - Base: `main` after PR #14 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `b7d1d9f`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/15
 - Implemented: `SELECT_MAP_NODE` routes typed event nodes to clean `MAP` entry, records event node visits, clears stale adapter-owned slot state, and `DungeonMapScreen` dispatches the event node command before opening its existing event choice modal.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: event choice resolution and showcase migration remain future slices.

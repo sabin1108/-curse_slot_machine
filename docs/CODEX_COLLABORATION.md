@@ -464,5 +464,5 @@
 
 ### GitHub
 
-- Draft PR pending creation for `feature/ui-adapter-event-node-entry`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/15
 - Merge policy: no merge without explicit user approval.
