@@ -114,6 +114,56 @@ describe('UiGameEngine', () => {
     expect(afterInvalidConfirm.enemy.hp).toBe(enemyHpBeforeConfirm)
   })
 
+  it('selects a shop map node into clean shop entry without resolving a stale slot', () => {
+    const engine = new GameEngine('lethal-ui-24')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    const chosenRewardId = rewardState.rewardCandidates[0].id
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    const shopState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 4, nodeType: 'SHOP' })
+    const enemyHpBeforeConfirm = shopState.enemy.hp
+
+    expect(shopState.screen).toBe('SHOP')
+    expect(shopState.visitedNodePath).toContain(4)
+    expect(shopState.currentResult).toBeNull()
+    expect(shopState.hasSpunThisTurn).toBe(false)
+    expect(shopState.lockedReels.size).toBe(0)
+
+    const afterInvalidConfirm = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(afterInvalidConfirm.enemy.hp).toBe(enemyHpBeforeConfirm)
+    expect(afterInvalidConfirm.screen).toBe('SHOP')
+  })
+
+  it('selects a rest map node into clean rest entry without resolving a stale slot', () => {
+    const engine = new GameEngine('lethal-ui-24')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    const chosenRewardId = rewardState.rewardCandidates[0].id
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    const restState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 5, nodeType: 'REST' })
+    const enemyHpBeforeConfirm = restState.enemy.hp
+
+    expect(restState.screen).toBe('REST')
+    expect(restState.visitedNodePath).toContain(5)
+    expect(restState.currentResult).toBeNull()
+    expect(restState.hasSpunThisTurn).toBe(false)
+    expect(restState.lockedReels.size).toBe(0)
+
+    const afterInvalidConfirm = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(afterInvalidConfirm.enemy.hp).toBe(enemyHpBeforeConfirm)
+    expect(afterInvalidConfirm.screen).toBe('REST')
+  })
+
   it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
     const engine = new GameEngine('slot-ui')
 

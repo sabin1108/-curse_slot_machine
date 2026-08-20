@@ -402,5 +402,36 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/13
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/13
+- User approved merging PR #13 on 2026-08-20.
+- PR #13 was marked ready and squash merged into `main`.
+- PR #13 squash merge commit: `1877c21`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Map Node Type Routing
+
+### Human Direction
+
+- Merge PR #13 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-node-type-routing` from updated `main` after PR #13 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiGameEngine` tests proving `SHOP` and `REST` node selections still routed to `BATTLE`.
+- Extended `SELECT_MAP_NODE` with optional `nodeType` command data.
+- Updated `UiGameEngine` to route typed map nodes to `SHOP`, `REST`, or battle entry while clearing stale adapter-owned slot state.
+- Updated `DungeonMapScreen` to pass node type in the command and stop dispatching extra `NAVIGATE` commands for battle/shop/rest nodes.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `SHOP` and `REST` nodes returned `BATTLE`, then passed with 9 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 47 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending creation for `feature/ui-adapter-node-type-routing`.
 - Merge policy: no merge without explicit user approval.
