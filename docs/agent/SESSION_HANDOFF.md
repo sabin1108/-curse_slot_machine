@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, and `feature/ui-adapter-event-node-entry` are merged; current work is `feature/ui-adapter-event-choice-command`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, and `feature/ui-adapter-event-choice-command` are merged; current work is `feature/ui-adapter-showcase-slot-guard`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -31,7 +31,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
 - Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `feature/ui-adapter-event-choice-command`.
+- Current branch: `feature/ui-adapter-showcase-slot-guard`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/ui-adapter-event-choice-command`
+- Current branch: `feature/ui-adapter-showcase-slot-guard`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -63,7 +63,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-select-map-node` | `1877c21` | https://github.com/sabin1108/-curse_slot_machine/pull/13 | Merged |
 | `feature/ui-adapter-node-type-routing` | `d4ea1bd` | https://github.com/sabin1108/-curse_slot_machine/pull/14 | Merged |
 | `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
-| `feature/ui-adapter-event-choice-command` | `8b0f42f` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Draft |
+| `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
+| `feature/ui-adapter-showcase-slot-guard` | `16c54a3` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Draft |
 
 ## Verification Commands
 
@@ -139,6 +140,10 @@ Latest completed verification:
 - `feature/ui-adapter-event-choice-command`: `npm.cmd run typecheck` passed.
 - `feature/ui-adapter-event-choice-command`: full `npm.cmd run test:run` passed with 51 tests across 10 files.
 - `feature/ui-adapter-event-choice-command`: `npm.cmd run build` passed.
+- `feature/ui-adapter-showcase-slot-guard`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because showcase spin used structured RNG and `START_SHOWCASE` leaked stale structured slot state, then passed with 15 tests after implementation.
+- `feature/ui-adapter-showcase-slot-guard`: `npm.cmd run typecheck` passed.
+- `feature/ui-adapter-showcase-slot-guard`: full `npm.cmd run test:run` passed with 53 tests across 10 files.
+- `feature/ui-adapter-showcase-slot-guard`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
@@ -148,15 +153,16 @@ Latest completed verification:
 - `feature/ui-adapter-select-map-node` was merged through PR #13.
 - `feature/ui-adapter-node-type-routing` was merged through PR #14.
 - `feature/ui-adapter-event-node-entry` was merged through PR #15.
-- `feature/ui-adapter-event-choice-command` is pushed and open as draft PR #16.
+- `feature/ui-adapter-event-choice-command` was merged through PR #16.
+- `feature/ui-adapter-showcase-slot-guard` is pushed and open as draft PR #17.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Keep PR #16 draft until review and explicit merge approval.
-2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until showcase state is covered.
+1. Review PR #17 and merge only after explicit user approval.
+2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until Showcase UI entry/overlay wiring is covered.
 
 ## Branch Log
 
@@ -313,4 +319,17 @@ Latest completed verification:
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/16
 - Implemented: `RESOLVE_EVENT_CHOICE` maps `OPEN`, `REST`, and `SKIP` through `UiGameEngine` into existing TypeScript engine behavior, while `DungeonMapScreen` only dispatches the selected event choice.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
+- Merge result: user approved merging PR #16 on 2026-08-20; PR #16 was marked ready and squash merged into `main`.
+- Squash merge commit: `2165922`.
 - Remaining issues: showcase migration remains a future slice.
+
+### feature/ui-adapter-showcase-slot-guard
+
+- Branch: `feature/ui-adapter-showcase-slot-guard`
+- Base: `main` after PR #16 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `16c54a3`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/17
+- Implemented: `START_SHOWCASE` clears adapter-owned structured slot state and showcase active `SPIN_COMBAT_SLOT` delegates to legacy presentation forced results instead of structured slot RNG.
+- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
+- Remaining issues: Showcase UI entry/overlay wiring remains a future slice.

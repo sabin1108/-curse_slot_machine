@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-event-choice-command`
-- Current PR: draft PR #16 - https://github.com/sabin1108/-curse_slot_machine/pull/16
+- Current branch: `feature/ui-adapter-showcase-slot-guard`
+- Current PR: draft PR #17 - https://github.com/sabin1108/-curse_slot_machine/pull/17
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -16,6 +16,7 @@ Last updated: 2026-08-20
 - PR #13 status: merged into `main` with squash commit `1877c21`.
 - PR #14 status: merged into `main` with squash commit `d4ea1bd`.
 - PR #15 status: merged into `main` with squash commit `eae8337`.
+- PR #16 status: merged into `main` with squash commit `2165922`.
 
 ## Completed Branches
 
@@ -33,33 +34,34 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-select-map-node` | #13 | `1877c21` | Merged |
 | `feature/ui-adapter-node-type-routing` | #14 | `d4ea1bd` | Merged |
 | `feature/ui-adapter-event-node-entry` | #15 | `eae8337` | Merged |
+| `feature/ui-adapter-event-choice-command` | #16 | `2165922` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-event-choice-command` is pushed and open as draft PR #16.
+`feature/ui-adapter-showcase-slot-guard` is pushed and open as draft PR #17.
 
 Implemented:
 
-- Added `RESOLVE_EVENT_CHOICE` as a single event choice command.
-- `UiGameEngine` maps `OPEN`, `REST`, and `SKIP` to the existing TypeScript presentation engine behavior.
-- `DungeonMapScreen` now dispatches the event choice command instead of selecting `BUY_SHOP_ITEM`, `REST_ACTION`, or `NAVIGATE` directly.
+- `START_SHOWCASE` now clears adapter-owned structured slot state and resets structured adapter internals.
+- Showcase active `SPIN_COMBAT_SLOT` delegates to the legacy presentation engine so scripted forced results remain authoritative.
+- Normal combat still uses the adapter-owned structured slot RNG path.
 
 Current branch commits:
 
-- `8b0f42f` - `fix: resolve event choices through ui adapter`
+- `16c54a3` - `fix: preserve showcase slot path in ui adapter`
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-event-choice-command`:
+Latest verification on `feature/ui-adapter-showcase-slot-guard`:
 
-- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `RESOLVE_EVENT_CHOICE` did not affect `OPEN`, `REST`, or `SKIP`, then passed with 13 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because showcase spin used structured RNG and `START_SHOWCASE` leaked a stale structured slot, then passed with 15 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 51 tests across 10 files.
+- `npm.cmd run test:run`: passed, 53 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/engine/UiGameEngine.test.ts` failed first because `RESOLVE_EVENT_CHOICE` left items, HP, and screen unchanged.
+- `src/game/engine/UiGameEngine.test.ts` failed first because showcase forced slot results were bypassed and stale structured slots could still resolve after `START_SHOWCASE`.
 
 ## Architecture Decisions Preserved
 
@@ -75,7 +77,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #16 draft until review and explicit merge approval.
-2. Continue showcase migration as a separate TDD slice.
+1. Keep PR #17 draft until review and explicit merge approval.
+2. Continue Showcase UI entry/overlay wiring as a separate TDD slice.
 
 Do not merge later PRs without explicit user approval.
