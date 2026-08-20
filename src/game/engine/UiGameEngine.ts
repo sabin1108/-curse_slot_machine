@@ -51,7 +51,23 @@ export class GameEngine {
       return this.presentation
     }
 
+    if (command.type === 'START_SHOWCASE') {
+      const state = this.legacy.dispatch(command)
+      this.structured = new StructuredGameEngine(state.seed)
+      this.structured.dispatch({ type: 'START_RUN' })
+      this.slotRng = createSeededRng(state.seed)
+      this.currentStructuredSlot = null
+      this.presentation = state
+      return this.presentation
+    }
+
     if (command.type === 'SPIN_COMBAT_SLOT') {
+      if (this.presentation.showcase.active) {
+        this.currentStructuredSlot = null
+        this.presentation = this.legacy.dispatch(command)
+        return this.presentation
+      }
+
       this.currentStructuredSlot = spinCombatSlot(this.slotRng)
       this.projectStructuredSlot(this.currentStructuredSlot)
       return this.presentation

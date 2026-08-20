@@ -495,5 +495,35 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/16
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/16
+- User approved merging PR #16 on 2026-08-20.
+- PR #16 was marked ready and squash merged into `main`.
+- PR #16 squash merge commit: `2165922`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Showcase Slot Guard
+
+### Human Direction
+
+- Merge PR #16 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-showcase-slot-guard` from updated `main` after PR #16 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiGameEngine` tests proving showcase spins used structured RNG and stale structured slots could resolve after `START_SHOWCASE`.
+- Updated `UiGameEngine` so `START_SHOWCASE` clears adapter-owned structured slot state.
+- Updated showcase active `SPIN_COMBAT_SLOT` to delegate to the legacy presentation engine, preserving scripted forced results.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because showcase forced results were bypassed, then passed with 15 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 53 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending creation for `feature/ui-adapter-showcase-slot-guard`.
 - Merge policy: no merge without explicit user approval.

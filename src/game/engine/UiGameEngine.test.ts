@@ -226,6 +226,37 @@ describe('UiGameEngine', () => {
     expect(state.screen).toBe('BATTLE')
   })
 
+  it('uses showcase forced slot results instead of structured slot rng', () => {
+    const engine = new GameEngine('showcase-forced-slot')
+
+    engine.dispatch({ type: 'START_SHOWCASE' })
+
+    const state = engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+
+    expect(state.showcase.active).toBe(true)
+    expect(state.currentResult).toMatchObject({
+      action: { id: 'bullet' },
+      target: { id: 'pow_10' },
+      modifier: { id: 'x2' },
+    })
+  })
+
+  it('clears adapter-owned slot state when starting showcase mode', () => {
+    const engine = new GameEngine('showcase-clears-structured-slot')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'showcase-clears-structured-slot' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+
+    const showcaseState = engine.dispatch({ type: 'START_SHOWCASE' })
+    const enemyHpBeforeConfirm = showcaseState.enemy.hp
+    const afterInvalidConfirm = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(showcaseState.showcase.active).toBe(true)
+    expect(showcaseState.currentResult).toBeNull()
+    expect(afterInvalidConfirm.enemy.hp).toBe(enemyHpBeforeConfirm)
+  })
+
   it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
     const engine = new GameEngine('slot-ui')
 
