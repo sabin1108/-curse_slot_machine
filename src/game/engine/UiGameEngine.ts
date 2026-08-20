@@ -1,24 +1,39 @@
-import type { GameCommand as UiGameCommand, GameState as UiGameState, AugmentItem, SynergyProgress as UiSynergyProgress } from '../../types/game'
+import type {
+  AugmentItem,
+  GameCommand as UiGameCommand,
+  GameState as UiGameState,
+  ReelSymbol,
+  SlotResult,
+  SynergyProgress as UiSynergyProgress,
+} from '../../types/game'
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
+import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
 import type { BuildRewardDefinition, SynergyDefinition, SynergyTag } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatEvent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
 import { GameEngine as StructuredGameEngine } from './GameEngine'
 import type { GameEvent } from './events'
-import type { RngSeed } from './rng'
+import { createSeededRng, type RngSeed, type SeededRng } from './rng'
 
 export class GameEngine {
   private legacy: LegacyGameEngine
 
   private structured: StructuredGameEngine
 
+  private slotRng: SeededRng
+
+  private currentStructuredSlot: CombatSlotResult | null
+
   private presentation: UiGameState
 
   constructor(seedString: string = 'curse_slot_demo_2026') {
     this.legacy = new LegacyGameEngine(seedString)
     this.structured = new StructuredGameEngine(seedString)
+    this.slotRng = createSeededRng(seedString)
+    this.currentStructuredSlot = null
     this.presentation = this.legacy.getState()
   }
 
@@ -32,7 +47,39 @@ export class GameEngine {
       const seed = command.seed ?? state.seed
       this.structured = new StructuredGameEngine(seed)
       this.structured.dispatch({ type: 'START_RUN' })
+      this.slotRng = createSeededRng(seed)
+      this.currentStructuredSlot = null
       this.presentation = state
+      return this.presentation
+    }
+
+    if (command.type === 'SPIN_COMBAT_SLOT') {
+      this.currentStructuredSlot = spinCombatSlot(this.slotRng)
+      this.projectStructuredSlot(this.currentStructuredSlot)
+      return this.presentation
+    }
+
+    if (command.type === 'TOGGLE_LOCK_REEL') {
+      if (this.presentation.lockedReels.has(command.reelId)) {
+        this.presentation.lockedReels.delete(command.reelId)
+      } else {
+        this.presentation.lockedReels.add(command.reelId)
+      }
+      return this.presentation
+    }
+
+    if (command.type === 'REROLL_UNLOCKED' && this.currentStructuredSlot) {
+      const locks = {
+        action: this.presentation.lockedReels.has('action'),
+        target: this.presentation.lockedReels.has('target'),
+        modifier: this.presentation.lockedReels.has('modifier'),
+      }
+      this.currentStructuredSlot = rerollCombatSlot(this.currentStructuredSlot, locks, this.slotRng)
+      this.presentation.curse.current = Math.min(
+        this.presentation.curse.max,
+        this.presentation.curse.current + getCombatRerollCurseCost(locks),
+      )
+      this.projectStructuredSlot(this.currentStructuredSlot)
       return this.presentation
     }
 
@@ -66,6 +113,18 @@ export class GameEngine {
 
     this.presentation = this.legacy.dispatch(command)
     return this.presentation
+  }
+
+  private projectStructuredSlot(slotResult: CombatSlotResult): void {
+    this.presentation.currentResult = toUiSlotResult(slotResult)
+    this.presentation.reelIndexes = {
+      action: getReelIndex(this.presentation.reels.action, this.presentation.currentResult.action.id),
+      target: getReelIndex(this.presentation.reels.target, this.presentation.currentResult.target.id),
+      modifier: getReelIndex(this.presentation.reels.modifier, this.presentation.currentResult.modifier.id),
+    }
+    this.presentation.hasSpunThisTurn = true
+    this.presentation.isSpinning = false
+    this.presentation.combatLogs.push(`[Slot] ${this.presentation.currentResult.finalEffectText}`)
   }
 
   private hasStructuredBuild(): boolean {
@@ -201,6 +260,70 @@ function toUiReward(reward: RewardOption): AugmentItem {
     icon: reward.kind === 'item' ? '◇' : '◆',
     effectValue: `score ${reward.score.total}`,
   }
+}
+
+function toUiSlotResult(slotResult: CombatSlotResult): SlotResult {
+  const action = getUiActionSymbol(slotResult.action)
+  const target = getUiTargetSymbol(slotResult.target)
+  const modifier = getUiModifierSymbol(slotResult.modifier)
+  const calculatedValue = getUiSlotAmount(slotResult)
+
+  return {
+    action,
+    target,
+    modifier,
+    isMiss: false,
+    calculatedValue,
+    finalEffectText: `${slotResult.action}/${slotResult.target}/${slotResult.modifier}: ${calculatedValue}`,
+  }
+}
+
+function getUiActionSymbol(action: CombatSlotResult['action']): ReelSymbol {
+  return getRequiredSymbol(ACTION_SYMBOLS, action)
+}
+
+function getUiTargetSymbol(target: CombatSlotResult['target']): ReelSymbol {
+  if (target === 'enemy') {
+    return TARGET_SYMBOLS.find((symbol) => symbol.type === 'ENEMY') ?? createTargetSymbol('enemy', 'ENEMY')
+  }
+
+  return createTargetSymbol(target, target === 'self' ? 'SELF' : 'ALL')
+}
+
+function getUiModifierSymbol(modifier: CombatSlotResult['modifier']): ReelSymbol {
+  return getRequiredSymbol(MODIFIER_SYMBOLS, modifier)
+}
+
+function getRequiredSymbol(symbols: ReelSymbol[], id: string): ReelSymbol {
+  const symbol = symbols.find((candidate) => candidate.id === id)
+  if (!symbol) {
+    throw new Error(`Missing UI reel symbol: ${id}`)
+  }
+  return symbol
+}
+
+function createTargetSymbol(id: CombatSlotResult['target'], type: 'SELF' | 'ALL' | 'ENEMY'): ReelSymbol {
+  return {
+    id,
+    name: type,
+    type,
+    category: 'TARGET',
+    baseValue: 0,
+    icon: type === 'SELF' ? 'SELF' : type === 'ALL' ? 'ALL' : 'ENEMY',
+    color: '#cccccc',
+    description: type,
+  }
+}
+
+function getUiSlotAmount(slotResult: CombatSlotResult): number {
+  const base = slotResult.action === 'bullet' ? 6 : slotResult.action === 'shield' ? 5 : 4
+  const multiplier = slotResult.modifier === 'x1' ? 1 : slotResult.modifier === 'x2' ? 2 : 3
+
+  return base * multiplier
+}
+
+function getReelIndex(symbols: ReelSymbol[], id: string): number {
+  return Math.max(0, symbols.findIndex((symbol) => symbol.id === id))
 }
 
 function toUiSynergyProgress(synergy: SynergyDefinition): UiSynergyProgress {

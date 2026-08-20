@@ -39,18 +39,20 @@ Implemented:
 - UI adapter `src/game/engine/UiGameEngine.ts` bridges structured reward/combat results into the current React-facing state contract for a narrow combo-effect path.
 - `src/app/App.tsx` now imports the UI adapter while unsupported UI commands continue to delegate to the legacy engine.
 - UI adapter now projects structured victory reward options and augment-slot presentation into `rewardCandidates` and `augSlotPresentation` for the current RewardModal contract.
+- UI adapter now routes `SPIN_COMBAT_SLOT` and lock-aware `REROLL_UNLOCKED` through pure `CombatSlotMachine` functions and projects the result into UI `currentResult`.
 
 Current branch commits:
 
 - `5ba1851` - `feat: add bounded content effect pilot`
 - `a261089` - `feat: project structured rewards to ui adapter`
+- structured slot spin/reroll follow-up is pending verification/commit.
 
 ## Verification
 
 Latest verification on `feature/content-effect-schema-pilot`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 38 tests across 9 files.
+- `npm.cmd run test:run`: passed, 40 tests across 9 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
@@ -60,6 +62,7 @@ TDD evidence:
 - `src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed after integration.
 - `src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed after adding the adapter.
 - `src/game/engine/UiGameEngine.test.ts` failed first because victory reward projection left `rewardCandidates` empty, then passed after projection implementation.
+- `src/game/engine/UiGameEngine.test.ts` failed first because spin/reroll still used legacy slot output, then passed after routing through pure slot functions.
 
 ## Architecture Decisions Preserved
 
@@ -75,8 +78,8 @@ TDD evidence:
 
 Next planned work:
 
-1. Expand adapter coverage only where needed: structured slot spinning and map/shop/rest migration should stay separate TDD slices.
-2. Continue with `feature/showcase-mode` after the effect pilot is reviewed.
+1. Commit and push the verified structured slot spin/reroll follow-up to PR #10.
+2. Keep map/shop/rest/showcase migration as separate TDD slices.
 3. Keep PR #10 draft until human review/approval.
 
 Do not merge later PRs without explicit user approval.

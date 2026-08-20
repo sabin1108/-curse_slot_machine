@@ -21,6 +21,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - MVP content should favor extensible data structures over hardcoded augment, item, or synergy names.
 - Content effects should use bounded typed effect modules rather than free-form scripts.
 - The visible React app now imports `src/game/engine/UiGameEngine.ts`, a thin adapter. The adapter delegates ordinary legacy UI commands to `src/game/GameEngine.ts` but can project structured reward/combat results from `src/game/engine/*` into the current UI state shape.
+- `UiGameEngine` owns adapter-local pure combat slot RNG for `SPIN_COMBAT_SLOT` and lock-aware `REROLL_UNLOCKED`; React still only dispatches commands and renders projected state.
 
 ## Environment Setup Results
 
@@ -102,8 +103,9 @@ Latest completed verification:
 - `feature/content-effect-schema-pilot`: `npm.cmd run typecheck` passed.
 - `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed with 1 test after implementation.
 - `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured victory rewards were not projected to UI `rewardCandidates`, then passed with 2 tests after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured slot spin/reroll still used legacy output, then passed with 4 tests after implementation.
 - `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` passed before and after switching `App.tsx` to the adapter import.
-- `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 38 tests across 9 files.
+- `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 40 tests across 9 files.
 - `feature/content-effect-schema-pilot`: `npm.cmd run build` passed.
 
 ## Remaining Problems
@@ -115,8 +117,9 @@ Latest completed verification:
 
 ## Next Session Work
 
-1. Expand adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
-2. Keep PR #10 draft until review and explicit human merge approval.
+1. Commit and push the verified structured slot spin/reroll follow-up to PR #10.
+2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+3. Keep PR #10 draft until review and explicit human merge approval.
 3. Continue `feature/showcase-mode` after the effect pilot decision.
 
 ## Branch Log
@@ -191,9 +194,9 @@ Latest completed verification:
 - Branch: `feature/content-effect-schema-pilot`
 - Base: `main` after PR #8 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `a261089`.
+- Commit: `d8f7b35` plus structured slot spin/reroll follow-up pending commit.
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft).
-- Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, and structured victory reward projection for the RewardModal contract.
+- Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, structured victory reward projection for the RewardModal contract, and pure combat slot spin/reroll routing.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: adapter coverage is narrow; reward candidate projection, structured slot spinning, map/shop/rest/showcase migration remain future slices.
 - Next branch candidate after PR: `feature/showcase-mode` or a legacy/pure engine integration adapter.

@@ -3,6 +3,38 @@ import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import { GameEngine } from './UiGameEngine'
 
 describe('UiGameEngine', () => {
+  it('projects pure combat slot spins into UI current result', () => {
+    const engine = new GameEngine('slot-ui')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui' })
+    const state = engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+
+    expect(state.hasSpunThisTurn).toBe(true)
+    expect(state.currentResult).toMatchObject({
+      action: { id: 'bullet' },
+      target: { type: 'ENEMY' },
+      modifier: { id: 'x2' },
+      calculatedValue: 12,
+    })
+  })
+
+  it('rerolls unlocked pure combat slot reels and applies pure lock curse cost', () => {
+    const engine = new GameEngine('slot-ui-2')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui-2' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    engine.dispatch({ type: 'TOGGLE_LOCK_REEL', reelId: 'action' })
+    const state = engine.dispatch({ type: 'REROLL_UNLOCKED' })
+
+    expect(state.curse.current).toBe(2)
+    expect(state.currentResult).toMatchObject({
+      action: { id: 'shield' },
+      target: { type: 'SELF' },
+      modifier: { id: 'x3' },
+      calculatedValue: 15,
+    })
+  })
+
   it('projects structured combo combat effects into UI-visible state', () => {
     const engine = new GameEngine('combo-ui')
 

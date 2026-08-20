@@ -273,6 +273,7 @@
 - Switched `App.tsx` to import the adapter after the existing App render test passed.
 - Created draft PR #10 after verification and pushed commit `5ba1851`.
 - Wrote a failing `UiGameEngine` reward projection test before projecting structured victory rewards into the legacy RewardModal state contract.
+- Wrote failing `UiGameEngine` spin/reroll tests before routing UI combat slot commands through pure `CombatSlotMachine` functions.
 
 ### Verification
 
@@ -281,6 +282,7 @@
 - `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because active build effects were not passed into combat, then passed with 6 tests.
 - `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `UiGameEngine` did not exist, then passed with 1 test.
 - `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because structured victory rewards left `rewardCandidates` empty, then passed with 2 tests after projection.
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because spin/reroll still produced legacy slot output, then passed with 4 tests after pure slot routing.
 - `npm.cmd run test:run -- src/app/App.test.tsx`: passed before and after the adapter import switch.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd run test:run`: passed, 37 tests across 9 files.
