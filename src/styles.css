@@ -1356,6 +1356,11 @@ html, body {
 }
 
 .reward-card-pixel {
+  appearance: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
   width: 200px;
   height: 270px;
   background-size: cover;

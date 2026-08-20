@@ -32,4 +32,25 @@ describe('App', () => {
     expect(screen.queryByText(/STEP 1 \/ 4/i)).not.toBeInTheDocument();
     expect(screen.getByText(/STEP 2 \/ 4/i)).toBeInTheDocument();
   });
+
+  it('hides showcase overlay controls while reward selection owns input', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+
+    expect(screen.getByText(/VICTORY REWARD/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /NEXT STEP/i })).not.toBeInTheDocument();
+  });
+
+  it('offers reward choices as semantic buttons in showcase reward step', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+
+    expect(screen.getByRole('button', { name: /방벽 코어/ })).toBeInTheDocument();
+  });
 });

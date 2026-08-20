@@ -27,7 +27,7 @@
 - Consumes: `gameState.showcase.active`, `gameState.screen`
 - Produces: overlay rendering only when Showcase Mode is active and the current screen is not `REWARD`
 
-- [ ] **Step 1: Write failing App test**
+- [x] **Step 1: Write failing App test**
 
 Add this test to `src/app/App.test.tsx`:
 
@@ -44,13 +44,13 @@ it('hides showcase overlay controls while reward selection owns input', () => {
 })
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `npm.cmd run test:run -- src/app/App.test.tsx`
 
 Expected: FAIL because `NEXT STEP` remains rendered behind the reward modal.
 
-- [ ] **Step 3: Implement minimal App change**
+- [x] **Step 3: Implement minimal App change**
 
 In `src/app/App.tsx`, render `ShowcaseOverlay` only when:
 
@@ -58,7 +58,7 @@ In `src/app/App.tsx`, render `ShowcaseOverlay` only when:
 gameState.showcase.active && gameState.screen !== 'REWARD'
 ```
 
-- [ ] **Step 4: Run targeted GREEN**
+- [x] **Step 4: Run targeted GREEN**
 
 Run: `npm.cmd run test:run -- src/app/App.test.tsx`
 
@@ -75,7 +75,7 @@ Expected: PASS for the overlay hiding test.
 - Consumes: existing `RewardModal` props and `CHOOSE_REWARD` command dispatch.
 - Produces: each reward card as a real `button type="button"` with an accessible name that includes the reward name.
 
-- [ ] **Step 1: Write failing App test**
+- [x] **Step 1: Write failing App test**
 
 Add this test to `src/app/App.test.tsx`:
 
@@ -91,13 +91,13 @@ it('offers reward choices as semantic buttons in showcase reward step', () => {
 })
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `npm.cmd run test:run -- src/app/App.test.tsx`
 
 Expected: FAIL because reward cards are clickable `div`s, not buttons.
 
-- [ ] **Step 3: Implement minimal RewardModal change**
+- [x] **Step 3: Implement minimal RewardModal change**
 
 Change each `.reward-card-pixel` wrapper from `div` to:
 
@@ -125,7 +125,7 @@ In `src/styles.css`, ensure `.reward-card-pixel` keeps visual layout as a button
 }
 ```
 
-- [ ] **Step 4: Run targeted GREEN**
+- [x] **Step 4: Run targeted GREEN**
 
 Run: `npm.cmd run test:run -- src/app/App.test.tsx`
 
@@ -133,9 +133,9 @@ Expected: PASS.
 
 ### Task 3: Verification And Publish
 
-- [ ] Run `npm.cmd run typecheck`.
-- [ ] Run `npm.cmd run test:run`.
-- [ ] Run `npm.cmd run build`.
-- [ ] Run focused browser check for Showcase reward step.
+- [x] Run `npm.cmd run typecheck`.
+- [x] Run `npm.cmd run test:run`.
+- [x] Run `npm.cmd run build`.
+- [x] Run focused browser check for Showcase reward step.
 - [ ] Update handoff/progress/collaboration docs.
 - [ ] Commit, push, and open a draft PR.
