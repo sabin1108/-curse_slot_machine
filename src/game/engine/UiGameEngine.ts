@@ -100,7 +100,7 @@ export class GameEngine {
     }
 
     if (command.type === 'CONFIRM_SLOT_RESULT' && this.hasStructuredBuild()) {
-      const slotResult = mapUiSlotResult(this.presentation)
+      const slotResult = this.currentStructuredSlot ?? mapUiSlotResult(this.presentation)
       if (slotResult) {
         const events = this.structured.dispatch({
           type: 'RESOLVE_COMBAT_SLOT',

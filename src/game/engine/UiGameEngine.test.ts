@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import { GameEngine } from './UiGameEngine'
 
 describe('UiGameEngine', () => {
@@ -36,22 +35,13 @@ describe('UiGameEngine', () => {
   })
 
   it('projects structured combo combat effects into UI-visible state', () => {
-    const engine = new GameEngine('combo-ui')
+    const engine = new GameEngine('structured-spin-ui')
 
-    engine.dispatch({ type: 'START_RUN', seed: 'combo-ui' })
+    engine.dispatch({ type: 'START_RUN', seed: 'structured-spin-ui' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'multi_hit_charm' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_finisher' })
-
-    const state = engine.getState()
-    state.currentResult = {
-      action: ACTION_SYMBOLS.find((symbol) => symbol.id === 'bullet')!,
-      target: TARGET_SYMBOLS.find((symbol) => symbol.id === 'pow_6')!,
-      modifier: MODIFIER_SYMBOLS.find((symbol) => symbol.id === 'x1')!,
-      isMiss: false,
-      calculatedValue: 6,
-      finalEffectText: 'bullet enemy x1',
-    }
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
@@ -60,20 +50,11 @@ describe('UiGameEngine', () => {
   })
 
   it('projects structured victory rewards into the UI reward modal state', () => {
-    const engine = new GameEngine('reward-ui')
+    const engine = new GameEngine('lethal-ui-24')
 
-    engine.dispatch({ type: 'START_RUN', seed: 'reward-ui' })
+    engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
-
-    const state = engine.getState()
-    state.currentResult = {
-      action: ACTION_SYMBOLS.find((symbol) => symbol.id === 'bullet')!,
-      target: TARGET_SYMBOLS.find((symbol) => symbol.id === 'pow_6')!,
-      modifier: MODIFIER_SYMBOLS.find((symbol) => symbol.id === 'x3')!,
-      isMiss: false,
-      calculatedValue: 18,
-      finalEffectText: 'lethal bullet enemy x3',
-    }
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
 
     const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
@@ -85,5 +66,24 @@ describe('UiGameEngine', () => {
       expect.any(String),
     ])
     expect(rewardState.augSlotPresentation?.targetAugment?.id).toBe(rewardState.rewardCandidates[0].id)
+  })
+
+  it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
+    const engine = new GameEngine('slot-ui')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    const spunState = engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+
+    spunState.currentResult = {
+      ...spunState.currentResult!,
+      action: spunState.reels.action.find((symbol) => symbol.id === 'heart')!,
+      calculatedValue: 0,
+      finalEffectText: 'mutated presentation result',
+    }
+
+    const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(resolvedState.enemy.hp).toBe(6)
   })
 })
