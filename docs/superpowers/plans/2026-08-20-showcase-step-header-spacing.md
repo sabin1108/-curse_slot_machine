@@ -144,7 +144,7 @@ Expected: all pass.
 
 Focused browser check also passed: Showcase step 4 `.showcase-step-heading` is visible, `.step-separator` renders `•`, and computed heading gap is `10px`.
 
-- [ ] **Step 7: Update docs, commit, push, and open draft PR**
+- [x] **Step 7: Update docs, commit, push, and open draft PR**
 
 Update:
 - `docs/agent/PROJECT_PROGRESS_SUMMARY.md`

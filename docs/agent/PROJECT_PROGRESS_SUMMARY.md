@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/showcase-reward-modal-accessibility`
-- Current PR: draft PR #20 - https://github.com/sabin1108/-curse_slot_machine/pull/20
+- Current branch: `feature/showcase-step-header-spacing`
+- Current PR: draft PR #21 - https://github.com/sabin1108/-curse_slot_machine/pull/21
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -20,6 +20,7 @@ Last updated: 2026-08-20
 - PR #17 status: merged into `main` with squash commit `5d1a89b`.
 - PR #18 status: merged into `main` with squash commit `fed924e`.
 - PR #19 status: merged into `main` with squash commit `f1145c6`.
+- PR #20 status: merged into `main` with squash commit `61744f1`.
 
 ## Completed Branches
 
@@ -41,37 +42,36 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-showcase-slot-guard` | #17 | `5d1a89b` | Merged |
 | `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
 | `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
+| `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
 
 ## Current Branch
 
-`feature/showcase-reward-modal-accessibility` is pushed and open as draft PR #20.
+`feature/showcase-step-header-spacing` is pushed and open as draft PR #21.
 
 Implemented:
 
-- `App` hides `ShowcaseOverlay` while `gameState.screen === 'REWARD'`, so the visible `NEXT STEP` CTA is not blocked by the reward modal backdrop.
-- `RewardModal` exposes each reward choice as a real `button type="button"` with an accessible reward-name label.
-- App-level regression tests cover accepted QA findings `SHOWCASE-QA-001` and `SHOWCASE-QA-002`.
+- `ShowcaseOverlay` separates the step counter, separator, and Korean step title into dedicated DOM elements.
+- `src/styles.css` adds spacing hooks so `STEP 4 / 4` cannot visually run into the title.
+- Focused component regression coverage now protects `SHOWCASE-QA-003`.
 
 Current branch commits:
 
-- `8217da6` - `docs: plan showcase reward accessibility fixes`
-- `428b1ca` - `fix: improve showcase reward accessibility`
+- `f758f60` - `docs: plan showcase step header spacing`
+- `8ba4287` - `fix: separate showcase step heading`
 
 ## Verification
 
-Latest verification on `feature/showcase-reward-modal-accessibility`:
+Latest verification on `feature/showcase-step-header-spacing`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 57 tests across 10 files.
+- `npm.cmd run test:run`: passed, 58 tests across 11 files.
 - `npm.cmd run build`: passed.
-- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
-- Focused Playwright browser check: passed; reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
+- Focused Playwright browser check: passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
 
 TDD evidence:
 
-- RED: `npm.cmd run test:run -- src/app/App.test.tsx` failed while `NEXT STEP` remained rendered behind the reward modal.
-- RED: `npm.cmd run test:run -- src/app/App.test.tsx` failed because reward cards were clickable `div`s, not semantic buttons.
-- GREEN: `npm.cmd run test:run -- src/app/App.test.tsx` passed with 5 App tests after implementation.
+- RED: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` failed because `.showcase-step-heading` did not exist.
+- GREEN: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` passed after adding the dedicated heading/separator/title structure.
 
 ## Architecture Decisions Preserved
 
@@ -87,7 +87,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #20 draft until review and explicit merge approval.
-2. Next recommended slice: fix low-risk Showcase polish finding `SHOWCASE-QA-003` or continue structured-engine UI migration.
+1. Keep PR #21 draft until review and explicit merge approval.
+2. Next recommended slice after PR #21: address `SHOWCASE-QA-004` font fallback/network noise or continue structured-engine UI migration.
 
 Do not merge later PRs without explicit user approval.
