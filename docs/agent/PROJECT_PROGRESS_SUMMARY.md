@@ -7,22 +7,11 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-synergy-progress`
-- Current PR: draft PR #23 - https://github.com/sabin1108/-curse_slot_machine/pull/23
-- PR #8 status: merged into `main` with squash commit `ca51454`.
-- PR #10 status: merged into `main` with squash commit `8be060c`.
-- PR #11 status: merged into `main` with squash commit `e8c5884`.
-- PR #12 status: merged into `main` with squash commit `9955372`.
-- PR #13 status: merged into `main` with squash commit `1877c21`.
-- PR #14 status: merged into `main` with squash commit `d4ea1bd`.
-- PR #15 status: merged into `main` with squash commit `eae8337`.
-- PR #16 status: merged into `main` with squash commit `2165922`.
-- PR #17 status: merged into `main` with squash commit `5d1a89b`.
-- PR #18 status: merged into `main` with squash commit `fed924e`.
-- PR #19 status: merged into `main` with squash commit `f1145c6`.
-- PR #20 status: merged into `main` with squash commit `61744f1`.
+- Current branch: `feature/ui-item-card-projection`
+- Current PR: draft PR pending for `feature/ui-item-card-projection`
 - PR #21 status: merged into `main` with squash commit `605b62d`.
 - PR #22 status: merged into `main` with squash commit `00a810c`.
+- PR #23 status: merged into `main` with squash commit `1ae1850`.
 
 ## Completed Branches
 
@@ -47,36 +36,36 @@ Last updated: 2026-08-20
 | `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
 | `feature/showcase-step-header-spacing` | #21 | `605b62d` | Merged |
 | `feature/offline-font-fallback` | #22 | `00a810c` | Merged |
+| `feature/ui-adapter-synergy-progress` | #23 | `1ae1850` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-synergy-progress` is open as draft PR #23.
+`feature/ui-item-card-projection` is verified locally and pending draft PR creation.
 
 Implemented:
 
-- `UiGameEngine` projects real structured `BuildState.synergies.progress` values into the legacy UI build panel state.
-- `toUiSynergyProgress` accepts structured progress while preserving catalog-derived fallback values.
-- React remains display/input only; synergy calculation stays in the pure TypeScript build system.
+- Added display-only `RewardCard` UI type with `kind: 'augment' | 'item'` and `kindLabel: '증강' | '아이템'`.
+- `toUiReward()` now projects structured reward kind into UI reward cards.
+- `RewardModal` renders item/augment labels and uses reward-neutral local naming.
+- Legacy presentation rewards are converted to augment `RewardCard`s at the legacy engine boundary.
+- React remains display/input only; reward kind/scoring/ownership stays in pure TypeScript systems.
 
 Current branch commits:
 
-- `4742591` - `docs: plan ui synergy progress projection`
-- `4d44cda` - `fix: project structured synergy progress`
-- `b0811e6` - `docs: update ui synergy progress pr handoff`
-- latest branch head: see PR #23 after PR #22 merge reconciliation.
+- `1bdb3df` - `docs: plan ui item card projection`
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-synergy-progress`:
+Latest verification on `feature/ui-item-card-projection`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 59 tests across 11 files.
+- `npm.cmd run test:run`: passed, 63 tests across 13 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- RED: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed because `combo_engine` UI progress stayed at `current: 0`.
-- GREEN: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` passed with 16 tests after passing structured progress through the adapter projection.
+- RED: `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/components/Reward/RewardModal.test.tsx` failed because reward cards lacked `kind`/`kindLabel` and the modal did not render `아이템`.
+- GREEN: the same targeted command passed with 5 tests after adding `RewardCard` projection and modal label rendering.
 
 ## Architecture Decisions Preserved
 
@@ -92,7 +81,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Finish merging PR #23 after conflict resolution and verification.
-2. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
+1. Open a draft PR for `feature/ui-item-card-projection`.
+2. Next structured-engine UI migration slice: rename command payload/UI fields from augment-specific names (`augmentId`, `targetAugment`) to reward-neutral aliases while preserving backward compatibility.
 
 Do not merge later PRs without explicit user approval.

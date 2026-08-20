@@ -445,4 +445,17 @@ Latest completed verification:
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/23
 - Implemented: `UiGameEngine` projects structured `BuildState.synergies.progress` values into legacy UI `build.synergyProgress`; `toUiSynergyProgress` now accepts structured progress.
 - Verification: targeted RED/GREEN `UiGameEngine` test, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed on 2026-08-20.
-- Remaining issues: draft PR #23; do not merge without explicit user approval. Next structured migration slice should address item-specific UI projection.
+- Merge result: user approved merging PR #23 on 2026-08-20; PR #23 was marked ready and squash merged into `main`.
+- Squash merge commit: `1ae1850`.
+- Remaining issues: item-specific reward card projection implemented on `feature/ui-item-card-projection`.
+
+### feature/ui-item-card-projection
+
+- Branch: `feature/ui-item-card-projection`
+- Base: `main` after PR #23 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: pending implementation commit.
+- PR: pending draft PR.
+- Implemented: `RewardCard` adds a display-only reward kind discriminator and Korean label; `toUiReward()` projects item/augment kind; `RewardModal` renders kind labels; legacy augment rewards are converted to augment reward cards at the legacy engine boundary.
+- Verification: targeted RED/GREEN projection/modal tests, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed on 2026-08-20.
+- Remaining issues: open draft PR after commit/push; next structured migration slice should rename augment-specific command/presentation field names to reward-neutral aliases.

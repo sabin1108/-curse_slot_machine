@@ -25,13 +25,13 @@
 - Modify: `src/game/engine/UiProjection.test.ts`
 - Modify: `src/game/engine/UiProjection.ts`
 - Modify: `src/components/Reward/RewardModal.tsx`
-- Modify: `src/app/App.test.tsx`
+- Create: `src/components/Reward/RewardModal.test.tsx`
 
 **Interfaces:**
 - Produces: `RewardCard` with `kind: 'augment' | 'item'` and `kindLabel: '증강' | '아이템'`.
 - Preserves: `BuildState.augments` as `AugmentItem[]`, `BuildState.items` as `string[]`, and `CHOOSE_REWARD` command behavior.
 
-- [ ] **Step 1: Write projection RED test**
+- [x] **Step 1: Write projection RED test**
 
 Add tests to `src/game/engine/UiProjection.test.ts`:
 
@@ -91,32 +91,46 @@ it('projects structured augment rewards with an augment discriminator and label'
 })
 ```
 
-- [ ] **Step 2: Write modal RED test**
+- [x] **Step 2: Write modal RED test**
 
-Add an App-level test to `src/app/App.test.tsx` that reaches the reward modal and verifies the item candidate exposes an item label:
+Add a component test to `src/components/Reward/RewardModal.test.tsx` that renders the reward modal with an item reward candidate and verifies the item label:
 
 ```ts
-it('labels structured item reward cards separately from augment cards', () => {
-  render(<App />)
+it('renders item reward cards with an item kind label', () => {
+  const itemReward = {
+    id: 'multi_hit_charm',
+    name: 'Multi-Hit Charm',
+    rarity: 'UNCOMMON',
+    tags: ['MULTI_HIT'],
+    description: 'Adds multi-hit support.',
+    icon: 'ITEM',
+    effectValue: 'score 14',
+    kind: 'item',
+    kindLabel: '아이템',
+  } satisfies AugmentItem & { kind: 'item'; kindLabel: '아이템' }
 
-  fireEvent.click(screen.getByText(/START/i))
-  fireEvent.click(screen.getByText(/SPIN/i))
-  fireEvent.click(screen.getByText(/CONFIRM/i))
+  render(
+    <RewardModal
+      candidates={[itemReward]}
+      augSlotPresentation={null}
+      onDispatch={vi.fn()}
+    />,
+  )
 
-  expect(screen.getByText(/Multi-Hit Charm/i)).toBeInTheDocument()
-  expect(screen.getByText(/아이템/)).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /Multi-Hit Charm/ })).toBeInTheDocument()
+  expect(screen.getByText('아이템')).toBeInTheDocument()
 })
 ```
 
-If the exact visible buttons differ in the current UI, keep the behavior target but use the existing accessible controls from `App.test.tsx`.
-
-- [ ] **Step 3: Run RED**
+- [x] **Step 3: Run RED**
 
 Run: `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/app/App.test.tsx`
 
 Expected: FAIL because `toUiReward()` does not expose `kind`/`kindLabel`, and the reward modal does not render a kind label.
 
-- [ ] **Step 4: Add display-only RewardCard type**
+Actual: FAIL with three expected failures: item/augment projections lacked `kind` and `kindLabel`, and RewardModal did not render `아이템`.
+
+- [x] **Step 4: Add display-only RewardCard type**
 
 In `src/types/game.ts`, add:
 
@@ -134,7 +148,7 @@ rewardCandidates: RewardCard[];
 targetAugment: RewardCard | null;
 ```
 
-- [ ] **Step 5: Project kind and kindLabel in adapter**
+- [x] **Step 5: Project kind and kindLabel in adapter**
 
 Change `toUiReward()` return type to `RewardCard` and add:
 
@@ -143,7 +157,7 @@ kind: reward.kind,
 kindLabel: reward.kind === 'item' ? '아이템' : '증강',
 ```
 
-- [ ] **Step 6: Render kind label in RewardModal**
+- [x] **Step 6: Render kind label in RewardModal**
 
 Update `RewardModal` to import/use `RewardCard`, rename local variables from `AugmentItem`/`selectedAug` to reward-card-neutral names, and render:
 
@@ -153,13 +167,15 @@ Update `RewardModal` to import/use `RewardCard`, rename local variables from `Au
 
 Do not add reward logic in React.
 
-- [ ] **Step 7: Run targeted GREEN**
+- [x] **Step 7: Run targeted GREEN**
 
 Run: `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/app/App.test.tsx`
 
 Expected: PASS.
 
-- [ ] **Step 8: Full verification**
+Actual: PASS with 5 tests.
+
+- [x] **Step 8: Full verification**
 
 Run:
 
@@ -170,6 +186,8 @@ npm.cmd run build
 ```
 
 Expected: all pass.
+
+Actual: `typecheck`, full `test:run` with 63 tests, and `build` passed.
 
 - [ ] **Step 9: Update docs, commit, push, and open draft PR**
 

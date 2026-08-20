@@ -716,4 +716,36 @@
 
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/23
 - Head commit: updated after PR #22 merge; see PR #23.
+- Merge result: user approved merging PR #23 on 2026-08-20; PR #23 was marked ready and squash merged into `main`.
+- Squash merge commit: `1ae1850`.
+- Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - UI Item Card Projection
+
+### Human Direction
+
+- Continue structured-engine UI migration after merging PR #23.
+- Separate item reward cards from augment-shaped presentation without moving reward rules into React.
+
+### Codex Work
+
+- Created `feature/ui-item-card-projection` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-ui-item-card-projection.md`.
+- Wrote failing projection tests proving `toUiReward()` did not expose reward kind or item/augment labels.
+- Wrote a failing RewardModal test proving item cards did not render an item label.
+- Added display-only `RewardCard` with `kind` and `kindLabel`.
+- Updated `toUiReward()` to project structured item/augment kind into UI cards.
+- Updated `RewardModal` to render reward kind labels and use reward-neutral local naming.
+- Converted legacy augment reward candidates to augment `RewardCard`s at the legacy engine boundary.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/components/Reward/RewardModal.test.tsx`: failed first because `kind`/`kindLabel` were missing and `아이템` did not render, then passed with 5 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 63 tests across 13 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending.
 - Merge policy: no merge without explicit user approval.
