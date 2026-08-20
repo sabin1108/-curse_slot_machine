@@ -47,6 +47,11 @@ export interface AugmentItem {
   effectValue: string;
 }
 
+export interface RewardCard extends AugmentItem {
+  kind: 'augment' | 'item';
+  kindLabel: '증강' | '아이템';
+}
+
 export interface SynergyProgress {
   synergyId: string;
   name: string;
@@ -176,10 +181,10 @@ export interface GameState {
   isSpinning: boolean;
   
   // Augment Slot Machine Presentation State (Reward reveal)
-  rewardCandidates: AugmentItem[];
+  rewardCandidates: RewardCard[];
   augSlotPresentation: {
     reels: [string, string, string];
-    targetAugment: AugmentItem | null;
+    targetAugment: RewardCard | null;
     isRevealed: boolean;
   } | null;
 

@@ -5,6 +5,7 @@ import {
   SlotResult,
   ReelSymbol,
   AugmentItem,
+  RewardCard,
   SynergyProgress
 } from '../types/game';
 import {
@@ -416,9 +417,9 @@ export class GameEngine {
     const available = ALL_AUGMENTS.filter(
       (aug) => !this.state.build.augments.some((existing) => existing.id === aug.id)
     );
-    this.state.rewardCandidates = available.slice(0, 3);
+    this.state.rewardCandidates = available.slice(0, 3).map(toLegacyAugmentRewardCard);
     if (this.state.rewardCandidates.length === 0) {
-      this.state.rewardCandidates = ALL_AUGMENTS.slice(0, 3);
+      this.state.rewardCandidates = ALL_AUGMENTS.slice(0, 3).map(toLegacyAugmentRewardCard);
     }
 
     const targetAug = this.state.rewardCandidates[0];
@@ -531,4 +532,12 @@ export class GameEngine {
     }
     this.state.screen = 'MAP';
   }
+}
+
+function toLegacyAugmentRewardCard(augment: AugmentItem): RewardCard {
+  return {
+    ...augment,
+    kind: 'augment',
+    kindLabel: '증강',
+  };
 }

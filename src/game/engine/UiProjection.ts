@@ -1,6 +1,7 @@
 import type {
   AugmentItem,
   ReelSymbol,
+  RewardCard,
   SlotResult,
   SynergyProgress as UiSynergyProgress,
 } from '../../types/game'
@@ -26,9 +27,11 @@ export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   }
 }
 
-export function toUiReward(reward: RewardOption): AugmentItem {
+export function toUiReward(reward: RewardOption): RewardCard {
   return {
     id: reward.id,
+    kind: reward.kind,
+    kindLabel: reward.kind === 'item' ? '아이템' : '증강',
     name: reward.name,
     rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
     tags: reward.tags,
