@@ -1450,6 +1450,30 @@ html, body {
   color: #fff;
 }
 
+.showcase-step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.showcase-step-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.step-separator {
+  color: #ffb703;
+  font-weight: bold;
+}
+
+.step-title {
+  color: #fff0d0;
+  min-width: 0;
+}
+
 /* ---------- 서사 프롤로그 및 기원(Origin) 선택 UI ---------- */
 .prologue-screen-overlay {
   position: relative;

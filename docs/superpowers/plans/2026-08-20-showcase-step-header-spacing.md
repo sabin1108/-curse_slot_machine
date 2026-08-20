@@ -28,7 +28,7 @@
 - Consumes: existing `ShowcaseOverlayProps` with `currentStepIndex`, `steps`, and `onDispatch`.
 - Produces: a `.showcase-step-heading` container with `.step-num`, `.step-separator`, and `.step-title` children.
 
-- [ ] **Step 1: Write the failing component test**
+- [x] **Step 1: Write the failing component test**
 
 Add `src/components/Showcase/ShowcaseOverlay.test.tsx`:
 
@@ -43,6 +43,7 @@ const steps: ShowcaseStep[] = [
     stepIndex: 4,
     title: '4단계: 보스 마무리 전투',
     instruction: '마지막 전투 흐름을 보여준다.',
+    actionScript: 'NONE',
     highlightMessage: '확실한 구분이 필요하다.',
   },
 ];
@@ -68,13 +69,13 @@ describe('ShowcaseOverlay', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx`
 
 Expected: FAIL because `.showcase-step-heading`, `.step-separator`, and `.step-title` do not exist.
 
-- [ ] **Step 3: Implement minimal JSX structure**
+- [x] **Step 3: Implement minimal JSX structure**
 
 In `src/components/Showcase/ShowcaseOverlay.tsx`, replace the current inline step counter/title pair:
 
@@ -93,7 +94,7 @@ with:
 </div>
 ```
 
-- [ ] **Step 4: Add CSS spacing hooks**
+- [x] **Step 4: Add CSS spacing hooks**
 
 In `src/styles.css`, add:
 
@@ -123,13 +124,13 @@ In `src/styles.css`, add:
 }
 ```
 
-- [ ] **Step 5: Run targeted GREEN**
+- [x] **Step 5: Run targeted GREEN**
 
 Run: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx`
 
 Expected: PASS.
 
-- [ ] **Step 6: Full verification**
+- [x] **Step 6: Full verification**
 
 Run:
 
@@ -140,6 +141,8 @@ npm.cmd run build
 ```
 
 Expected: all pass.
+
+Focused browser check also passed: Showcase step 4 `.showcase-step-heading` is visible, `.step-separator` renders `•`, and computed heading gap is `10px`.
 
 - [ ] **Step 7: Update docs, commit, push, and open draft PR**
 
