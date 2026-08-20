@@ -365,6 +365,7 @@ export class GameEngine {
         };
         this.state.combatLogs.push(`[보호] 보호막 +${res.calculatedValue} (총: ${this.state.player.shield})`);
         this.applyPriestPurifyTrait(act);
+        this.applyGamblerJackpotTrait(res.modifier.id);
       } else if (act === 'HEART') {
         const heal = res.calculatedValue;
         this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + heal);
@@ -375,6 +376,7 @@ export class GameEngine {
         };
         this.state.combatLogs.push(`[회복] HP +${heal} 회복`);
         this.applyPriestPurifyTrait(act);
+        this.applyGamblerJackpotTrait(res.modifier.id);
       } else {
         // Attack Enemy
         const dmg = res.calculatedValue;
@@ -396,6 +398,7 @@ export class GameEngine {
           this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
         }
         this.applySwordsmanBonusStrike(dmg);
+        this.applyGamblerJackpotTrait(res.modifier.id);
       }
     }
 
@@ -444,6 +447,7 @@ export class GameEngine {
     // Prepare next turn
     this.state.turn += 1;
     this.state.hasSpunThisTurn = false;
+    this.resetOriginTraitState();
   }
 
   private resetOriginTraitState() {
@@ -462,11 +466,11 @@ export class GameEngine {
   }
 
   private applySwordsmanBonusStrike(baseDamage: number) {
-    if (this.state.selectedOrigin !== 'SWORDSMAN' || baseDamage < 35 || this.state.enemy.hp <= 0) {
+    if (this.state.selectedOrigin !== 'SWORDSMAN' || baseDamage < 16 || this.state.enemy.hp <= 0) {
       return;
     }
 
-    const bonusDamage = Math.max(1, Math.floor(baseDamage * 0.5));
+    const bonusDamage = Math.max(1, Math.round(baseDamage * 0.5));
     this.state.enemy.hp = Math.max(0, this.state.enemy.hp - bonusDamage);
     this.state.lastDamagePop = {
       value: bonusDamage,
@@ -483,6 +487,21 @@ export class GameEngine {
 
     this.state.curse.current = Math.max(0, this.state.curse.current - 1);
     this.state.combatLogs.push('[Origin:Priest] shield/heart result purified curse -1');
+  }
+
+  private applyGamblerJackpotTrait(modifierId: string) {
+    if (this.state.selectedOrigin !== 'GAMBLER' || modifierId !== 'x3') {
+      return;
+    }
+
+    this.state.player.gold += 25;
+    const purifiedCurse = this.state.curse.current > 0;
+    this.state.curse.current = Math.max(0, this.state.curse.current - 1);
+    this.state.combatLogs.push(
+      purifiedCurse
+        ? `[Origin:Gambler] x3 jackpot: gold +25, curse -1`
+        : `[Origin:Gambler] x3 jackpot: gold +25`
+    );
   }
 
   private prepareRewardScreen() {

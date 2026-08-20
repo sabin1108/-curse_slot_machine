@@ -137,8 +137,8 @@ export function resolveCombatSlot(
       }
     }
 
-    if (context.originTrait === 'swordsman' && affectedActors.includes('enemy') && amount >= 18 && enemy.health > 0) {
-      const bonusStrikeAmount = Math.max(1, Math.floor(amount * 0.5))
+    if (context.originTrait === 'swordsman' && affectedActors.includes('enemy') && amount >= 16 && enemy.health > 0) {
+      const bonusStrikeAmount = Math.max(1, Math.round(amount * 0.5))
       const resolved = applyDamage(enemy, bonusStrikeAmount)
       enemy = resolved.actor
       events.push({
@@ -166,8 +166,9 @@ export function resolveCombatSlot(
   const curseGain = context.originTrait === 'priest' && (slotResult.action === 'shield' || slotResult.action === 'heart')
     ? Math.max(0, baseCurseGain - 1)
     : baseCurseGain
+  const jackpotCurseReduction = context.originTrait === 'gambler' && slotResult.modifier === 'x3' ? 1 : 0
   const curse = {
-    value: state.curse.value + curseGain,
+    value: Math.max(0, state.curse.value + curseGain - jackpotCurseReduction),
   }
   events.push({
     type: 'CURSE_INCREASED',

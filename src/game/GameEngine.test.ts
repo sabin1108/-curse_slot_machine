@@ -98,7 +98,7 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(state.narrativeMicrocopy).toContain('빚진 도박사');
   });
 
-  it('gives Gambler one curse-free reroll per battle', () => {
+  it('gives Gambler one curse-free reroll per turn', () => {
     const engine = new GameEngine('gambler_free_reroll');
     engine.dispatch({ type: 'START_RUN' });
     engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
@@ -112,6 +112,19 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
 
     engine.dispatch({ type: 'REROLL_UNLOCKED' });
     expect(engine.getState().curse.current).toBe(2);
+
+    const state = engine.getState();
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action: state.reels.action.find((symbol) => symbol.type === 'SHIELD')!,
+      target: state.reels.target.find((symbol) => symbol.type === 'SELF')!,
+      modifier: state.reels.modifier.find((symbol) => symbol.id === 'x1')!,
+      isMiss: false,
+      calculatedValue: 8,
+      finalEffectText: 'test next turn'
+    };
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+    expect(engine.getState().originTraitState.freeRerollAvailable).toBe(true);
   });
 
   it('adds a half-power Swordsman follow-up when attack damage reaches the threshold', () => {
@@ -129,13 +142,39 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
       target,
       modifier,
       isMiss: false,
-      calculatedValue: 40,
+      calculatedValue: 17,
       finalEffectText: 'test attack'
     };
 
     engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
 
-    expect(engine.getState().enemy.hp).toBe(40);
+    expect(engine.getState().enemy.hp).toBe(74);
+  });
+
+  it('rewards Gambler jackpot on x3 results', () => {
+    const engine = new GameEngine('gambler_jackpot');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
+    const state = engine.getState();
+    const action = state.reels.action.find((symbol) => symbol.type === 'SHIELD')!;
+    const target = state.reels.target.find((symbol) => symbol.type === 'SELF')!;
+    const modifier = state.reels.modifier.find((symbol) => symbol.id === 'x3')!;
+
+    state.curse.current = 3;
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action,
+      target,
+      modifier,
+      isMiss: false,
+      calculatedValue: 20,
+      finalEffectText: 'test jackpot'
+    };
+
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+
+    expect(engine.getState().player.gold).toBe(225);
+    expect(engine.getState().curse.current).toBe(2);
   });
 
   it('purifies curse when Priest confirms shield or heart results', () => {

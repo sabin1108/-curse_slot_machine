@@ -13,7 +13,7 @@ export const ORIGINS: Record<OriginId, OriginData> = {
     startingAugmentId: 'aug_fire_sword',
     icon: '⚔️',
     symbolBiasText: '소드/단검 물리 공격 심볼 가중치 우세 (시작 증강: 화염검 강결)',
-    rouletteTraitText: '검사의 결: 공격 피해가 35 이상이면 그 피해의 50%로 적에게 1회 추가 공격합니다.',
+    rouletteTraitText: '검사의 결: 공격 피해가 16 이상이면 그 피해의 50%를 반올림해 적에게 1회 추가 공격합니다.',
   },
   GAMBLER: {
     id: 'GAMBLER',
@@ -27,7 +27,7 @@ export const ORIGINS: Record<OriginId, OriginData> = {
     startingAugmentId: 'aug_frenzy_core',
     icon: '🎲',
     symbolBiasText: '골드/배율(CRIT) 심볼 가중치 우세 (시작 증강: 폭주 코어)',
-    rouletteTraitText: '빚 없는 첫 판: 전투마다 첫 재회전은 저주가 오르지 않습니다.',
+    rouletteTraitText: '잭팟 감각: 매 턴 첫 재회전은 저주가 오르지 않고, x3 확정 시 골드 +25와 저주 -1을 얻습니다.',
   },
   PRIEST: {
     id: 'PRIEST',

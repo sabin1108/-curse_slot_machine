@@ -150,6 +150,7 @@ export class GameEngine {
           originTrait: this.getStructuredOriginTrait(),
         })
         this.projectStructuredState(events)
+        this.applyGamblerJackpotTrait(slotResult)
         return this.presentation
       }
     }
@@ -235,9 +236,13 @@ export class GameEngine {
     return true
   }
 
-  private getStructuredOriginTrait(): 'swordsman' | 'priest' | undefined {
+  private getStructuredOriginTrait(): 'swordsman' | 'gambler' | 'priest' | undefined {
     if (this.presentation.selectedOrigin === 'SWORDSMAN') {
       return 'swordsman'
+    }
+
+    if (this.presentation.selectedOrigin === 'GAMBLER') {
+      return 'gambler'
     }
 
     if (this.presentation.selectedOrigin === 'PRIEST') {
@@ -245,6 +250,15 @@ export class GameEngine {
     }
 
     return undefined
+  }
+
+  private applyGamblerJackpotTrait(slotResult: CombatSlotResult): void {
+    if (this.presentation.selectedOrigin !== 'GAMBLER' || slotResult.modifier !== 'x3') {
+      return
+    }
+
+    this.presentation.player.gold += 25
+    this.presentation.combatLogs.push('[Origin:Gambler] x3 jackpot: gold +25, curse -1')
   }
 
   private projectStructuredRewards(): void {

@@ -51,6 +51,23 @@ describe('UiGameEngine', () => {
     expect(secondReroll.curse.current).toBe(2)
   })
 
+  it('projects Gambler x3 jackpots into UI gold rewards', () => {
+    const engine = new GameEngine('slot-ui-gambler-jackpot')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui-gambler-jackpot' })
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    ;(engine as any).currentStructuredSlot = {
+      action: 'shield',
+      target: 'self',
+      modifier: 'x3',
+    }
+
+    const state = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(state.player.gold).toBe(225)
+  })
+
   it('projects structured combo combat effects into UI-visible state', () => {
     const engine = new GameEngine('structured-spin-ui')
 
