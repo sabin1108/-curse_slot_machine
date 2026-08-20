@@ -46,7 +46,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['COMBO'],
       effectId: 'combo_damage_seed',
       effectLabel: 'bullet +20%',
-      assetKey: 'sword_gold',
+      assetKey: 'item_combo_starter',
       description: 'Starts a combo route with reliable bullet scaling.',
       effects: [bulletPct('combo_starter_bullet_pct', 20)],
     },
@@ -58,7 +58,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['COMBO', 'CRITICAL'],
       effectId: 'combo_damage_bonus',
       effectLabel: 'x2/x3 bullet +35%',
-      assetKey: 'sword_red',
+      assetKey: 'item_combo_finisher',
       description: 'Turns high multipliers into a clear combo payoff.',
       effects: [
         {
@@ -79,7 +79,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['MULTI_HIT'],
       effectId: 'extra_hit_seed',
       effectLabel: 'extra hit 35%',
-      assetKey: 'ring_gold',
+      assetKey: 'item_multi_hit_charm',
       description: 'Adds a smaller follow-up hit after bullet attacks.',
       effects: [
         {
@@ -97,7 +97,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['MULTI_HIT', 'COMBO'],
       effectId: 'split_blade_extra',
       effectLabel: 'extra hit 45%',
-      assetKey: 'sword_red',
+      assetKey: 'item_split_blade',
       description: 'Adds a stronger second hit for aggressive combo builds.',
       effects: [
         {
@@ -115,7 +115,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['MULTI_HIT', 'CRITICAL'],
       effectId: 'echo_trigger_extra',
       effectLabel: 'x3 extra hit 75%',
-      assetKey: 'orb_gold',
+      assetKey: 'item_echo_trigger',
       description: 'A jackpot item that repeats heavy x3 bullet turns.',
       effects: [
         {
@@ -134,7 +134,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['BURN'],
       effectId: 'burn_bullet_seed',
       effectLabel: 'bullet +3',
-      assetKey: 'fx_fire_strip',
+      assetKey: 'item_ember_edge',
       description: 'A small flat damage boost that starts burn routes.',
       effects: [bulletAdd('ember_edge_flat', 3)],
     },
@@ -146,7 +146,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['BURN', 'RESOURCE'],
       effectId: 'ash_powder_burn',
       effectLabel: 'bullet +15%',
-      assetKey: 'orb_purple',
+      assetKey: 'item_ash_powder',
       description: 'Fuel for burn builds that also keeps resource routes open.',
       effects: [bulletPct('ash_powder_pct', 15)],
     },
@@ -158,7 +158,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['BURN', 'RISK'],
       effectId: 'furnace_curse_damage',
       effectLabel: 'curse 4+ bullet +40%',
-      assetKey: 'orb_purple',
+      assetKey: 'item_furnace_heart',
       description: 'Rewards high curse with a major burn damage spike.',
       effects: [
         {
@@ -175,7 +175,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['BURN', 'CURSE', 'RISK'],
       effectId: 'wildfire_contract',
       effectLabel: 'bullet +55%, curse +1',
-      assetKey: 'card_red_r0',
+      assetKey: 'item_wildfire_contract',
       description: 'A cursed burn contract: more damage, more pressure.',
       effects: [
         bulletPct('wildfire_contract_damage', 55),
@@ -194,7 +194,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['DEFENSE'],
       effectId: 'block_bonus',
       effectLabel: 'shield +4',
-      assetKey: 'shield_blue',
+      assetKey: 'item_guard_core',
       description: 'A basic defensive core that makes shield spins stronger.',
       effects: [shieldAdd('guard_core_block', 4)],
     },
@@ -206,7 +206,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['DEFENSE', 'CRITICAL'],
       effectId: 'mirror_buckler',
       effectLabel: 'shield +25%',
-      assetKey: 'shield_blue',
+      assetKey: 'item_mirror_buckler',
       description: 'Scales shield turns and supports defensive crit routes.',
       effects: [shieldPct('mirror_buckler_pct', 25)],
     },
@@ -218,7 +218,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['DEFENSE'],
       effectId: 'stone_aegis',
       effectLabel: 'x2/x3 shield +7',
-      assetKey: 'orb_gray',
+      assetKey: 'item_stone_aegis',
       description: 'Turns multiplier shield spins into large blocking turns.',
       effects: [
         {
@@ -239,7 +239,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['DEFENSE', 'RESOURCE'],
       effectId: 'fortress_oath',
       effectLabel: 'shield +60%, curse -1',
-      assetKey: 'dg_chest_full_open_anim_f2',
+      assetKey: 'item_fortress_oath',
       description: 'A defensive capstone that converts slow play into curse control.',
       effects: [
         shieldPct('fortress_oath_pct', 60),
@@ -258,7 +258,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CURSE', 'RISK'],
       effectId: 'curse_tradeoff',
       effectLabel: 'curse 5+ bullet +50%',
-      assetKey: 'orb_purple',
+      assetKey: 'item_cursed_lens',
       description: 'Supports risk and curse routes with strong late-curse scaling.',
       effects: [
         {
@@ -275,7 +275,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CURSE', 'RISK', 'CRITICAL'],
       effectId: 'blood_price',
       effectLabel: 'low HP bullet +65%',
-      assetKey: 'card_red_r0',
+      assetKey: 'item_blood_price',
       description: 'A dangerous payoff when the run is near collapse.',
       effects: [
         {
@@ -292,7 +292,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CURSE', 'RESOURCE'],
       effectId: 'hex_battery',
       effectLabel: 'curse -1',
-      assetKey: 'orb_blue',
+      assetKey: 'item_hex_battery',
       description: 'A stabilizer for cursed builds that lowers normal curse gain.',
       effects: [
         {
@@ -310,7 +310,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CURSE', 'RISK', 'MULTI_HIT'],
       effectId: 'jackpot_debt',
       effectLabel: 'extra hit 90%, curse +1',
-      assetKey: 'orb_gold',
+      assetKey: 'item_jackpot_debt',
       description: 'A huge follow-up hit with a constant curse tax.',
       effects: [
         {
@@ -333,7 +333,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['RESOURCE'],
       effectId: 'red_coin',
       effectLabel: 'heart +3',
-      assetKey: 'dg_coin_anim_f0',
+      assetKey: 'item_red_coin',
       description: 'A simple economy pickup that improves healing spins.',
       effects: [heartAdd('red_coin_heal', 3)],
     },
@@ -345,7 +345,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['RESOURCE'],
       effectId: 'blue_vial',
       effectLabel: 'heart +30%',
-      assetKey: 'potion_blue',
+      assetKey: 'item_blue_vial',
       description: 'Makes heart spins matter during longer fights.',
       effects: [heartPct('blue_vial_pct', 30)],
     },
@@ -357,7 +357,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['RESOURCE', 'DEFENSE'],
       effectId: 'green_vial',
       effectLabel: 'heart +4, shield +2',
-      assetKey: 'potion_green',
+      assetKey: 'item_green_vial',
       description: 'A hybrid sustain item for slower shield builds.',
       effects: [heartAdd('green_vial_heal', 4), shieldAdd('green_vial_block', 2)],
     },
@@ -369,7 +369,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['RESOURCE', 'COMBO'],
       effectId: 'lucky_receipt',
       effectLabel: 'x1 bullet +5',
-      assetKey: 'card_green_r0',
+      assetKey: 'item_lucky_receipt',
       description: 'Makes low rolls less dead while building combo tags.',
       effects: [
         {
@@ -386,7 +386,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CRITICAL'],
       effectId: 'crit_die',
       effectLabel: 'x3 bullet +45%',
-      assetKey: 'ring_gold',
+      assetKey: 'item_crit_die',
       description: 'A clean critical route starter for x3 turns.',
       effects: [
         {
@@ -403,7 +403,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CRITICAL', 'RISK'],
       effectId: 'glass_cannon',
       effectLabel: 'bullet +45%',
-      assetKey: 'sword_red',
+      assetKey: 'item_glass_cannon',
       description: 'A direct damage spike for risky offense.',
       effects: [bulletPct('glass_cannon_pct', 45)],
     },
@@ -415,7 +415,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CRITICAL', 'COMBO', 'RISK'],
       effectId: 'royal_joker',
       effectLabel: 'x3 bullet +80%',
-      assetKey: 'card_teal_r0',
+      assetKey: 'item_royal_joker',
       description: 'A premium jackpot payoff for crit-combo builds.',
       effects: [
         {
@@ -432,7 +432,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['COMBO', 'RESOURCE'],
       effectId: 'safe_cracker',
       effectLabel: 'bullet +2, heart +2',
-      assetKey: 'dg_chest_full_open_anim_f2',
+      assetKey: 'item_safe_cracker',
       description: 'A flexible early pickup that keeps two routes alive.',
       effects: [bulletAdd('safe_cracker_bullet', 2), heartAdd('safe_cracker_heart', 2)],
     },
@@ -444,7 +444,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['DEFENSE', 'BURN'],
       effectId: 'thorn_shell',
       effectLabel: 'shield +4, bullet +4',
-      assetKey: 'shield_blue',
+      assetKey: 'item_thorn_shell',
       description: 'A battle-mage pickup that links defense and burn pressure.',
       effects: [shieldAdd('thorn_shell_block', 4), bulletAdd('thorn_shell_bullet', 4)],
     },
@@ -456,7 +456,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['BURN', 'CURSE'],
       effectId: 'black_candle',
       effectLabel: 'curse 3+ bullet +35%',
-      assetKey: 'orb_purple',
+      assetKey: 'item_black_candle',
       description: 'Turns curse buildup into consistent burn damage.',
       effects: [
         {
@@ -473,7 +473,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['RESOURCE', 'RISK'],
       effectId: 'panic_button',
       effectLabel: 'low HP heart +80%',
-      assetKey: 'btn_yellow',
+      assetKey: 'item_panic_button',
       description: 'A comeback item that makes emergency healing meaningful.',
       effects: [
         {
@@ -490,7 +490,7 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       tags: ['CURSE', 'COMBO'],
       effectId: 'house_mark',
       effectLabel: 'x2 bullet +40%, curse +1',
-      assetKey: 'card_red_r0',
+      assetKey: 'item_house_mark',
       description: 'A risky mid-roll payoff that makes x2 attacks sharp.',
       effects: [
         {
