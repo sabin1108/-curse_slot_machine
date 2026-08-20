@@ -45,7 +45,7 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(9)
+    expect(resolvedState.enemy.hp).toBe(6)
     expect(resolvedState.build.activeSynergies).toContain('Combo Engine')
   })
 
@@ -273,6 +273,6 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(6)
+    expect(resolvedState.enemy.hp).toBe(4)
   })
 })

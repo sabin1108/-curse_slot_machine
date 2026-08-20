@@ -51,7 +51,7 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
 
-    expect(screen.getByRole('button', { name: /諛⑸꼍 肄붿뼱/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /\uBC29\uBCBD \uCF54\uC5B4 \uC120\uD0DD/ })).toBeInTheDocument();
   });
 
   it('uses local font fallbacks instead of external Google Fonts', () => {

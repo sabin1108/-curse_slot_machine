@@ -26,6 +26,8 @@ export type BuildRewardDefinition = {
   rarity: Rarity
   tags: SynergyTag[]
   effectId?: string
+  effectLabel?: string
+  assetKey?: string
   effects?: EffectDefinition[]
   description: string
 }

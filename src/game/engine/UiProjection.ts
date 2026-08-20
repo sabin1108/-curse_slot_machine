@@ -8,6 +8,7 @@ import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import type { BuildRewardDefinition, SynergyDefinition, SynergyTag } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import { getAsset } from '../../assets/assetHelper'
 
 export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   return {
@@ -17,7 +18,8 @@ export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
     tags: reward.tags,
     description: reward.description,
     icon: 'AUG',
-    effectValue: reward.effectId ?? reward.effects?.[0]?.id ?? 'EFFECT',
+    imgUrl: reward.assetKey ? getAsset(reward.assetKey) : undefined,
+    effectValue: reward.effectLabel ?? reward.effectId ?? reward.effects?.[0]?.id ?? 'EFFECT',
   }
 }
 
@@ -29,7 +31,8 @@ export function toUiReward(reward: RewardOption): AugmentItem {
     tags: reward.tags,
     description: reward.description,
     icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
-    effectValue: `score ${reward.score.total}`,
+    imgUrl: reward.assetKey ? getAsset(reward.assetKey) : undefined,
+    effectValue: reward.effectLabel ?? `score ${reward.score.total}`,
   }
 }
 

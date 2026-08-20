@@ -1,5 +1,6 @@
 import { ReelSymbol, AugmentItem, SynergyProgress, EnemyState, ShowcaseStep } from '../types/game';
 import { getAsset } from '../assets/assetHelper';
+import { DEFAULT_BUILD_CATALOG } from './build/BuildCatalog';
 
 export const ACTION_SYMBOLS: ReelSymbol[] = [
   {
@@ -226,7 +227,17 @@ export const ALL_AUGMENTS: AugmentItem[] = [
     icon: '🔮',
     imgUrl: getAsset('orb_purple'),
     effectValue: 'NEW'
-  }
+  },
+  ...DEFAULT_BUILD_CATALOG.rewards.map((reward): AugmentItem => ({
+    id: reward.id,
+    name: reward.name,
+    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    tags: reward.tags,
+    description: reward.description,
+    icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
+    imgUrl: reward.assetKey ? getAsset(reward.assetKey) : getAsset('sword_gold'),
+    effectValue: reward.effectLabel ?? reward.effectId ?? 'EFFECT'
+  }))
 ];
 
 export const INITIAL_SYNERGIES: SynergyProgress[] = [
@@ -247,7 +258,16 @@ export const INITIAL_SYNERGIES: SynergyProgress[] = [
     required: 3,
     completed: false,
     effectDescription: 'COMBO 태그 3개 완성 시 모든 타격 피해 2배 증폭'
-  }
+  },
+  ...DEFAULT_BUILD_CATALOG.synergies.map((synergy): SynergyProgress => ({
+    synergyId: synergy.id,
+    name: synergy.name,
+    tag: synergy.requiredTags[0]?.tag ?? 'COMBO',
+    current: 0,
+    required: synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
+    completed: false,
+    effectDescription: synergy.description
+  }))
 ];
 
 export const DEFAULT_ENEMIES: EnemyState[] = [

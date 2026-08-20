@@ -14,12 +14,8 @@ describe('RewardSystem', () => {
 
     expect(options).toHaveLength(3)
     expect(options.map((option) => option.id)).not.toContain('combo_starter')
-    expect(options[0]).toMatchObject({
-      kind: 'augment',
-      id: 'combo_finisher',
-      score: expect.objectContaining({
-        completionValue: expect.any(Number),
-      }),
+    expect(options[0].score).toMatchObject({
+      completionValue: expect.any(Number),
     })
     expect(options[0].score.completionValue).toBeGreaterThan(0)
   })

@@ -309,7 +309,11 @@ export class GameEngine {
 
     let multiplier = modifier.baseValue;
     const baseValueSum = action.baseValue + target.baseValue;
-    const calculatedValue = isMiss ? 0 : Math.round(baseValueSum * multiplier);
+    const actionFlatBonus = this.getLegacyActionFlatBonus(action.type);
+    const actionPctBonus = this.getLegacyActionPctBonus(action.type, modifier.id);
+    const calculatedValue = isMiss
+      ? 0
+      : Math.round((baseValueSum * multiplier + actionFlatBonus) * (1 + actionPctBonus / 100));
 
     let text = `[${action.name}] + [${target.name}] × [${modifier.name}]: `;
     if (isMiss) {
@@ -369,6 +373,16 @@ export class GameEngine {
           id: Date.now()
         };
         this.state.combatLogs.push(`[타격] ${this.state.enemy.name}에게 ${dmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
+        const extraDmg = this.getLegacyExtraHitDamage(dmg, res.modifier.id);
+        if (extraDmg > 0 && this.state.enemy.hp > 0) {
+          this.state.enemy.hp = Math.max(0, this.state.enemy.hp - extraDmg);
+          this.state.lastDamagePop = {
+            value: extraDmg,
+            type: 'ENEMY_DMG',
+            id: Date.now()
+          };
+          this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
+        }
       }
     }
 
@@ -384,11 +398,18 @@ export class GameEngine {
     this.state.isEnemyAttacking = true;
     const intent = this.state.enemy.intent;
     let enemyDmg = intent.value;
+    let absorbedTotal = 0;
     if (this.state.player.shield > 0) {
       const absorbed = Math.min(this.state.player.shield, enemyDmg);
       this.state.player.shield -= absorbed;
       enemyDmg -= absorbed;
+      absorbedTotal += absorbed;
       this.state.combatLogs.push(`[수호 방벽 흡수] 보호막이 ${absorbed} 피해를 차단했습니다!`);
+    }
+    const thornDamage = this.getLegacyThornDamage(absorbedTotal);
+    if (thornDamage > 0) {
+      this.state.enemy.hp = Math.max(0, this.state.enemy.hp - thornDamage);
+      this.state.combatLogs.push(`[Thorns] 방어막 반격 ${thornDamage} 피해!`);
     }
     if (enemyDmg > 0) {
       this.state.player.hp = Math.max(0, this.state.player.hp - enemyDmg);
@@ -524,6 +545,106 @@ export class GameEngine {
     this.state.build.activeSynergies = this.state.build.synergyProgress
       .filter((s) => s.completed)
       .map((s) => s.name);
+  }
+
+  private getLegacyActionFlatBonus(actionType: ReelSymbol['type']): number {
+    if (actionType === 'BULLET' || actionType === 'DAGGER' || actionType === 'BOMB') {
+      return this.countLegacyTags('BURN') * 3
+        + this.countLegacyTags('COMBO') * 2
+        + (this.hasLegacyReward('aug_fire_sword') ? 6 : 0)
+        + (this.hasLegacyReward('safe_cracker') ? 2 : 0)
+        + (this.hasLegacyReward('thorn_shell') ? 4 : 0);
+    }
+
+    if (actionType === 'SHIELD') {
+      return this.countLegacyTags('DEFENSE') * 3
+        + (this.hasLegacyReward('aug_barrier') ? 3 : 0)
+        + (this.hasLegacyReward('green_vial') ? 2 : 0);
+    }
+
+    if (actionType === 'HEART') {
+      return this.countLegacyTags('RESOURCE') * 2
+        + (this.hasLegacyReward('aug_regen') ? 2 : 0)
+        + (this.hasLegacyReward('red_coin') ? 3 : 0)
+        + (this.hasLegacyReward('green_vial') ? 4 : 0);
+    }
+
+    return 0;
+  }
+
+  private getLegacyActionPctBonus(actionType: ReelSymbol['type'], modifierId: string): number {
+    let pct = 0;
+
+    if (actionType === 'BULLET' || actionType === 'DAGGER' || actionType === 'BOMB') {
+      pct += this.countLegacyTags('CRITICAL') * 12;
+      pct += this.countLegacyTags('RISK') * 8;
+      if (this.isLegacySynergyCompleted('burn_pressure')) pct += 45;
+      if (this.isLegacySynergyCompleted('curse_engine') && this.state.curse.current >= 5) pct += 65;
+      if (this.isLegacySynergyCompleted('jackpot_engine') && modifierId === 'x3') pct += 100;
+      if (this.hasLegacyReward('glass_cannon')) pct += 45;
+      if (this.hasLegacyReward('cursed_lens') && this.state.curse.current >= 5) pct += 50;
+      if (this.hasLegacyReward('furnace_heart') && this.state.curse.current >= 4) pct += 40;
+      if (this.hasLegacyReward('black_candle') && this.state.curse.current >= 3) pct += 35;
+      if (this.hasLegacyReward('blood_price') && this.getPlayerHpPct() <= 40) pct += 65;
+      if (this.hasLegacyReward('royal_joker') && modifierId === 'x3') pct += 80;
+      if (this.hasLegacyReward('house_mark') && modifierId === 'x2') pct += 40;
+      if (this.hasLegacyReward('crit_die') && modifierId === 'x3') pct += 45;
+    }
+
+    if (actionType === 'SHIELD') {
+      pct += this.countLegacyTags('DEFENSE') * 8;
+      if (this.isLegacySynergyCompleted('fortress_loop')) pct += 50;
+      if (this.hasLegacyReward('mirror_buckler')) pct += 25;
+      if (this.hasLegacyReward('fortress_oath')) pct += 60;
+    }
+
+    if (actionType === 'HEART') {
+      pct += this.countLegacyTags('RESOURCE') * 8;
+      if (this.isLegacySynergyCompleted('sustain_engine')) pct += 70;
+      if (this.hasLegacyReward('blue_vial')) pct += 30;
+      if (this.hasLegacyReward('panic_button') && this.getPlayerHpPct() <= 45) pct += 80;
+    }
+
+    return Math.min(220, pct);
+  }
+
+  private getLegacyExtraHitDamage(baseDamage: number, modifierId: string): number {
+    let pct = this.countLegacyTags('MULTI_HIT') * 20;
+
+    if (this.isLegacySynergyCompleted('combo_engine')) pct += 50;
+    if (this.hasLegacyReward('aug_frenzy_core')) pct += 35;
+    if (this.hasLegacyReward('multi_hit_charm')) pct += 35;
+    if (this.hasLegacyReward('split_blade')) pct += 45;
+    if (this.hasLegacyReward('jackpot_debt')) pct += 90;
+    if (this.hasLegacyReward('echo_trigger') && modifierId === 'x3') pct += 75;
+
+    return pct > 0 ? Math.floor(baseDamage * Math.min(150, pct) / 100) : 0;
+  }
+
+  private getLegacyThornDamage(absorbedDamage: number): number {
+    if (absorbedDamage <= 0) return 0;
+    const defenseTags = this.countLegacyTags('DEFENSE');
+    if (defenseTags < 2 && !this.hasLegacyReward('thorn_shell')) return 0;
+
+    return Math.max(1, Math.floor(absorbedDamage * (defenseTags >= 3 ? 0.5 : 0.3)));
+  }
+
+  private countLegacyTags(tag: AugmentItem['tags'][number]): number {
+    return this.state.build.augments.reduce((count, augment) => (
+      augment.tags.includes(tag) ? count + 1 : count
+    ), 0);
+  }
+
+  private hasLegacyReward(id: string): boolean {
+    return this.state.build.augments.some((augment) => augment.id === id);
+  }
+
+  private isLegacySynergyCompleted(synergyId: string): boolean {
+    return this.state.build.synergyProgress.some((synergy) => synergy.synergyId === synergyId && synergy.completed);
+  }
+
+  private getPlayerHpPct(): number {
+    return (this.state.player.hp / this.state.player.maxHp) * 100;
   }
 
   private handleStartShowcase() {

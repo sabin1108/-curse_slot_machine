@@ -169,12 +169,13 @@ describe('GameEngine', () => {
       },
     })
 
-    expect(engine.getState().combat.enemy.health).toBe(9)
+    expect(engine.getState().combat.enemy.health).toBe(6)
     expect(events).toEqual([
       expect.objectContaining({
         type: 'COMBAT_SLOT_RESOLVED',
         combatEvents: expect.arrayContaining([
-          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 6 }),
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 7 }),
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 2 }),
           expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 3 }),
         ]),
       }),

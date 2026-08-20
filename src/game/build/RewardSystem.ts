@@ -23,6 +23,8 @@ export type RewardOption = RewardRef & {
   rarity: Rarity
   tags: SynergyTag[]
   description: string
+  effectLabel?: string
+  assetKey?: string
   score: RewardScore
 }
 
@@ -70,6 +72,8 @@ function createRewardOption(
     rarity: reward.rarity,
     tags: [...reward.tags],
     description: reward.description,
+    effectLabel: reward.effectLabel,
+    assetKey: reward.assetKey,
     score,
   }
 }
