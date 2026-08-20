@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/ui-adapter-synergy-progress`
-- Current PR: draft PR pending for `feature/ui-adapter-synergy-progress`
+- Current PR: draft PR #23 - https://github.com/sabin1108/-curse_slot_machine/pull/23
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -49,7 +49,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/ui-adapter-synergy-progress` is verified locally and pending draft PR creation.
+`feature/ui-adapter-synergy-progress` is pushed and open as draft PR #23.
 
 Implemented:
 
@@ -60,6 +60,7 @@ Implemented:
 Current branch commits:
 
 - `4742591` - `docs: plan ui synergy progress projection`
+- `4d44cda` - `fix: project structured synergy progress`
 
 ## Verification
 
@@ -89,7 +90,7 @@ TDD evidence:
 Next planned work:
 
 1. Keep PR #22 draft/open until explicit merge approval.
-2. Open a draft PR for `feature/ui-adapter-synergy-progress`.
+2. Keep PR #23 draft/open until explicit merge approval.
 3. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
 
 Do not merge later PRs without explicit user approval.

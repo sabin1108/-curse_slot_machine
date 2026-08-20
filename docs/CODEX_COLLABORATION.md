@@ -712,5 +712,6 @@
 
 ### GitHub
 
-- Draft PR pending.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/23
+- Head commit: `4d44cda`.
 - Merge policy: no merge without explicit user approval.
