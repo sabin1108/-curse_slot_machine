@@ -433,5 +433,36 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/14
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/14
+- User approved merging PR #14 on 2026-08-20.
+- PR #14 was marked ready and squash merged into `main`.
+- PR #14 squash merge commit: `d4ea1bd`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Event Node Entry
+
+### Human Direction
+
+- Merge PR #14 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-event-node-entry` from updated `main` after PR #14 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving `EVENT` node selection still routed to `BATTLE`.
+- Updated `UiGameEngine` to route typed event node entry to `MAP` while clearing stale adapter-owned slot state.
+- Updated `DungeonMapScreen` to dispatch `SELECT_MAP_NODE` for event nodes before opening the existing local event choice modal.
+- Kept event choice reward/rest/skip resolution out of this slice.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `EVENT` node selection returned `BATTLE`, then passed with 10 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 48 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending creation for `feature/ui-adapter-event-node-entry`.
 - Merge policy: no merge without explicit user approval.

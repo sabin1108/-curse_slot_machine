@@ -249,6 +249,10 @@ function getMapNodeDestinationScreen(nodeType: MapNodeType | undefined): UiGameS
     return 'REST'
   }
 
+  if (nodeType === 'EVENT') {
+    return 'MAP'
+  }
+
   return 'BATTLE'
 }
 
