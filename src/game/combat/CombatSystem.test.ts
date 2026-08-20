@@ -80,4 +80,89 @@ describe('CombatSystem', () => {
       'COMBAT_ENDED',
     ])
   })
+
+  it('applies a matching percentage damage effect before enemy response', () => {
+    const result = resolveCombatSlot(
+      createCombatState(),
+      {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x1',
+      },
+      {
+        effects: [
+          {
+            id: 'bullet_boost',
+            type: 'combat.action_amount.add_pct',
+            params: { action: 'bullet', percent: 50 },
+          },
+        ],
+      },
+    )
+
+    expect(result.enemy.health).toBe(9)
+    expect(result.events).toContainEqual(
+      expect.objectContaining({
+        type: 'DAMAGE_APPLIED',
+        target: 'enemy',
+        amount: 9,
+        healthLost: 9,
+      }),
+    )
+  })
+
+  it('applies one non-recursive bullet extra hit before enemy response', () => {
+    const result = resolveCombatSlot(
+      createCombatState(),
+      {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x1',
+      },
+      {
+        effects: [
+          {
+            id: 'extra_hit',
+            type: 'combat.bullet.extra_hit',
+            params: { percent: 50 },
+          },
+        ],
+      },
+    )
+
+    expect(result.enemy.health).toBe(9)
+    expect(
+      result.events.filter((event) => event.type === 'DAMAGE_APPLIED'),
+    ).toEqual([
+      expect.objectContaining({ amount: 6, healthLost: 6 }),
+      expect.objectContaining({ amount: 3, healthLost: 3 }),
+    ])
+  })
+
+  it('clamps curse gain after curse gain effects', () => {
+    const result = resolveCombatSlot(
+      createCombatState(),
+      {
+        action: 'shield',
+        target: 'self',
+        modifier: 'x1',
+      },
+      {
+        effects: [
+          {
+            id: 'curse_relief',
+            type: 'combat.curse_gain.add',
+            params: { amount: -1 },
+          },
+        ],
+      },
+    )
+
+    expect(result.curse.value).toBe(0)
+    expect(result.events).toContainEqual({
+      type: 'CURSE_INCREASED',
+      amount: 0,
+      value: 0,
+    })
+  })
 })

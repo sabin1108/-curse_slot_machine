@@ -118,6 +118,10 @@ export type GameScreen = 'TITLE' | 'PROLOGUE' | 'ORIGIN' | 'BATTLE' | 'REWARD' |
 
 export type GameMode = 'NORMAL' | 'SHOWCASE';
 
+export type MapNodeType = 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
+
+export type EventChoice = 'OPEN' | 'REST' | 'SKIP';
+
 export interface ShowcaseStep {
   stepIndex: number;
   title: string;
@@ -195,7 +199,7 @@ export type GameCommand =
   | { type: 'START_RUN'; seed?: string; mode?: GameMode }
   | { type: 'OPEN_PROLOGUE' }
   | { type: 'SELECT_ORIGIN'; originId: OriginId }
-  | { type: 'SELECT_MAP_NODE'; nodeId: number }
+  | { type: 'SELECT_MAP_NODE'; nodeId: number; nodeType?: MapNodeType }
   | { type: 'SPIN_COMBAT_SLOT' }
   | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
   | { type: 'REROLL_UNLOCKED' }
@@ -204,6 +208,7 @@ export type GameCommand =
   | { type: 'NAVIGATE'; screen: GameScreen }
   | { type: 'START_SHOWCASE'; scenarioId?: string }
   | { type: 'NEXT_SHOWCASE_STEP' }
+  | { type: 'RESOLVE_EVENT_CHOICE'; choice: EventChoice }
   | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
   | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
 

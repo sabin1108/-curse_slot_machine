@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { GameEngine } from '../game/GameEngine';
+import { GameEngine } from '../game/engine/UiGameEngine';
 import { GameCommand } from '../types/game';
 
 import { TitleScreen } from '../components/Title/TitleScreen';
@@ -13,6 +13,7 @@ import { DungeonMapScreen } from '../components/Navigation/DungeonMapScreen';
 import { ShopScreen } from '../components/Navigation/ShopScreen';
 import { RestScreen } from '../components/Navigation/RestScreen';
 import { GameOverVictoryModal } from '../components/Navigation/GameOverVictoryModal';
+import { ShowcaseOverlay } from '../components/Showcase/ShowcaseOverlay';
 
 import '../styles.css';
 
@@ -80,6 +81,14 @@ export function App() {
           </button>
         </div>
       </nav>
+
+      {gameState.showcase.active && (
+        <ShowcaseOverlay
+          currentStepIndex={gameState.showcase.currentStep}
+          steps={gameState.showcase.steps}
+          onDispatch={handleDispatch}
+        />
+      )}
 
       {/* Main View Area with Screen Transition Wipe */}
       <ScreenTransitionOverlay screen={gameState.screen}>

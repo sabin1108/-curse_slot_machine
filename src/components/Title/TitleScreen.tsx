@@ -21,6 +21,11 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurs
     }
   };
 
+  const handleStartShowcase = () => {
+    soundManager.playClick();
+    onDispatch({ type: 'START_SHOWCASE' });
+  };
+
   return (
     <div
       className="frame title-screen"
@@ -65,6 +70,9 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurs
         <div className="k-btn big primary glow-pulse" onClick={handleStartNormal}>
           🎮 던전 탐사 시작 (START GAME)
         </div>
+        <button className="k-btn big showcase glow-pulse" onClick={handleStartShowcase} type="button">
+          Showcase Mode
+        </button>
         <div className="k-btn sub-btn" onClick={handleOpenCurseLog} style={{ cursor: 'pointer', padding: '6px 16px', background: 'rgba(0,0,0,0.6)', border: '1px solid #7c6f50', borderRadius: '4px', color: '#e2d3a8', fontSize: '13px' }}>
           📜 저주 일지 (Curse Log)
         </div>

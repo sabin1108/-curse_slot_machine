@@ -198,3 +198,363 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/7
 - Implementation commit: `f2edf57`; PR documentation updates are included on the branch.
 - Merge policy: no merge without explicit user approval.
+
+### Merge Result
+
+- User approved merging PR #7 on 2026-08-19.
+- PR #7 was marked ready, verified, and squash merged into `main`.
+- PR #7 squash merge commit: `622f52f`.
+
+## 2026-08-19 - Augment Slot Machine
+
+### Human Direction
+
+- After merging build reward synergy, proceed to the next branch.
+- Implement `feature/augment-slot-machine` with TDD.
+- Keep AugmentSlotMachine as a reveal/presentation system; reward generation remains owned by RewardSystem.
+
+### Codex Work
+
+- Created and used the isolated worktree `C:\Users\00\Documents\Codex\csm_augment_slot`.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `AugmentSlotMachine` tests before adding production slot modules.
+- Implemented deterministic three-reel reward presentation and immutable reveal behavior.
+- Added a random API guard test to keep augment slot presentation from deciding reward RNG.
+- Wrote failing `GameEngine` tests before adding reward presentation state and event fields.
+- Integrated combat victory reward generation with `rewards.augmentSlot`, and clear it on `CHOOSE_REWARD`.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/slot/AugmentSlotMachine.test.ts`: failed first because `AugmentSlotMachine` did not exist, then passed with 3 tests.
+- `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because reward state/events did not include augment slot presentation, then passed with 5 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 27 tests across 8 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/8
+- Implementation commit: `e57b615`; PR documentation updates are included on the branch.
+- Merge policy: no merge without explicit user approval.
+
+### Merge Result
+
+- User approved merging PR #8 on 2026-08-20.
+- PR #8 was marked ready and squash merged into `main`.
+- PR #8 squash merge commit: `ca51454`.
+
+## 2026-08-20 - Content Effect Schema Pilot
+
+### Human Direction
+
+- Merge PR #8 and continue the next work.
+- Use the meeting feedback about insufficient item/augment/synergy logic.
+- Keep new gameplay logic in pure TypeScript systems and avoid large structure changes without approval.
+
+### Codex Work
+
+- Created `feature/content-effect-schema-pilot` from updated `main` after PR #8 merge.
+- Added content logic analysis and design documents:
+  - `docs/agent/CONTENT_LOGIC_ANALYSIS.md`
+  - `docs/design/CONTENT_EFFECT_SCHEMA_PLAN.md`
+  - `docs/design/PILOT_AUGMENT_ITEM_SYNERGY_SETS.md`
+  - `docs/design/MVP_REWARD_AND_STAGE_FLOW.md`
+  - `docs/agent/feedback/*`
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `BuildSystem` test before adding `getActiveEffects`.
+- Added bounded `EffectDefinition` and `EffectCondition` types.
+- Implemented active effect resolution from owned rewards and completed synergies.
+- Wrote failing `CombatSystem` tests before adding combat effect context.
+- Implemented initial combat effects for action amount adjustment, bullet extra hit, and curse gain adjustment.
+- Wrote failing pure `GameEngine` test before passing active build effects into combat.
+- Added a default `combo_engine` structured extra-hit effect and pure engine integration.
+- Used a read-only `explore` subagent to verify the UI/engine split before adapter work.
+- Wrote failing `UiGameEngine` adapter test before adding a UI-facing bridge to structured reward/combat effects.
+- Switched `App.tsx` to import the adapter after the existing App render test passed.
+- Created draft PR #10 after verification and pushed commit `5ba1851`.
+- Wrote a failing `UiGameEngine` reward projection test before projecting structured victory rewards into the legacy RewardModal state contract.
+- Wrote failing `UiGameEngine` spin/reroll tests before routing UI combat slot commands through pure `CombatSlotMachine` functions.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/build/BuildSystem.test.ts`: failed first because `getActiveEffects` did not exist, then passed with 4 tests.
+- `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts`: failed first because combat effects were ignored, then passed with 7 tests.
+- `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because active build effects were not passed into combat, then passed with 6 tests.
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `UiGameEngine` did not exist, then passed with 1 test.
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because structured victory rewards left `rewardCandidates` empty, then passed with 2 tests after projection.
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because spin/reroll still produced legacy slot output, then passed with 4 tests after pure slot routing.
+- `npm.cmd run test:run -- src/app/App.test.tsx`: passed before and after the adapter import switch.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 37 tests across 9 files.
+- `npm.cmd run build`: passed.
+
+### Remaining Gap
+
+- The visible React app imports `src/game/engine/UiGameEngine.ts`, which preserves the current UI state contract and delegates ordinary legacy commands while exposing a narrow structured combo-effect combat path. Full legacy engine retirement remains out of scope for this branch.
+
+### Merge Result
+
+- User approved merging PR #10 on 2026-08-20.
+- PR #10 was marked ready and squash merged into `main`.
+- PR #10 squash merge commit: `8be060c`.
+
+## 2026-08-20 - UI Adapter Confirm Result
+
+### Human Direction
+
+- Merge PR #10 and continue the next adapter slice.
+
+### Codex Work
+
+- Created `feature/ui-adapter-confirm-result` from updated `main` after PR #10 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving `CONFIRM_SLOT_RESULT` still trusted mutable UI `currentResult`.
+- Updated `CONFIRM_SLOT_RESULT` to prefer the adapter-owned pure `currentStructuredSlot`.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because mutated UI presentation prevented enemy damage, then passed with 5 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 41 tests across 9 files.
+- `npm.cmd run build`: passed.
+
+## 2026-08-20 - UI Projection Helper Extraction
+
+### Human Direction
+
+- Continue the next adapter cleanup on draft PR #11 after approval.
+- Keep the work small, TDD-protected, and avoid broad engine/UI migration in this slice.
+
+### Codex Work
+
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiProjection` tests before adding the production projection module.
+- Extracted reusable UI projection helpers from `UiGameEngine` into `src/game/engine/UiProjection.ts`.
+- Kept `UiGameEngine` focused on command orchestration, adapter-owned combat slot state, and structured state projection.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: failed first because `UiProjection.ts` did not exist.
+- `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts`: passed, 7 tests across 2 files.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 43 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/11
+- User approved merging PR #11 on 2026-08-20.
+- PR #11 was marked ready and squash merged into `main`.
+- PR #11 squash merge commit: `e8c5884`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Reward To Map Adapter
+
+### Human Direction
+
+- Merge PR #11 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-map-node` from updated `main` after PR #11 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving structured reward selection left the UI on `REWARD`.
+- Updated structured `CHOOSE_REWARD` handling to apply the reward in the structured engine while using the legacy presentation engine only for temporary map/wave/enemy shell progression when the visible UI is on the reward screen.
+- Re-projected structured build and reward presentation after the legacy shell update so reward candidates and augment slot state clear.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `screen` stayed `REWARD`, then passed with 6 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 44 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/12
+- User approved merging PR #12 on 2026-08-20.
+- PR #12 was marked ready and squash merged into `main`.
+- PR #12 squash merge commit: `9955372`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Select Map Node Adapter
+
+### Human Direction
+
+- Merge PR #12 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-select-map-node` from updated `main` after PR #12 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving `SELECT_MAP_NODE` left the UI on `MAP`.
+- Updated `SELECT_MAP_NODE` handling to delegate map path bookkeeping to the legacy presentation engine, then prepare a clean `BATTLE` entry state.
+- Cleared adapter-owned structured slot state on map node selection so `CONFIRM_SLOT_RESULT` cannot re-resolve a previous slot before the next spin.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `screen` stayed `MAP`, then passed with 7 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 45 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/13
+- User approved merging PR #13 on 2026-08-20.
+- PR #13 was marked ready and squash merged into `main`.
+- PR #13 squash merge commit: `1877c21`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Map Node Type Routing
+
+### Human Direction
+
+- Merge PR #13 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-node-type-routing` from updated `main` after PR #13 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiGameEngine` tests proving `SHOP` and `REST` node selections still routed to `BATTLE`.
+- Extended `SELECT_MAP_NODE` with optional `nodeType` command data.
+- Updated `UiGameEngine` to route typed map nodes to `SHOP`, `REST`, or battle entry while clearing stale adapter-owned slot state.
+- Updated `DungeonMapScreen` to pass node type in the command and stop dispatching extra `NAVIGATE` commands for battle/shop/rest nodes.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `SHOP` and `REST` nodes returned `BATTLE`, then passed with 9 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 47 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/14
+- User approved merging PR #14 on 2026-08-20.
+- PR #14 was marked ready and squash merged into `main`.
+- PR #14 squash merge commit: `d4ea1bd`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Event Node Entry
+
+### Human Direction
+
+- Merge PR #14 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-event-node-entry` from updated `main` after PR #14 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving `EVENT` node selection still routed to `BATTLE`.
+- Updated `UiGameEngine` to route typed event node entry to `MAP` while clearing stale adapter-owned slot state.
+- Updated `DungeonMapScreen` to dispatch `SELECT_MAP_NODE` for event nodes before opening the existing local event choice modal.
+- Kept event choice reward/rest/skip resolution out of this slice.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `EVENT` node selection returned `BATTLE`, then passed with 10 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 48 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/15
+- User approved merging PR #15 on 2026-08-20.
+- PR #15 was marked ready and squash merged into `main`.
+- PR #15 squash merge commit: `eae8337`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Event Choice Command
+
+### Human Direction
+
+- Merge PR #15 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-event-choice-command` from updated `main` after PR #15 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiGameEngine` tests proving `RESOLVE_EVENT_CHOICE` did not yet affect open/rest/skip outcomes.
+- Added `EventChoice` and `RESOLVE_EVENT_CHOICE`.
+- Updated `UiGameEngine` to map event choices to existing TypeScript engine commands.
+- Updated `DungeonMapScreen` so event buttons dispatch one event choice command instead of branching into outcome-specific commands.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `RESOLVE_EVENT_CHOICE` left outcomes unchanged, then passed with 13 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 51 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/16
+- User approved merging PR #16 on 2026-08-20.
+- PR #16 was marked ready and squash merged into `main`.
+- PR #16 squash merge commit: `2165922`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Showcase Slot Guard
+
+### Human Direction
+
+- Merge PR #16 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-showcase-slot-guard` from updated `main` after PR #16 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `UiGameEngine` tests proving showcase spins used structured RNG and stale structured slots could resolve after `START_SHOWCASE`.
+- Updated `UiGameEngine` so `START_SHOWCASE` clears adapter-owned structured slot state.
+- Updated showcase active `SPIN_COMBAT_SLOT` to delegate to the legacy presentation engine, preserving scripted forced results.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because showcase forced results were bypassed, then passed with 15 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 53 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/17
+- User approved merging PR #17 on 2026-08-20.
+- PR #17 was marked ready and squash merged into `main`.
+- PR #17 squash merge commit: `5d1a89b`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - Showcase UI Entry Overlay
+
+### Human Direction
+
+- Merge PR #17 and continue the next Showcase UI slice.
+- Keep React as display/input only.
+
+### Codex Work
+
+- Created `feature/showcase-ui-entry-overlay` from updated `main` after PR #17 merge.
+- Added `docs/superpowers/specs/2026-08-20-showcase-ui-entry-overlay-design.md`.
+- Added `docs/superpowers/plans/2026-08-20-showcase-ui-entry-overlay.md`.
+- Wrote failing `App` tests for title-screen Showcase entry and overlay step advancement.
+- Added a title-screen `Showcase Mode` button that dispatches `START_SHOWCASE`.
+- Rendered `ShowcaseOverlay` while `gameState.showcase.active` is true.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/App.test.tsx`: failed first because the Showcase button did not exist, then passed with 3 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 55 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/18
+- Merge policy: no merge without explicit user approval.

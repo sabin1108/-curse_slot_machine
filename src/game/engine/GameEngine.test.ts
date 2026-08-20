@@ -102,14 +102,29 @@ describe('GameEngine', () => {
         options: expect.arrayContaining([
           expect.objectContaining({ kind: 'augment', id: expect.any(String) }),
         ]),
+        augmentSlot: expect.objectContaining({
+          reels: [
+            expect.objectContaining({ id: 'primary-tag' }),
+            expect.objectContaining({ id: 'rarity' }),
+            expect.objectContaining({ id: 'reward-name' }),
+          ],
+          targetReward: expect.objectContaining({ id: expect.any(String) }),
+          isRevealed: false,
+        }),
       }),
     ])
+    const rewardState = engine.getState().rewards
+    expect(rewardState.augmentSlot?.targetReward).toEqual(rewardState.options[0])
     expect(engine.getState()).toMatchObject({
       phase: 'reward',
       rewards: {
         options: expect.arrayContaining([
           expect.objectContaining({ kind: 'augment', id: expect.any(String) }),
         ]),
+        augmentSlot: expect.objectContaining({
+          targetReward: expect.objectContaining({ id: expect.any(String) }),
+          isRevealed: false,
+        }),
       },
     })
 
@@ -134,6 +149,36 @@ describe('GameEngine', () => {
     expect(engine.getState().build[`${reward.kind}s`]).toContain(reward.id)
     expect(engine.getState().phase).toBe('battle')
     expect(engine.getState().rewards.options).toEqual([])
+    expect(engine.getState().rewards.augmentSlot).toBeNull()
+  })
+
+  it('passes completed build synergy effects into combat resolution', () => {
+    const engine = new GameEngine('combo-effects')
+
+    engine.dispatch({ type: 'START_RUN' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', reward: { kind: 'augment', id: 'combo_starter' } })
+    engine.dispatch({ type: 'CHOOSE_REWARD', reward: { kind: 'item', id: 'multi_hit_charm' } })
+    engine.dispatch({ type: 'CHOOSE_REWARD', reward: { kind: 'augment', id: 'combo_finisher' } })
+
+    const events = engine.dispatch({
+      type: 'RESOLVE_COMBAT_SLOT',
+      result: {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x1',
+      },
+    })
+
+    expect(engine.getState().combat.enemy.health).toBe(9)
+    expect(events).toEqual([
+      expect.objectContaining({
+        type: 'COMBAT_SLOT_RESOLVED',
+        combatEvents: expect.arrayContaining([
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 6 }),
+          expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 3 }),
+        ]),
+      }),
+    ])
   })
 })
 

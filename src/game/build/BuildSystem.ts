@@ -13,6 +13,7 @@ import type {
   SynergyState,
   SynergyTag,
 } from './BuildTypes'
+import type { EffectDefinition } from '../effects/EffectTypes'
 
 export function createBuildState(overrides: BuildStateOverrides = {}): BuildState {
   const rewards = {
@@ -53,7 +54,7 @@ export function evaluateSynergies(
       active.push({
         synergyId: synergy.id,
         name: synergy.name,
-        effectId: synergy.effectId,
+        effectId: synergy.effectId ?? '',
       })
     }
 
@@ -133,6 +134,21 @@ export function hasReward(build: Pick<BuildState, 'augments' | 'items'>, reward:
   return reward.kind === 'augment'
     ? build.augments.includes(reward.id)
     : build.items.includes(reward.id)
+}
+
+export function getActiveEffects(
+  build: Pick<BuildState, 'augments' | 'items'>,
+  catalog: BuildCatalog = DEFAULT_BUILD_CATALOG,
+): EffectDefinition[] {
+  const ownedRewardEffects = getOwnedRewardDefinitions(build, catalog).flatMap(
+    (reward) => reward.effects ?? [],
+  )
+  const synergies = evaluateSynergies(build, catalog)
+  const completedSynergyEffects = catalog.synergies
+    .filter((synergy) => synergies.completed.includes(synergy.id))
+    .flatMap((synergy) => synergy.effects ?? [])
+
+  return [...ownedRewardEffects, ...completedSynergyEffects]
 }
 
 function getRequirementProgress(
