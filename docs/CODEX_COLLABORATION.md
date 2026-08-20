@@ -525,5 +525,36 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/17
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/17
+- User approved merging PR #17 on 2026-08-20.
+- PR #17 was marked ready and squash merged into `main`.
+- PR #17 squash merge commit: `5d1a89b`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - Showcase UI Entry Overlay
+
+### Human Direction
+
+- Merge PR #17 and continue the next Showcase UI slice.
+- Keep React as display/input only.
+
+### Codex Work
+
+- Created `feature/showcase-ui-entry-overlay` from updated `main` after PR #17 merge.
+- Added `docs/superpowers/specs/2026-08-20-showcase-ui-entry-overlay-design.md`.
+- Added `docs/superpowers/plans/2026-08-20-showcase-ui-entry-overlay.md`.
+- Wrote failing `App` tests for title-screen Showcase entry and overlay step advancement.
+- Added a title-screen `Showcase Mode` button that dispatches `START_SHOWCASE`.
+- Rendered `ShowcaseOverlay` while `gameState.showcase.active` is true.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/App.test.tsx`: failed first because the Showcase button did not exist, then passed with 3 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 55 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/18
 - Merge policy: no merge without explicit user approval.

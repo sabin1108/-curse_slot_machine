@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-showcase-slot-guard`
-- Current PR: draft PR #17 - https://github.com/sabin1108/-curse_slot_machine/pull/17
+- Current branch: `feature/showcase-ui-entry-overlay`
+- Current PR: draft PR #18 - https://github.com/sabin1108/-curse_slot_machine/pull/18
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -17,6 +17,7 @@ Last updated: 2026-08-20
 - PR #14 status: merged into `main` with squash commit `d4ea1bd`.
 - PR #15 status: merged into `main` with squash commit `eae8337`.
 - PR #16 status: merged into `main` with squash commit `2165922`.
+- PR #17 status: merged into `main` with squash commit `5d1a89b`.
 
 ## Completed Branches
 
@@ -35,33 +36,36 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-node-type-routing` | #14 | `d4ea1bd` | Merged |
 | `feature/ui-adapter-event-node-entry` | #15 | `eae8337` | Merged |
 | `feature/ui-adapter-event-choice-command` | #16 | `2165922` | Merged |
+| `feature/ui-adapter-showcase-slot-guard` | #17 | `5d1a89b` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-showcase-slot-guard` is pushed and open as draft PR #17.
+`feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
 
 Implemented:
 
-- `START_SHOWCASE` now clears adapter-owned structured slot state and resets structured adapter internals.
-- Showcase active `SPIN_COMBAT_SLOT` delegates to the legacy presentation engine so scripted forced results remain authoritative.
-- Normal combat still uses the adapter-owned structured slot RNG path.
+- Title screen now exposes a user-facing Showcase Mode button.
+- The button dispatches the existing `START_SHOWCASE` command.
+- `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
+- Overlay next-step input continues through the existing `NEXT_SHOWCASE_STEP` command path.
 
 Current branch commits:
 
-- `16c54a3` - `fix: preserve showcase slot path in ui adapter`
+- `f3422ca` - `docs: plan showcase ui entry overlay`
+- `4846552` - `feat: wire showcase ui entry overlay`
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-showcase-slot-guard`:
+Latest verification on `feature/showcase-ui-entry-overlay`:
 
-- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because showcase spin used structured RNG and `START_SHOWCASE` leaked a stale structured slot, then passed with 15 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/app/App.test.tsx`: failed first because the Showcase Mode button did not exist, then passed with 3 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 53 tests across 10 files.
+- `npm.cmd run test:run`: passed, 55 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/engine/UiGameEngine.test.ts` failed first because showcase forced slot results were bypassed and stale structured slots could still resolve after `START_SHOWCASE`.
+- `src/app/App.test.tsx` failed first because title-screen Showcase entry and App-level overlay rendering were missing.
 
 ## Architecture Decisions Preserved
 
@@ -77,7 +81,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #17 draft until review and explicit merge approval.
-2. Continue Showcase UI entry/overlay wiring as a separate TDD slice.
+1. Keep PR #18 draft until review and explicit merge approval.
+2. Continue with a small UI/UX review or seed-based playable Showcase QA after this branch lands.
 
 Do not merge later PRs without explicit user approval.
