@@ -54,4 +54,4 @@ Expected: pass.
 - [x] Run `npm.cmd run typecheck`.
 - [x] Run `npm.cmd run test:run`.
 - [x] Run `npm.cmd run build`.
-- [ ] Commit and push the follow-up change to draft PR #10.
+- [x] Commit and push the follow-up change to draft PR #10.

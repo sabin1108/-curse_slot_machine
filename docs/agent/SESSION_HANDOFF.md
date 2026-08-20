@@ -117,9 +117,8 @@ Latest completed verification:
 
 ## Next Session Work
 
-1. Commit and push the verified structured slot spin/reroll follow-up to PR #10.
-2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
-3. Keep PR #10 draft until review and explicit human merge approval.
+1. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+2. Keep PR #10 draft until review and explicit human merge approval.
 3. Continue `feature/showcase-mode` after the effect pilot decision.
 
 ## Branch Log
@@ -194,9 +193,9 @@ Latest completed verification:
 - Branch: `feature/content-effect-schema-pilot`
 - Base: `main` after PR #8 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `d8f7b35` plus structured slot spin/reroll follow-up pending commit.
+- Commit: `b4532a3`.
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft).
 - Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, structured victory reward projection for the RewardModal contract, and pure combat slot spin/reroll routing.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Remaining issues: adapter coverage is narrow; reward candidate projection, structured slot spinning, map/shop/rest/showcase migration remain future slices.
+- Remaining issues: adapter coverage is narrow; map/shop/rest/showcase migration remain future slices.
 - Next branch candidate after PR: `feature/showcase-mode` or a legacy/pure engine integration adapter.

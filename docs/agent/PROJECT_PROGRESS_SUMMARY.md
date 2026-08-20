@@ -45,7 +45,7 @@ Current branch commits:
 
 - `5ba1851` - `feat: add bounded content effect pilot`
 - `a261089` - `feat: project structured rewards to ui adapter`
-- structured slot spin/reroll follow-up is pending verification/commit.
+- `b4532a3` - `feat: route ui slot spin through pure slot machine`
 
 ## Verification
 
@@ -78,8 +78,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Commit and push the verified structured slot spin/reroll follow-up to PR #10.
-2. Keep map/shop/rest/showcase migration as separate TDD slices.
-3. Keep PR #10 draft until human review/approval.
+1. Keep map/shop/rest/showcase migration as separate TDD slices.
+2. Keep PR #10 draft until human review/approval.
 
 Do not merge later PRs without explicit user approval.
