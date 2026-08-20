@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, and `feature/ui-adapter-showcase-slot-guard` are merged; current work is `feature/showcase-ui-entry-overlay`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, `feature/ui-adapter-showcase-slot-guard`, and `feature/showcase-ui-entry-overlay` are merged; current work is `review/showcase-playable-qa`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -31,7 +31,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
 - Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `feature/showcase-ui-entry-overlay`.
+- Current branch: `review/showcase-playable-qa`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/showcase-ui-entry-overlay`
+- Current branch: `review/showcase-playable-qa`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -65,7 +65,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
 | `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | `5d1a89b` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Merged |
-| `feature/showcase-ui-entry-overlay` | `4846552` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Draft |
+| `feature/showcase-ui-entry-overlay` | `fed924e` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Merged |
+| `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Draft |
 
 ## Verification Commands
 
@@ -149,6 +150,11 @@ Latest completed verification:
 - `feature/showcase-ui-entry-overlay`: `npm.cmd run typecheck` passed.
 - `feature/showcase-ui-entry-overlay`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
 - `feature/showcase-ui-entry-overlay`: `npm.cmd run build` passed.
+- `review/showcase-playable-qa`: `npm.cmd run test:e2e` passed with 1 Chromium smoke test.
+- `review/showcase-playable-qa`: Playwright browser QA at 1280x720 repeated the step 3 reward modal/overlay obstruction and confirmed reward-card click allows step 4 progression.
+- `review/showcase-playable-qa`: `npm.cmd run typecheck` passed.
+- `review/showcase-playable-qa`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
+- `review/showcase-playable-qa`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
@@ -160,15 +166,16 @@ Latest completed verification:
 - `feature/ui-adapter-event-node-entry` was merged through PR #15.
 - `feature/ui-adapter-event-choice-command` was merged through PR #16.
 - `feature/ui-adapter-showcase-slot-guard` was merged through PR #17.
-- `feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
+- `feature/showcase-ui-entry-overlay` was merged through PR #18.
+- `review/showcase-playable-qa` is pushed and open as draft PR #19.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Review PR #18 and merge only after explicit user approval.
-2. After this branch lands, run a focused playable Showcase QA pass before broad structured-engine replacement.
+1. Review PR #19 and merge only after explicit user approval.
+2. If findings are accepted, implement fixes in a separate TDD branch.
 
 ## Branch Log
 
@@ -351,4 +358,17 @@ Latest completed verification:
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/18
 - Implemented: title-screen `Showcase Mode` entry dispatches `START_SHOWCASE`, and `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Remaining issues: review PR #18; do not merge without explicit user approval.
+- Merge result: user approved merging PR #18 on 2026-08-20; PR #18 was marked ready and squash merged into `main`.
+- Squash merge commit: `fed924e`.
+- Remaining issues: focused playable Showcase QA remains a future slice.
+
+### review/showcase-playable-qa
+
+- Branch: `review/showcase-playable-qa`
+- Base: `main` after PR #18 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `d5c15f4`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/19
+- Implemented: review-only `docs/reviews/milestone-showcase-playable-qa/qa-review.md` plus screenshot/JSON evidence.
+- Verification: `npm.cmd run test:e2e`, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed; Playwright browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
+- Remaining issues: review PR #19; do not merge without explicit user approval. Findings remain proposed until accepted by a human.
