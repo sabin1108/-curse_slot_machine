@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/content-effect-schema-pilot`
-- Current PR: not opened yet
+- Current PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft)
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 
 ## Completed Branches
@@ -24,7 +24,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/content-effect-schema-pilot` is implemented locally and not yet pushed.
+`feature/content-effect-schema-pilot` is pushed and has draft PR #10 open.
 
 Implemented:
 
@@ -38,17 +38,19 @@ Implemented:
 - Pure `GameEngine` passes active build effects into combat resolution.
 - UI adapter `src/game/engine/UiGameEngine.ts` bridges structured reward/combat results into the current React-facing state contract for a narrow combo-effect path.
 - `src/app/App.tsx` now imports the UI adapter while unsupported UI commands continue to delegate to the legacy engine.
+- UI adapter now projects structured victory reward options and augment-slot presentation into `rewardCandidates` and `augSlotPresentation` for the current RewardModal contract.
 
 Current branch commits:
 
-- none yet; local changes are verified but uncommitted.
+- `5ba1851` - `feat: add bounded content effect pilot`
+- follow-up reward projection changes are verified and pending commit.
 
 ## Verification
 
 Latest verification on `feature/content-effect-schema-pilot`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 37 tests across 9 files.
+- `npm.cmd run test:run`: passed, 38 tests across 9 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
@@ -57,6 +59,7 @@ TDD evidence:
 - `src/game/combat/CombatSystem.test.ts` failed first because combat effects were ignored, then passed after implementation.
 - `src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed after integration.
 - `src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed after adding the adapter.
+- `src/game/engine/UiGameEngine.test.ts` failed first because victory reward projection left `rewardCandidates` empty, then passed after projection implementation.
 
 ## Architecture Decisions Preserved
 
@@ -72,8 +75,8 @@ TDD evidence:
 
 Next planned work:
 
-1. Commit and push `feature/content-effect-schema-pilot`, then open a draft PR if approved.
-2. Expand adapter coverage only where needed: reward candidate projection, structured slot spinning, and map/shop/rest migration should stay separate TDD slices.
+1. Finish verification, commit, and push the reward projection follow-up to PR #10.
+2. Expand adapter coverage only where needed: structured slot spinning and map/shop/rest migration should stay separate TDD slices.
 3. Continue with `feature/showcase-mode` after the effect pilot is reviewed.
 
 Do not merge later PRs without explicit user approval.

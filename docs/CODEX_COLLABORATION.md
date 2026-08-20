@@ -271,6 +271,8 @@
 - Used a read-only `explore` subagent to verify the UI/engine split before adapter work.
 - Wrote failing `UiGameEngine` adapter test before adding a UI-facing bridge to structured reward/combat effects.
 - Switched `App.tsx` to import the adapter after the existing App render test passed.
+- Created draft PR #10 after verification and pushed commit `5ba1851`.
+- Wrote a failing `UiGameEngine` reward projection test before projecting structured victory rewards into the legacy RewardModal state contract.
 
 ### Verification
 
@@ -278,6 +280,7 @@
 - `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts`: failed first because combat effects were ignored, then passed with 7 tests.
 - `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because active build effects were not passed into combat, then passed with 6 tests.
 - `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `UiGameEngine` did not exist, then passed with 1 test.
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because structured victory rewards left `rewardCandidates` empty, then passed with 2 tests after projection.
 - `npm.cmd run test:run -- src/app/App.test.tsx`: passed before and after the adapter import switch.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd run test:run`: passed, 37 tests across 9 files.

@@ -56,7 +56,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
 | `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
 | `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
-| `feature/content-effect-schema-pilot` | local only | not opened | Verified locally, not pushed |
+| `feature/content-effect-schema-pilot` | `5ba1851` plus pending follow-up | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Draft PR open |
 
 ## Verification Commands
 
@@ -101,20 +101,21 @@ Latest completed verification:
 - `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed with 6 tests after implementation.
 - `feature/content-effect-schema-pilot`: `npm.cmd run typecheck` passed.
 - `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed with 1 test after implementation.
+- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured victory rewards were not projected to UI `rewardCandidates`, then passed with 2 tests after implementation.
 - `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` passed before and after switching `App.tsx` to the adapter import.
-- `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 37 tests across 9 files.
+- `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 38 tests across 9 files.
 - `feature/content-effect-schema-pilot`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
-- `feature/content-effect-schema-pilot` is local only and not yet pushed or opened as a PR.
+- `feature/content-effect-schema-pilot` has draft PR #10 open.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. If approved, commit, push, and open a draft PR for `feature/content-effect-schema-pilot`.
+1. Commit and push the verified reward projection follow-up to PR #10.
 2. Expand adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
 3. Continue `feature/showcase-mode` after the effect pilot decision.
 
@@ -190,9 +191,9 @@ Latest completed verification:
 - Branch: `feature/content-effect-schema-pilot`
 - Base: `main` after PR #8 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
-- Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, and a narrow `UiGameEngine` adapter imported by React.
+- Commit: `5ba1851` plus reward projection follow-up pending commit.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft).
+- Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, and structured victory reward projection for the RewardModal contract.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: adapter coverage is narrow; reward candidate projection, structured slot spinning, map/shop/rest/showcase migration remain future slices.
 - Next branch candidate after PR: `feature/showcase-mode` or a legacy/pure engine integration adapter.

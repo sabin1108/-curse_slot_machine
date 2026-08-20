@@ -2,6 +2,7 @@ import type { GameCommand as UiGameCommand, GameState as UiGameState, AugmentIte
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
 import type { BuildRewardDefinition, SynergyDefinition, SynergyTag } from '../build/BuildTypes'
+import type { RewardOption } from '../build/RewardSystem'
 import type { CombatEvent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import { GameEngine as StructuredGameEngine } from './GameEngine'
@@ -97,6 +98,7 @@ export class GameEngine {
     this.presentation.currentResult = null
     this.presentation.lockedReels.clear()
     this.projectStructuredBuild()
+    this.projectStructuredRewards()
     this.appendCombatLogs(events)
   }
 
@@ -109,6 +111,19 @@ export class GameEngine {
       activeSynergies: build.synergies.active.map((synergy) => synergy.name),
       synergyProgress: DEFAULT_BUILD_CATALOG.synergies.map((synergy) => toUiSynergyProgress(synergy)),
     }
+  }
+
+  private projectStructuredRewards(): void {
+    const rewards = this.structured.getState().rewards
+
+    this.presentation.rewardCandidates = rewards.options.map(toUiReward)
+    this.presentation.augSlotPresentation = rewards.augmentSlot
+      ? {
+          reels: rewards.augmentSlot.reels.map((reel) => reel.label) as [string, string, string],
+          targetAugment: toUiReward(rewards.augmentSlot.targetReward),
+          isRevealed: rewards.augmentSlot.isRevealed,
+        }
+      : null
   }
 
   private appendCombatLogs(events: GameEvent[]): void {
@@ -173,6 +188,18 @@ function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
     description: reward.description,
     icon: '◆',
     effectValue: reward.effectId ?? reward.effects?.[0]?.id ?? 'EFFECT',
+  }
+}
+
+function toUiReward(reward: RewardOption): AugmentItem {
+  return {
+    id: reward.id,
+    name: reward.name,
+    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    tags: reward.tags,
+    description: reward.description,
+    icon: reward.kind === 'item' ? '◇' : '◆',
+    effectValue: `score ${reward.score.total}`,
   }
 }
 
