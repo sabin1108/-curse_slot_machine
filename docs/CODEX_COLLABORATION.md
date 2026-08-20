@@ -556,5 +556,104 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/18
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/18
+- User approved merging PR #18 on 2026-08-20.
+- PR #18 was marked ready and squash merged into `main`.
+- PR #18 squash merge commit: `fed924e`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - Showcase Playable QA
+
+### Human Direction
+
+- Merge PR #18 and continue the next work.
+- Run focused Showcase playable QA before broad structured-engine replacement.
+
+### Codex Work
+
+- Created `review/showcase-playable-qa` from updated `main` after PR #18 merge.
+- Read `DESIGN.md`, `docs/design/PLANNING_SUMMARY.md`, and `docs/reviews/README.md`.
+- Ran existing Playwright smoke test.
+- Captured Showcase browser evidence at 1280x720 under `docs/reviews/milestone-showcase-playable-qa/evidence/`.
+- Wrote `docs/reviews/milestone-showcase-playable-qa/qa-review.md`.
+
+### Findings
+
+- `SHOWCASE-QA-001`: step 3 reward modal makes the visible overlay `NEXT STEP` button non-actionable until a reward is selected.
+- `SHOWCASE-QA-002`: reward choices are clickable divs rather than semantic buttons.
+- `SHOWCASE-QA-003`: step counter and title can visually run together.
+- `SHOWCASE-QA-004`: Google Fonts request fails in network-restricted review.
+
+### Verification
+
+- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
+- Browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 55 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/19
+- Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - Showcase Reward Modal Accessibility
+
+### Human Direction
+
+- User approved merging PR #19 and continuing with the accepted QA fixes.
+- Keep the fix small, TDD-protected, and limited to React display/input behavior.
+
+### Codex Work
+
+- Merged PR #19 after approval; squash merge commit on `main`: `f1145c6`.
+- Created `feature/showcase-reward-modal-accessibility` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-showcase-reward-modal-accessibility.md`.
+- Wrote failing App tests for `SHOWCASE-QA-001` and `SHOWCASE-QA-002`.
+- Updated `App` so `ShowcaseOverlay` is not rendered while the reward modal owns input on `REWARD`.
+- Updated `RewardModal` so reward cards are semantic `button type="button"` controls with accessible reward-name labels.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/App.test.tsx`: failed first for each accepted QA issue, then passed with 5 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 57 tests across 10 files.
+- `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
+- Focused Playwright browser check passed: reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/20
+- Head commit: `428b1ca`.
+- Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - Showcase Step Header Spacing
+
+### Human Direction
+
+- User approved merging PR #20 and continuing with the next accepted Showcase QA polish slice.
+- Keep the fix scoped to `SHOWCASE-QA-003`.
+
+### Codex Work
+
+- Merged PR #20 after approval; squash merge commit on `main`: `61744f1`.
+- Created `feature/showcase-step-header-spacing` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-showcase-step-header-spacing.md`.
+- Wrote a failing `ShowcaseOverlay` component test for dedicated step heading separation.
+- Updated `ShowcaseOverlay` to render separate `.step-num`, `.step-separator`, and `.step-title` elements.
+- Added CSS spacing/wrapping hooks so the step counter and Korean title do not visually run together.
+
+### Verification
+
+- `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx`: failed first because `.showcase-step-heading` did not exist, then passed after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 58 tests across 11 files.
+- `npm.cmd run build`: passed.
+- Focused Playwright browser check passed: step 4 heading visible, separator renders `•`, computed heading gap is `10px`.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/21
+- Head commit: `8ba4287`.
 - Merge policy: no merge without explicit user approval.

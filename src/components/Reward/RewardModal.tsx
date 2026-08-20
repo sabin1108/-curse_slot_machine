@@ -34,11 +34,10 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
       <div className="reward-modal-content">
         <div className="reward-header">
           <span className="reward-badge">VICTORY REWARD</span>
-          <h2>전투 승리 보상: 증강 카드 선택</h2>
-          <p>획득할 증강 카드를 선택하세요 (AugmentSlotMachine 연출)</p>
+          <h2>?꾪닾 ?밸━ 蹂댁긽: 利앷컯 移대뱶 ?좏깮</h2>
+          <p>?띾뱷??利앷컯 移대뱶瑜??좏깮?섏꽭??(AugmentSlotMachine ?곗텧)</p>
         </div>
 
-        {/* AugmentSlotMachine Presentation View */}
         {augSlotPresentation && (
           <div className="aug-slot-presentation-box">
             <div className="aug-slot-topper">AUGMENT REVEAL SLOT</div>
@@ -50,7 +49,6 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
           </div>
         )}
 
-        {/* 3 Pixel Art Cards Choice */}
         <div className="reward-card-grid">
           {candidates.map((aug) => {
             const isSelected = selectedAug?.id === aug.id;
@@ -59,9 +57,10 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
                 key={aug.id}
                 className={`reward-card-pixel ${isSelected ? 'selected' : ''}`}
                 style={{ backgroundImage: `url(${getCardFrame(aug.rarity)})` }}
-                onClick={() => handleSelectReward(aug)}
                 type="button"
+                aria-label={`${aug.name} 선택`}
                 aria-pressed={isSelected}
+                onClick={() => handleSelectReward(aug)}
               >
                 <div className="card-pixel-rarity">{aug.rarity}</div>
                 <img className="card-pixel-icon" src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />

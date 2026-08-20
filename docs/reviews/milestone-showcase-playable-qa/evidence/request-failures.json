@@ -1,0 +1,10 @@
+{
+  "commit": "fed924e",
+  "viewport": "1280x720",
+  "failedRequests": [
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Jua&display=swap",
+      "failure": "net::ERR_NETWORK_ACCESS_DENIED"
+    }
+  ]
+}

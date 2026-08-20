@@ -1358,6 +1358,11 @@ html, body {
 }
 
 .reward-card-pixel {
+  appearance: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
   width: 200px;
   height: 270px;
   border: 0;
@@ -1540,6 +1545,30 @@ html, body {
   color: #fff;
 }
 
+.showcase-step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.showcase-step-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.step-separator {
+  color: #ffb703;
+  font-weight: bold;
+}
+
+.step-title {
+  color: #fff0d0;
+  min-width: 0;
+}
+
 @media (max-width: 860px) {
   .showcase-overlay-bar {
     position: relative;
@@ -1551,10 +1580,8 @@ html, body {
     grid-template-columns: 1fr;
   }
 
-  .showcase-step-info .step-num,
   .highlight-callout {
     grid-column: 1;
-    grid-row: auto;
   }
 
   .showcase-actions {

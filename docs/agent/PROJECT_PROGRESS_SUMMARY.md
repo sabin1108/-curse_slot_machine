@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/showcase-ui-entry-overlay`
-- Current PR: draft PR #18 - https://github.com/sabin1108/-curse_slot_machine/pull/18
+- Current branch: `feature/showcase-step-header-spacing`
+- Current PR: draft PR #21 - https://github.com/sabin1108/-curse_slot_machine/pull/21
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -18,6 +18,9 @@ Last updated: 2026-08-20
 - PR #15 status: merged into `main` with squash commit `eae8337`.
 - PR #16 status: merged into `main` with squash commit `2165922`.
 - PR #17 status: merged into `main` with squash commit `5d1a89b`.
+- PR #18 status: merged into `main` with squash commit `fed924e`.
+- PR #19 status: merged into `main` with squash commit `f1145c6`.
+- PR #20 status: merged into `main` with squash commit `61744f1`.
 
 ## Completed Branches
 
@@ -37,35 +40,38 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-event-node-entry` | #15 | `eae8337` | Merged |
 | `feature/ui-adapter-event-choice-command` | #16 | `2165922` | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | #17 | `5d1a89b` | Merged |
+| `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
+| `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
+| `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
 
 ## Current Branch
 
-`feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
+`feature/showcase-step-header-spacing` is pushed and open as draft PR #21.
 
 Implemented:
 
-- Title screen now exposes a user-facing Showcase Mode button.
-- The button dispatches the existing `START_SHOWCASE` command.
-- `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
-- Overlay next-step input continues through the existing `NEXT_SHOWCASE_STEP` command path.
+- `ShowcaseOverlay` separates the step counter, separator, and Korean step title into dedicated DOM elements.
+- `src/styles.css` adds spacing hooks so `STEP 4 / 4` cannot visually run into the title.
+- Focused component regression coverage now protects `SHOWCASE-QA-003`.
 
 Current branch commits:
 
-- `f3422ca` - `docs: plan showcase ui entry overlay`
-- `4846552` - `feat: wire showcase ui entry overlay`
+- `f758f60` - `docs: plan showcase step header spacing`
+- `8ba4287` - `fix: separate showcase step heading`
 
 ## Verification
 
-Latest verification on `feature/showcase-ui-entry-overlay`:
+Latest verification on `feature/showcase-step-header-spacing`:
 
-- Targeted `npm.cmd run test:run -- src/app/App.test.tsx`: failed first because the Showcase Mode button did not exist, then passed with 3 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 55 tests across 10 files.
+- `npm.cmd run test:run`: passed, 58 tests across 11 files.
 - `npm.cmd run build`: passed.
+- Focused Playwright browser check: passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
 
 TDD evidence:
 
-- `src/app/App.test.tsx` failed first because title-screen Showcase entry and App-level overlay rendering were missing.
+- RED: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` failed because `.showcase-step-heading` did not exist.
+- GREEN: `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` passed after adding the dedicated heading/separator/title structure.
 
 ## Architecture Decisions Preserved
 
@@ -81,7 +87,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #18 draft until review and explicit merge approval.
-2. Continue with a small UI/UX review or seed-based playable Showcase QA after this branch lands.
+1. Keep PR #21 draft until review and explicit merge approval.
+2. Next recommended slice after PR #21: address `SHOWCASE-QA-004` font fallback/network noise or continue structured-engine UI migration.
 
 Do not merge later PRs without explicit user approval.

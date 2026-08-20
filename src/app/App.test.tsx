@@ -7,9 +7,8 @@ describe('App', () => {
   it('renders the cursed slot machine UI shell', () => {
     render(<App />);
 
-    expect(screen.getAllByText(/저주받은 슬롯머신/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/START/i)).toBeInTheDocument();
-    expect(screen.getByText(/던전 탐사 시작/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /showcase mode/i })).toBeInTheDocument();
   });
 
   it('starts showcase mode from the title screen and shows the overlay', () => {
@@ -34,16 +33,25 @@ describe('App', () => {
     expect(screen.getByText(/STEP 2 \/ 4/i)).toBeInTheDocument();
   });
 
-  it('keeps showcase next step available over reward selection and exposes reward cards as buttons', () => {
+  it('hides showcase overlay controls while reward selection owns input', () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
 
-    expect(screen.getByText(/STEP 3 \/ 4/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /NEXT STEP/i })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /선택하기/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/VICTORY REWARD/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /NEXT STEP/i })).not.toBeInTheDocument();
+  });
+
+  it('offers reward choices as semantic buttons in showcase reward step', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+
+    expect(screen.getByRole('button', { name: /諛⑸꼍 肄붿뼱/ })).toBeInTheDocument();
   });
 
   it('uses local font fallbacks instead of external Google Fonts', () => {

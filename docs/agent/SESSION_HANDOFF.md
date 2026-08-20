@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, and `feature/ui-adapter-showcase-slot-guard` are merged; current work is `feature/showcase-ui-entry-overlay`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, `feature/ui-adapter-showcase-slot-guard`, `feature/showcase-ui-entry-overlay`, `review/showcase-playable-qa`, and `feature/showcase-reward-modal-accessibility` are merged; current work is `feature/showcase-step-header-spacing`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -31,7 +31,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
 - Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `feature/showcase-ui-entry-overlay`.
+- Current branch: `feature/showcase-step-header-spacing`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/showcase-ui-entry-overlay`
+- Current branch: `feature/showcase-step-header-spacing`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -65,7 +65,10 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
 | `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | `5d1a89b` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Merged |
-| `feature/showcase-ui-entry-overlay` | `4846552` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Draft |
+| `feature/showcase-ui-entry-overlay` | `fed924e` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Merged |
+| `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Merged |
+| `feature/showcase-reward-modal-accessibility` | `428b1ca` | https://github.com/sabin1108/-curse_slot_machine/pull/20 | Merged |
+| `feature/showcase-step-header-spacing` | `8ba4287` | https://github.com/sabin1108/-curse_slot_machine/pull/21 | Draft |
 
 ## Verification Commands
 
@@ -149,6 +152,23 @@ Latest completed verification:
 - `feature/showcase-ui-entry-overlay`: `npm.cmd run typecheck` passed.
 - `feature/showcase-ui-entry-overlay`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
 - `feature/showcase-ui-entry-overlay`: `npm.cmd run build` passed.
+- `review/showcase-playable-qa`: `npm.cmd run test:e2e` passed with 1 Chromium smoke test.
+- `review/showcase-playable-qa`: Playwright browser QA at 1280x720 repeated the step 3 reward modal/overlay obstruction and confirmed reward-card click allows step 4 progression.
+- `review/showcase-playable-qa`: `npm.cmd run typecheck` passed.
+- `review/showcase-playable-qa`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
+- `review/showcase-playable-qa`: `npm.cmd run build` passed.
+- `feature/showcase-reward-modal-accessibility`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because `NEXT STEP` remained rendered behind the reward modal, then passed after hiding the Showcase overlay on `REWARD`.
+- `feature/showcase-reward-modal-accessibility`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because reward cards were clickable `div`s, then passed after converting reward cards to semantic buttons.
+- `feature/showcase-reward-modal-accessibility`: `npm.cmd run typecheck` passed.
+- `feature/showcase-reward-modal-accessibility`: full `npm.cmd run test:run` passed with 57 tests across 10 files.
+- `feature/showcase-reward-modal-accessibility`: `npm.cmd run build` passed.
+- `feature/showcase-reward-modal-accessibility`: `npm.cmd run test:e2e` passed with 1 Chromium smoke test.
+- `feature/showcase-reward-modal-accessibility`: focused Playwright browser check passed; reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
+- `feature/showcase-step-header-spacing`: targeted `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` failed first because `.showcase-step-heading` did not exist, then passed after separating the counter/title structure.
+- `feature/showcase-step-header-spacing`: `npm.cmd run typecheck` passed.
+- `feature/showcase-step-header-spacing`: full `npm.cmd run test:run` passed with 58 tests across 11 files.
+- `feature/showcase-step-header-spacing`: `npm.cmd run build` passed.
+- `feature/showcase-step-header-spacing`: focused Playwright browser check passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
 
 ## Remaining Problems
 
@@ -160,15 +180,18 @@ Latest completed verification:
 - `feature/ui-adapter-event-node-entry` was merged through PR #15.
 - `feature/ui-adapter-event-choice-command` was merged through PR #16.
 - `feature/ui-adapter-showcase-slot-guard` was merged through PR #17.
-- `feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
+- `feature/showcase-ui-entry-overlay` was merged through PR #18.
+- `review/showcase-playable-qa` was merged through PR #19.
+- `feature/showcase-reward-modal-accessibility` was merged through PR #20.
+- `feature/showcase-step-header-spacing` is pushed and open as draft PR #21.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Review PR #18 and merge only after explicit user approval.
-2. After this branch lands, run a focused playable Showcase QA pass before broad structured-engine replacement.
+1. Review PR #21 and merge only after explicit user approval.
+2. Next recommended slice: address `SHOWCASE-QA-004` font fallback/network noise or continue structured-engine UI migration.
 
 ## Branch Log
 
@@ -351,4 +374,43 @@ Latest completed verification:
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/18
 - Implemented: title-screen `Showcase Mode` entry dispatches `START_SHOWCASE`, and `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Remaining issues: review PR #18; do not merge without explicit user approval.
+- Merge result: user approved merging PR #18 on 2026-08-20; PR #18 was marked ready and squash merged into `main`.
+- Squash merge commit: `fed924e`.
+- Remaining issues: focused playable Showcase QA remains a future slice.
+
+### review/showcase-playable-qa
+
+- Branch: `review/showcase-playable-qa`
+- Base: `main` after PR #18 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `d5c15f4`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/19
+- Implemented: review-only `docs/reviews/milestone-showcase-playable-qa/qa-review.md` plus screenshot/JSON evidence.
+- Verification: `npm.cmd run test:e2e`, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed; Playwright browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
+- Merge result: user approved merging PR #19 on 2026-08-20; PR #19 was marked ready and squash merged into `main`.
+- Squash merge commit: `f1145c6`.
+- Remaining issues: `SHOWCASE-QA-001` and `SHOWCASE-QA-002` accepted and implemented in PR #20; `SHOWCASE-QA-003` and `SHOWCASE-QA-004` remain lower-priority polish/infrastructure findings.
+
+### feature/showcase-reward-modal-accessibility
+
+- Branch: `feature/showcase-reward-modal-accessibility`
+- Base: `main` after PR #19 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `428b1ca`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/20
+- Implemented: `App` hides `ShowcaseOverlay` while the reward modal owns input, and `RewardModal` exposes reward cards as semantic `button type="button"` controls with accessible reward-name labels.
+- Verification: targeted RED/GREEN App tests, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, `npm.cmd run test:e2e`, and focused Playwright browser check passed on 2026-08-20.
+- Merge result: user approved merging PR #20 on 2026-08-20; PR #20 was marked ready and squash merged into `main`.
+- Squash merge commit: `61744f1`.
+- Remaining issues: `SHOWCASE-QA-003` accepted and implemented in PR #21; `SHOWCASE-QA-004` remains lower-priority infrastructure/noise.
+
+### feature/showcase-step-header-spacing
+
+- Branch: `feature/showcase-step-header-spacing`
+- Base: `main` after PR #20 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `8ba4287`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/21
+- Implemented: `ShowcaseOverlay` renders a dedicated `.showcase-step-heading` with separated `.step-num`, `.step-separator`, and `.step-title`; CSS adds wrapping and spacing hooks.
+- Verification: targeted RED/GREEN component test, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, and focused Playwright browser check passed on 2026-08-20.
+- Remaining issues: draft PR #21; do not merge without explicit user approval.
