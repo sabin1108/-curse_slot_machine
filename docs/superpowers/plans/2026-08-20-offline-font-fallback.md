@@ -28,7 +28,7 @@
 - Consumes: source CSS and `index.html` as browser-loaded assets.
 - Produces: no externally hosted Google Fonts URLs in app-owned browser assets.
 
-- [ ] **Step 1: Write the failing policy test**
+- [x] **Step 1: Write the failing policy test**
 
 Create `src/app/OfflineAssetPolicy.test.ts`:
 
@@ -51,13 +51,13 @@ describe('offline browser asset policy', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts`
 
 Expected: FAIL because `src/styles.css` imports `https://fonts.googleapis.com/css2?family=Jua&display=swap`.
 
-- [ ] **Step 3: Implement minimal CSS fallback**
+- [x] **Step 3: Implement minimal CSS fallback**
 
 In `src/styles.css`:
 
@@ -72,13 +72,13 @@ In `src/styles.css`:
 
 - Replace `font-family: 'Jua', sans-serif;` with `font-family: var(--font-display);`.
 
-- [ ] **Step 4: Run targeted GREEN**
+- [x] **Step 4: Run targeted GREEN**
 
 Run: `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 5: Full verification**
+- [x] **Step 5: Full verification**
 
 Run:
 
@@ -90,11 +90,13 @@ npm.cmd run build
 
 Expected: all pass.
 
-- [ ] **Step 6: Focused browser check**
+- [x] **Step 6: Focused browser check**
 
 Run a local browser check and collect failed request URLs while loading the title screen.
 
 Expected: no failed request URL contains `fonts.googleapis.com` or `fonts.gstatic.com`.
+
+Actual: focused Playwright browser check loaded the title screen with `failedCount: 0` and `fontFailures: []`.
 
 - [ ] **Step 7: Update docs, commit, push, and open draft PR**
 
