@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `review/showcase-playable-qa`
-- Current PR: pending draft PR creation
+- Current PR: draft PR #19 - https://github.com/sabin1108/-curse_slot_machine/pull/19
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -42,7 +42,7 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`review/showcase-playable-qa` is local and contains review-only artifacts; draft PR creation is pending.
+`review/showcase-playable-qa` is pushed and open as draft PR #19.
 
 Implemented:
 
@@ -52,7 +52,7 @@ Implemented:
 
 Current branch commits:
 
-- none yet; review artifacts are pending commit/push/PR.
+- `d5c15f4` - `docs: add showcase playable qa review`
 
 ## Verification
 
@@ -83,7 +83,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Commit, push, and open a draft PR for `review/showcase-playable-qa`.
+1. Keep PR #19 draft until review and explicit merge approval.
 2. If findings are accepted, implement fixes in a separate TDD branch.
 
 Do not merge later PRs without explicit user approval.

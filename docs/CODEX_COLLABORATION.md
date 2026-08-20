@@ -594,5 +594,5 @@
 
 ### GitHub
 
-- Draft PR pending creation for `review/showcase-playable-qa`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/19
 - Merge policy: no merge without explicit user approval.

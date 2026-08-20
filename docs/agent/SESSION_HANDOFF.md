@@ -66,7 +66,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | `5d1a89b` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Merged |
 | `feature/showcase-ui-entry-overlay` | `fed924e` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Merged |
-| `review/showcase-playable-qa` | local review artifacts | not opened | In progress |
+| `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Draft |
 
 ## Verification Commands
 
@@ -167,14 +167,14 @@ Latest completed verification:
 - `feature/ui-adapter-event-choice-command` was merged through PR #16.
 - `feature/ui-adapter-showcase-slot-guard` was merged through PR #17.
 - `feature/showcase-ui-entry-overlay` was merged through PR #18.
-- `review/showcase-playable-qa` is local and review-only; draft PR creation is pending.
+- `review/showcase-playable-qa` is pushed and open as draft PR #19.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for the review artifacts.
+1. Review PR #19 and merge only after explicit user approval.
 2. If findings are accepted, implement fixes in a separate TDD branch.
 
 ## Branch Log
@@ -367,8 +367,8 @@ Latest completed verification:
 - Branch: `review/showcase-playable-qa`
 - Base: `main` after PR #18 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local review artifacts only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `d5c15f4`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/19
 - Implemented: review-only `docs/reviews/milestone-showcase-playable-qa/qa-review.md` plus screenshot/JSON evidence.
 - Verification: `npm.cmd run test:e2e`, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed; Playwright browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
-- Remaining issues: commit, push, and draft PR creation are pending.
+- Remaining issues: review PR #19; do not merge without explicit user approval. Findings remain proposed until accepted by a human.
