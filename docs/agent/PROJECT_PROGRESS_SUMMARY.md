@@ -22,7 +22,7 @@ Last updated: 2026-08-20
 - PR #19 status: merged into `main` with squash commit `f1145c6`.
 - PR #20 status: merged into `main` with squash commit `61744f1`.
 - PR #21 status: merged into `main` with squash commit `605b62d`.
-- PR #22 status: open draft PR for `feature/offline-font-fallback` - https://github.com/sabin1108/-curse_slot_machine/pull/22.
+- PR #22 status: merged into `main` with squash commit `00a810c`.
 
 ## Completed Branches
 
@@ -46,14 +46,15 @@ Last updated: 2026-08-20
 | `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
 | `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
 | `feature/showcase-step-header-spacing` | #21 | `605b62d` | Merged |
+| `feature/offline-font-fallback` | #22 | `00a810c` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-synergy-progress` is pushed and open as draft PR #23.
+`feature/ui-adapter-synergy-progress` is open as draft PR #23.
 
 Implemented:
 
-- `UiGameEngine` now projects real structured `BuildState.synergies.progress` values into the legacy UI build panel state.
+- `UiGameEngine` projects real structured `BuildState.synergies.progress` values into the legacy UI build panel state.
 - `toUiSynergyProgress` accepts structured progress while preserving catalog-derived fallback values.
 - React remains display/input only; synergy calculation stays in the pure TypeScript build system.
 
@@ -61,6 +62,7 @@ Current branch commits:
 
 - `4742591` - `docs: plan ui synergy progress projection`
 - `4d44cda` - `fix: project structured synergy progress`
+- `b0811e6` - `docs: update ui synergy progress pr handoff`
 
 ## Verification
 
@@ -89,8 +91,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #22 draft/open until explicit merge approval.
-2. Keep PR #23 draft/open until explicit merge approval.
-3. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
+1. Finish merging PR #23 after conflict resolution and verification.
+2. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
 
 Do not merge later PRs without explicit user approval.

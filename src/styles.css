@@ -1,8 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
-
 * {
   box-sizing: border-box;
   image-rendering: pixelated;
+}
+
+:root {
+  --font-display: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
 }
 
 html, body {
@@ -12,7 +14,7 @@ html, body {
   min-height: 100vh;
   background: #08070c;
   color: #eee;
-  font-family: 'Jua', sans-serif;
+  font-family: var(--font-display);
 }
 
 #root {
@@ -76,7 +78,7 @@ html, body {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ccc;
-  font-family: 'Jua', sans-serif;
+  font-family: var(--font-display);
   font-size: 13px;
   padding: 6px 16px;
   border-radius: 6px;
@@ -258,7 +260,7 @@ html, body {
   border: 2px solid #3a1c00;
   border-radius: 6px;
   color: #3a1c00;
-  font-family: 'Jua', sans-serif;
+  font-family: var(--font-display);
   font-size: 16px;
   padding: 10px 36px;
   cursor: pointer;

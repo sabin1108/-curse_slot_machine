@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. Branches through `feature/showcase-step-header-spacing` are merged; `feature/offline-font-fallback` is open as draft PR #22; `feature/ui-adapter-synergy-progress` is open as draft PR #23. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. Branches through `feature/offline-font-fallback` are merged; `feature/ui-adapter-synergy-progress` is open as draft PR #23. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -69,7 +69,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Merged |
 | `feature/showcase-reward-modal-accessibility` | `428b1ca` | https://github.com/sabin1108/-curse_slot_machine/pull/20 | Merged |
 | `feature/showcase-step-header-spacing` | `605b62d` | https://github.com/sabin1108/-curse_slot_machine/pull/21 | Merged |
-| `feature/offline-font-fallback` | `51822c8` | https://github.com/sabin1108/-curse_slot_machine/pull/22 | Draft |
+| `feature/offline-font-fallback` | `00a810c` | https://github.com/sabin1108/-curse_slot_machine/pull/22 | Merged |
 | `feature/ui-adapter-synergy-progress` | `4d44cda` | https://github.com/sabin1108/-curse_slot_machine/pull/23 | Draft |
 
 ## Verification Commands
@@ -189,7 +189,7 @@ Latest completed verification:
 - `feature/showcase-ui-entry-overlay` was merged through PR #18.
 - `review/showcase-playable-qa` was merged through PR #19.
 - `feature/showcase-reward-modal-accessibility` was merged through PR #20.
-- `feature/offline-font-fallback` is pushed and open as draft PR #22.
+- `feature/offline-font-fallback` was merged through PR #22.
 - `feature/ui-adapter-synergy-progress` is pushed and open as draft PR #23.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
@@ -197,8 +197,8 @@ Latest completed verification:
 
 ## Next Session Work
 
-1. Review PR #21 and merge only after explicit user approval.
-2. Next recommended slice: address `SHOWCASE-QA-004` font fallback/network noise or continue structured-engine UI migration.
+1. Review PR #22 and merge only after explicit user approval.
+2. Next recommended slice: continue structured-engine UI migration.
 
 ## Branch Log
 
@@ -429,16 +429,17 @@ Latest completed verification:
 - Branch: `feature/offline-font-fallback`
 - Base: `main` after PR #21 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `51822c8`
+- Commit: `00a810c`
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/22
 - Implemented: removed the external Google Fonts import, added an offline-safe Korean/system display font stack, and added an offline asset policy regression test.
 - Verification: targeted RED/GREEN offline asset policy test, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, and a focused browser network check passed on 2026-08-20.
-- Remaining issues: draft PR #22; do not merge without explicit user approval.
+- Merge result: user approved merging PR #22 on 2026-08-20; PR #22 was marked ready and squash merged into `main`.
+- Squash merge commit: `00a810c`.
 
 ### feature/ui-adapter-synergy-progress
 
 - Branch: `feature/ui-adapter-synergy-progress`
-- Base: `main` after PR #21 merge.
+- Base: `main` after PR #22 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Commit: `4d44cda`
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/23
