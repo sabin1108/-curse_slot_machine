@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `review/showcase-playable-qa`
-- Current PR: draft PR #19 - https://github.com/sabin1108/-curse_slot_machine/pull/19
+- Current branch: `feature/showcase-reward-modal-accessibility`
+- Current PR: draft PR #20 - https://github.com/sabin1108/-curse_slot_machine/pull/20
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -19,6 +19,7 @@ Last updated: 2026-08-20
 - PR #16 status: merged into `main` with squash commit `2165922`.
 - PR #17 status: merged into `main` with squash commit `5d1a89b`.
 - PR #18 status: merged into `main` with squash commit `fed924e`.
+- PR #19 status: merged into `main` with squash commit `f1145c6`.
 
 ## Completed Branches
 
@@ -39,35 +40,38 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-event-choice-command` | #16 | `2165922` | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | #17 | `5d1a89b` | Merged |
 | `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
+| `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
 
 ## Current Branch
 
-`review/showcase-playable-qa` is pushed and open as draft PR #19.
+`feature/showcase-reward-modal-accessibility` is pushed and open as draft PR #20.
 
 Implemented:
 
-- Showcase playable QA review artifact under `docs/reviews/milestone-showcase-playable-qa/`.
-- Screenshot and JSON evidence for title entry, overlay steps, reward modal obstruction, reward selection, step 4 battle presentation, and failed external font request.
-- Review findings only; no production source code changed on this branch.
+- `App` hides `ShowcaseOverlay` while `gameState.screen === 'REWARD'`, so the visible `NEXT STEP` CTA is not blocked by the reward modal backdrop.
+- `RewardModal` exposes each reward choice as a real `button type="button"` with an accessible reward-name label.
+- App-level regression tests cover accepted QA findings `SHOWCASE-QA-001` and `SHOWCASE-QA-002`.
 
 Current branch commits:
 
-- `d5c15f4` - `docs: add showcase playable qa review`
+- `8217da6` - `docs: plan showcase reward accessibility fixes`
+- `428b1ca` - `fix: improve showcase reward accessibility`
 
 ## Verification
 
-Latest verification on `review/showcase-playable-qa`:
+Latest verification on `feature/showcase-reward-modal-accessibility`:
 
-- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
-- Browser QA at 1280x720 repeated the step 3 modal/overlay obstruction.
-- Browser QA confirmed reward-card click allows progression to step 4 battle.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 55 tests across 10 files.
+- `npm.cmd run test:run`: passed, 57 tests across 10 files.
 - `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
+- Focused Playwright browser check: passed; reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
 
 TDD evidence:
 
-- Not applicable; this is a review-only branch with no production implementation.
+- RED: `npm.cmd run test:run -- src/app/App.test.tsx` failed while `NEXT STEP` remained rendered behind the reward modal.
+- RED: `npm.cmd run test:run -- src/app/App.test.tsx` failed because reward cards were clickable `div`s, not semantic buttons.
+- GREEN: `npm.cmd run test:run -- src/app/App.test.tsx` passed with 5 App tests after implementation.
 
 ## Architecture Decisions Preserved
 
@@ -83,7 +87,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #19 draft until review and explicit merge approval.
-2. If findings are accepted, implement fixes in a separate TDD branch.
+1. Keep PR #20 draft until review and explicit merge approval.
+2. Next recommended slice: fix low-risk Showcase polish finding `SHOWCASE-QA-003` or continue structured-engine UI migration.
 
 Do not merge later PRs without explicit user approval.

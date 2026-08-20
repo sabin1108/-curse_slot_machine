@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, `feature/ui-adapter-showcase-slot-guard`, and `feature/showcase-ui-entry-overlay` are merged; current work is `review/showcase-playable-qa`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, `feature/ui-adapter-showcase-slot-guard`, `feature/showcase-ui-entry-overlay`, and `review/showcase-playable-qa` are merged; current work is `feature/showcase-reward-modal-accessibility`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -31,7 +31,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
 - Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `review/showcase-playable-qa`.
+- Current branch: `feature/showcase-reward-modal-accessibility`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `review/showcase-playable-qa`
+- Current branch: `feature/showcase-reward-modal-accessibility`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -66,7 +66,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | `5d1a89b` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Merged |
 | `feature/showcase-ui-entry-overlay` | `fed924e` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Merged |
-| `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Draft |
+| `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Merged |
+| `feature/showcase-reward-modal-accessibility` | `428b1ca` | https://github.com/sabin1108/-curse_slot_machine/pull/20 | Draft |
 
 ## Verification Commands
 
@@ -155,6 +156,13 @@ Latest completed verification:
 - `review/showcase-playable-qa`: `npm.cmd run typecheck` passed.
 - `review/showcase-playable-qa`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
 - `review/showcase-playable-qa`: `npm.cmd run build` passed.
+- `feature/showcase-reward-modal-accessibility`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because `NEXT STEP` remained rendered behind the reward modal, then passed after hiding the Showcase overlay on `REWARD`.
+- `feature/showcase-reward-modal-accessibility`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because reward cards were clickable `div`s, then passed after converting reward cards to semantic buttons.
+- `feature/showcase-reward-modal-accessibility`: `npm.cmd run typecheck` passed.
+- `feature/showcase-reward-modal-accessibility`: full `npm.cmd run test:run` passed with 57 tests across 10 files.
+- `feature/showcase-reward-modal-accessibility`: `npm.cmd run build` passed.
+- `feature/showcase-reward-modal-accessibility`: `npm.cmd run test:e2e` passed with 1 Chromium smoke test.
+- `feature/showcase-reward-modal-accessibility`: focused Playwright browser check passed; reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
 
 ## Remaining Problems
 
@@ -167,15 +175,16 @@ Latest completed verification:
 - `feature/ui-adapter-event-choice-command` was merged through PR #16.
 - `feature/ui-adapter-showcase-slot-guard` was merged through PR #17.
 - `feature/showcase-ui-entry-overlay` was merged through PR #18.
-- `review/showcase-playable-qa` is pushed and open as draft PR #19.
+- `review/showcase-playable-qa` was merged through PR #19.
+- `feature/showcase-reward-modal-accessibility` is pushed and open as draft PR #20.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Review PR #19 and merge only after explicit user approval.
-2. If findings are accepted, implement fixes in a separate TDD branch.
+1. Review PR #20 and merge only after explicit user approval.
+2. Next recommended slice: address `SHOWCASE-QA-003` step counter/title spacing or continue structured-engine UI migration.
 
 ## Branch Log
 
@@ -371,4 +380,17 @@ Latest completed verification:
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/19
 - Implemented: review-only `docs/reviews/milestone-showcase-playable-qa/qa-review.md` plus screenshot/JSON evidence.
 - Verification: `npm.cmd run test:e2e`, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed; Playwright browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
-- Remaining issues: review PR #19; do not merge without explicit user approval. Findings remain proposed until accepted by a human.
+- Merge result: user approved merging PR #19 on 2026-08-20; PR #19 was marked ready and squash merged into `main`.
+- Squash merge commit: `f1145c6`.
+- Remaining issues: `SHOWCASE-QA-001` and `SHOWCASE-QA-002` accepted and implemented in PR #20; `SHOWCASE-QA-003` and `SHOWCASE-QA-004` remain lower-priority polish/infrastructure findings.
+
+### feature/showcase-reward-modal-accessibility
+
+- Branch: `feature/showcase-reward-modal-accessibility`
+- Base: `main` after PR #19 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `428b1ca`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/20
+- Implemented: `App` hides `ShowcaseOverlay` while the reward modal owns input, and `RewardModal` exposes reward cards as semantic `button type="button"` controls with accessible reward-name labels.
+- Verification: targeted RED/GREEN App tests, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, `npm.cmd run test:e2e`, and focused Playwright browser check passed on 2026-08-20.
+- Remaining issues: draft PR #20; do not merge without explicit user approval.

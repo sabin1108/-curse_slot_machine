@@ -137,5 +137,5 @@ Expected: PASS.
 - [x] Run `npm.cmd run test:run`.
 - [x] Run `npm.cmd run build`.
 - [x] Run focused browser check for Showcase reward step.
-- [ ] Update handoff/progress/collaboration docs.
-- [ ] Commit, push, and open a draft PR.
+- [x] Update handoff/progress/collaboration docs.
+- [x] Commit, push, and open a draft PR.
