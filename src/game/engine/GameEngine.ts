@@ -1,6 +1,7 @@
 import { applyReward } from '../build/BuildSystem'
 import { generateRewardOptions } from '../build/RewardSystem'
 import { resolveCombatSlot } from '../combat/CombatSystem'
+import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
 import { createInitialGameState, type GameState } from './GameState'
@@ -76,6 +77,7 @@ export class GameEngine {
     const resolution = resolveCombatSlot(this.state.combat, command.result)
     const turn = this.state.turn + 1
     const rewards = resolution.outcome === 'victory' ? generateRewardOptions(this.state.build) : []
+    const augmentSlot = rewards.length > 0 ? createAugmentSlotPresentation(rewards[0]) : null
 
     this.state = {
       ...this.state,
@@ -90,6 +92,7 @@ export class GameEngine {
       },
       rewards: {
         options: rewards,
+        augmentSlot,
       },
     }
 
@@ -103,10 +106,11 @@ export class GameEngine {
       },
     ]
 
-    if (rewards.length > 0) {
+    if (augmentSlot) {
       events.push({
         type: 'REWARDS_GENERATED',
         options: rewards,
+        augmentSlot,
       })
     }
 
@@ -122,6 +126,7 @@ export class GameEngine {
       build: result.build,
       rewards: {
         options: [],
+        augmentSlot: null,
       },
     }
 
