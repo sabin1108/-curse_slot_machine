@@ -72,6 +72,7 @@ export type CombatResolution = CombatState & {
 
 export type CombatEffectContext = {
   effects?: EffectDefinition[]
+  originTrait?: 'swordsman' | 'priest'
 }
 
 export type CombatStateOverrides = {

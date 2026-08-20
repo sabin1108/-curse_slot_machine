@@ -98,6 +98,71 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(state.narrativeMicrocopy).toContain('빚진 도박사');
   });
 
+  it('gives Gambler one curse-free reroll per battle', () => {
+    const engine = new GameEngine('gambler_free_reroll');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' });
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1 });
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' });
+    engine.dispatch({ type: 'TOGGLE_LOCK_REEL', reelId: 'action' });
+
+    engine.dispatch({ type: 'REROLL_UNLOCKED' });
+    expect(engine.getState().curse.current).toBe(0);
+    expect(engine.getState().originTraitState.freeRerollAvailable).toBe(false);
+
+    engine.dispatch({ type: 'REROLL_UNLOCKED' });
+    expect(engine.getState().curse.current).toBe(2);
+  });
+
+  it('adds a half-power Swordsman follow-up when attack damage reaches the threshold', () => {
+    const engine = new GameEngine('swordsman_follow_up');
+    const state = engine.getState();
+    const action = state.reels.action.find((symbol) => symbol.type === 'BULLET')!;
+    const target = state.reels.target.find((symbol) => symbol.type === 'ENEMY')!;
+    const modifier = state.reels.modifier.find((symbol) => symbol.id === 'x1')!;
+
+    state.enemy.hp = 100;
+    state.enemy.maxHp = 100;
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action,
+      target,
+      modifier,
+      isMiss: false,
+      calculatedValue: 40,
+      finalEffectText: 'test attack'
+    };
+
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+
+    expect(engine.getState().enemy.hp).toBe(40);
+  });
+
+  it('purifies curse when Priest confirms shield or heart results', () => {
+    const engine = new GameEngine('priest_purify');
+    engine.dispatch({ type: 'START_RUN' });
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'PRIEST' });
+    const state = engine.getState();
+    const action = state.reels.action.find((symbol) => symbol.type === 'SHIELD')!;
+    const target = state.reels.target.find((symbol) => symbol.type === 'SELF')!;
+    const modifier = state.reels.modifier.find((symbol) => symbol.id === 'x1')!;
+
+    state.curse.current = 3;
+    state.enemy.intent.value = 0;
+    state.currentResult = {
+      action,
+      target,
+      modifier,
+      isMiss: false,
+      calculatedValue: 12,
+      finalEffectText: 'test shield'
+    };
+
+    engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' });
+
+    expect(engine.getState().curse.current).toBe(2);
+  });
+
   it('should attach context-sensitive narrative microcopy on NAVIGATE', () => {
     const engine = new GameEngine();
     engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' });

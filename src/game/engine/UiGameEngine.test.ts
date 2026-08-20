@@ -34,6 +34,23 @@ describe('UiGameEngine', () => {
     })
   })
 
+  it('projects Gambler origin free reroll into structured slot rerolls', () => {
+    const engine = new GameEngine('slot-ui-gambler')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui-gambler' })
+    engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'GAMBLER' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1 })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    engine.dispatch({ type: 'TOGGLE_LOCK_REEL', reelId: 'action' })
+    const firstReroll = engine.dispatch({ type: 'REROLL_UNLOCKED' })
+
+    expect(firstReroll.curse.current).toBe(0)
+    expect(firstReroll.originTraitState.freeRerollAvailable).toBe(false)
+
+    const secondReroll = engine.dispatch({ type: 'REROLL_UNLOCKED' })
+    expect(secondReroll.curse.current).toBe(2)
+  })
+
   it('projects structured combo combat effects into UI-visible state', () => {
     const engine = new GameEngine('structured-spin-ui')
 

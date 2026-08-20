@@ -233,6 +233,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               onToggleLock={(reelId: ReelId) => onDispatch({ type: 'TOGGLE_LOCK_REEL', reelId })}
               onReroll={() => onDispatch({ type: 'REROLL_UNLOCKED' })}
               onConfirm={() => onDispatch({ type: 'CONFIRM_SLOT_RESULT' })}
+              isFreeRerollAvailable={state.originTraitState.freeRerollAvailable}
             />
           </div>
         </div>

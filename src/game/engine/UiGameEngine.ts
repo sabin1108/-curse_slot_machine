@@ -89,11 +89,16 @@ export class GameEngine {
         modifier: this.presentation.lockedReels.has('modifier'),
       }
       this.currentStructuredSlot = rerollCombatSlot(this.currentStructuredSlot, locks, this.slotRng)
+      const hasFreeReroll = this.consumeFreeRerollIfAvailable()
+      const curseCost = hasFreeReroll ? 0 : getCombatRerollCurseCost(locks)
       this.presentation.curse.current = Math.min(
         this.presentation.curse.max,
-        this.presentation.curse.current + getCombatRerollCurseCost(locks),
+        this.presentation.curse.current + curseCost,
       )
       this.projectStructuredSlot(this.currentStructuredSlot)
+      if (hasFreeReroll) {
+        this.presentation.combatLogs.push('[Origin:Gambler] free reroll ignored curse gain')
+      }
       return this.presentation
     }
 
@@ -113,6 +118,7 @@ export class GameEngine {
         }
         this.projectStructuredBuild()
         this.projectStructuredRewards()
+        this.resetOriginTraitState()
         this.presentation.combatLogs.push(`[Reward] ${reward.name}`)
         return this.presentation
       }
@@ -126,6 +132,7 @@ export class GameEngine {
       this.presentation.hasSpunThisTurn = false
       this.presentation.isSpinning = false
       this.presentation.lockedReels.clear()
+      this.resetOriginTraitState()
       return this.presentation
     }
 
@@ -140,6 +147,7 @@ export class GameEngine {
         const events = this.structured.dispatch({
           type: 'RESOLVE_COMBAT_SLOT',
           result: slotResult,
+          originTrait: this.getStructuredOriginTrait(),
         })
         this.projectStructuredState(events)
         return this.presentation
@@ -210,6 +218,33 @@ export class GameEngine {
         )
       )),
     }
+  }
+
+  private resetOriginTraitState(): void {
+    this.presentation.originTraitState = {
+      freeRerollAvailable: this.presentation.selectedOrigin === 'GAMBLER',
+    }
+  }
+
+  private consumeFreeRerollIfAvailable(): boolean {
+    if (this.presentation.selectedOrigin !== 'GAMBLER' || !this.presentation.originTraitState.freeRerollAvailable) {
+      return false
+    }
+
+    this.presentation.originTraitState.freeRerollAvailable = false
+    return true
+  }
+
+  private getStructuredOriginTrait(): 'swordsman' | 'priest' | undefined {
+    if (this.presentation.selectedOrigin === 'SWORDSMAN') {
+      return 'swordsman'
+    }
+
+    if (this.presentation.selectedOrigin === 'PRIEST') {
+      return 'priest'
+    }
+
+    return undefined
   }
 
   private projectStructuredRewards(): void {

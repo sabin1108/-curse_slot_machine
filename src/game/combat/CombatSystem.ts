@@ -136,6 +136,19 @@ export function resolveCombatSlot(
         })
       }
     }
+
+    if (context.originTrait === 'swordsman' && affectedActors.includes('enemy') && amount >= 18 && enemy.health > 0) {
+      const bonusStrikeAmount = Math.max(1, Math.floor(amount * 0.5))
+      const resolved = applyDamage(enemy, bonusStrikeAmount)
+      enemy = resolved.actor
+      events.push({
+        type: 'DAMAGE_APPLIED',
+        target: 'enemy',
+        amount: bonusStrikeAmount,
+        blocked: resolved.blocked,
+        healthLost: resolved.healthLost,
+      })
+    }
   }
 
   if (enemy.health > 0 && player.health > 0) {
@@ -149,7 +162,10 @@ export function resolveCombatSlot(
     })
   }
 
-  const curseGain = getCurseGain(state, slotResult, effects)
+  const baseCurseGain = getCurseGain(state, slotResult, effects)
+  const curseGain = context.originTrait === 'priest' && (slotResult.action === 'shield' || slotResult.action === 'heart')
+    ? Math.max(0, baseCurseGain - 1)
+    : baseCurseGain
   const curse = {
     value: state.curse.value + curseGain,
   }

@@ -67,6 +67,9 @@ export class GameEngine {
       },
       visitedNodePath: [],
       selectedOrigin: 'SWORDSMAN',
+      originTraitState: {
+        freeRerollAvailable: false
+      },
       narrativeMicrocopy: '저주받은 슬롯머신이 침묵하고 있습니다.',
       curseLogsUnlocked: ['log_01'],
       isEnemyAttacking: false,
@@ -160,6 +163,7 @@ export class GameEngine {
   private handleSelectOrigin(originId: typeof ORIGINS[keyof typeof ORIGINS]['id']) {
     const origin = ORIGINS[originId] || ORIGINS.SWORDSMAN;
     this.state.selectedOrigin = originId;
+    this.resetOriginTraitState();
     
     // Apply starting stat bonuses
     this.state.player.gold += origin.startingGoldBonus;
@@ -215,6 +219,7 @@ export class GameEngine {
     this.state.currentResult = null;
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
+    this.resetOriginTraitState();
   }
 
   private handleSpinCombatSlot() {
@@ -268,10 +273,13 @@ export class GameEngine {
     if (!this.state.hasSpunThisTurn || this.state.isSpinning) return;
 
     const lockedCount = this.state.lockedReels.size;
-    const curseDelta = lockedCount + 1;
+    const hasFreeReroll = this.consumeFreeRerollIfAvailable();
+    const curseDelta = hasFreeReroll ? 0 : lockedCount + 1;
 
-    this.state.curse.current = Math.min(this.state.curse.max, this.state.curse.current + curseDelta);
-    this.checkCurseThresholds();
+    if (curseDelta > 0) {
+      this.state.curse.current = Math.min(this.state.curse.max, this.state.curse.current + curseDelta);
+      this.checkCurseThresholds();
+    }
 
     // Reroll non-locked reels
     let { action: actionIdx, target: targetIdx, modifier: modifierIdx } = this.state.reelIndexes;
@@ -294,7 +302,9 @@ export class GameEngine {
 
     this.state.currentResult = this.calculateSlotResult(actionSym, targetSym, modifierSym);
     this.state.combatLogs.push(
-      `[재회전] (잠금: ${lockedCount}개, 저주 +${curseDelta}) => ${actionSym.name} + ${targetSym.name} × ${modifierSym.name}`
+      hasFreeReroll
+        ? `[Origin:Gambler] free reroll, locks ${lockedCount}, curse +0 => ${actionSym.name} + ${targetSym.name} x ${modifierSym.name}`
+        : `[재회전] (잠금: ${lockedCount}개, 저주 +${curseDelta}) => ${actionSym.name} + ${targetSym.name} × ${modifierSym.name}`
     );
   }
 
@@ -354,6 +364,7 @@ export class GameEngine {
           id: Date.now()
         };
         this.state.combatLogs.push(`[보호] 보호막 +${res.calculatedValue} (총: ${this.state.player.shield})`);
+        this.applyPriestPurifyTrait(act);
       } else if (act === 'HEART') {
         const heal = res.calculatedValue;
         this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + heal);
@@ -363,6 +374,7 @@ export class GameEngine {
           id: Date.now()
         };
         this.state.combatLogs.push(`[회복] HP +${heal} 회복`);
+        this.applyPriestPurifyTrait(act);
       } else {
         // Attack Enemy
         const dmg = res.calculatedValue;
@@ -383,6 +395,7 @@ export class GameEngine {
           };
           this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
         }
+        this.applySwordsmanBonusStrike(dmg);
       }
     }
 
@@ -431,6 +444,45 @@ export class GameEngine {
     // Prepare next turn
     this.state.turn += 1;
     this.state.hasSpunThisTurn = false;
+  }
+
+  private resetOriginTraitState() {
+    this.state.originTraitState = {
+      freeRerollAvailable: this.state.selectedOrigin === 'GAMBLER'
+    };
+  }
+
+  private consumeFreeRerollIfAvailable(): boolean {
+    if (this.state.selectedOrigin !== 'GAMBLER' || !this.state.originTraitState.freeRerollAvailable) {
+      return false;
+    }
+
+    this.state.originTraitState.freeRerollAvailable = false;
+    return true;
+  }
+
+  private applySwordsmanBonusStrike(baseDamage: number) {
+    if (this.state.selectedOrigin !== 'SWORDSMAN' || baseDamage < 35 || this.state.enemy.hp <= 0) {
+      return;
+    }
+
+    const bonusDamage = Math.max(1, Math.floor(baseDamage * 0.5));
+    this.state.enemy.hp = Math.max(0, this.state.enemy.hp - bonusDamage);
+    this.state.lastDamagePop = {
+      value: bonusDamage,
+      type: 'ENEMY_DMG',
+      id: Date.now()
+    };
+    this.state.combatLogs.push(`[Origin:Swordsman] half-power follow-up ${bonusDamage} damage! (enemy HP: ${this.state.enemy.hp})`);
+  }
+
+  private applyPriestPurifyTrait(actionType: ReelSymbol['type']) {
+    if (this.state.selectedOrigin !== 'PRIEST' || (actionType !== 'SHIELD' && actionType !== 'HEART') || this.state.curse.current <= 0) {
+      return;
+    }
+
+    this.state.curse.current = Math.max(0, this.state.curse.current - 1);
+    this.state.combatLogs.push('[Origin:Priest] shield/heart result purified curse -1');
   }
 
   private prepareRewardScreen() {
@@ -516,6 +568,7 @@ export class GameEngine {
     this.state.enemy = this.generateEnemyForStage(this.state.floor, this.state.wave);
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
+    this.resetOriginTraitState();
     this.state.screen = 'MAP';
   }
 

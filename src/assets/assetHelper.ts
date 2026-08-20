@@ -30,6 +30,11 @@ const PUBLIC_ASSETS: Record<string, string> = {
   item_black_candle: '/assets/icons_rpg/candle_01b.png',
   item_panic_button: '/assets/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7/frames/button_red_up.png',
   item_house_mark: '/assets/icons_rpg/spellbook_03e.png',
+  rest_heal: '/assets/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7/frames/flask_big_red.png',
+  rest_purify: '/assets/icons_rpg/spellbook_02c.png',
+  rest_campfire: '/assets/icons_rpg/candle_01a.png',
+  rest_shrine: '/assets/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7/frames/flask_big_yellow.png',
+  rest_shelter: '/assets/icons_rpg/book_06g.png',
 };
 
 export function getAsset(key: string): string {
