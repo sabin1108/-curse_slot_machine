@@ -7,10 +7,11 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-confirm-result`
-- Current PR: #11 draft, https://github.com/sabin1108/-curse_slot_machine/pull/11
+- Current branch: `feature/ui-adapter-map-node`
+- Current PR: pending draft PR creation
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
+- PR #11 status: merged into `main` with squash commit `e8c5884`.
 
 ## Completed Branches
 
@@ -23,38 +24,34 @@ Last updated: 2026-08-20
 | `feature/build-reward-synergy` | #7 | `622f52f` | Merged |
 | `feature/augment-slot-machine` | #8 | `ca51454` | Merged |
 | `feature/content-effect-schema-pilot` | #10 | `8be060c` | Merged |
+| `feature/ui-adapter-confirm-result` | #11 | `e8c5884` | Merged |
 
 ## Current Branch
 
-`feature/ui-adapter-confirm-result` is pushed and open as draft PR #11.
+`feature/ui-adapter-map-node` is local and verified; draft PR creation is pending.
 
 Implemented:
 
-- `CONFIRM_SLOT_RESULT` now prefers the adapter-owned pure combat slot result over mutable UI `currentResult`.
-- `UiGameEngine` structured confirm tests now spin through the adapter instead of mutating presentation state.
-- UI projection helpers for structured slot results, rewards, augments, synergies, and reel indexes now live in `src/game/engine/UiProjection.ts`.
-- `UiGameEngine` now keeps orchestration and adapter state projection code while delegating reusable UI shape conversion to the pure projection module.
+- Structured reward selection in `UiGameEngine` now returns the visible UI to the map progression shell when the player chooses from the reward screen.
+- Structured build ownership is preserved while the legacy presentation engine temporarily advances wave/enemy/map UI state.
+- Reward candidates and augment slot presentation clear after the structured reward is chosen.
 
 Current branch commits:
 
-- `1b68c65` - `fix: confirm adapter-owned slot result`
-- follow-up UI projection extraction changes are verified for draft PR #11.
+- none yet; local changes are verified and pending commit/push/PR.
 
 ## Verification
 
-Latest verification on `feature/ui-adapter-confirm-result`:
+Latest verification on `feature/ui-adapter-map-node`:
 
-- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because confirm used mutable UI `currentResult`, then passed with 5 tests after implementation.
-- Targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: failed first because `UiProjection.ts` did not exist.
-- Targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts`: passed, 7 tests across 2 files after helper extraction.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because structured reward selection left the UI on `REWARD`, then passed with 6 tests after implementation.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 43 tests across 10 files.
+- `npm.cmd run test:run`: passed, 44 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/engine/UiGameEngine.test.ts` failed first because confirm used mutable UI `currentResult`, then passed after using adapter-owned `currentStructuredSlot`.
-- `src/game/engine/UiProjection.test.ts` failed first because the projection module did not exist, then passed after extracting pure projection helpers.
+- `src/game/engine/UiGameEngine.test.ts` failed first because structured reward selection returned `screen: 'REWARD'` instead of `screen: 'MAP'`.
 
 ## Architecture Decisions Preserved
 
@@ -70,7 +67,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep map/shop/rest/showcase migration as separate TDD slices.
-2. Keep PR #11 draft until review/merge approval.
+1. Commit, push, and open a draft PR for `feature/ui-adapter-map-node`.
+2. Continue map/shop/rest/showcase migration as separate TDD slices.
 
 Do not merge later PRs without explicit user approval.

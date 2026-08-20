@@ -342,5 +342,35 @@
 
 ### GitHub
 
-- Draft PR remains open: https://github.com/sabin1108/-curse_slot_machine/pull/11
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/11
+- User approved merging PR #11 on 2026-08-20.
+- PR #11 was marked ready and squash merged into `main`.
+- PR #11 squash merge commit: `e8c5884`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - UI Reward To Map Adapter
+
+### Human Direction
+
+- Merge PR #11 and continue the next adapter slice.
+- Keep the work small and TDD-protected.
+
+### Codex Work
+
+- Created `feature/ui-adapter-map-node` from updated `main` after PR #11 merge.
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote a failing `UiGameEngine` test proving structured reward selection left the UI on `REWARD`.
+- Updated structured `CHOOSE_REWARD` handling to apply the reward in the structured engine while using the legacy presentation engine only for temporary map/wave/enemy shell progression when the visible UI is on the reward screen.
+- Re-projected structured build and reward presentation after the legacy shell update so reward candidates and augment slot state clear.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `screen` stayed `REWARD`, then passed with 6 tests after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 44 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending creation for `feature/ui-adapter-map-node`.
 - Merge policy: no merge without explicit user approval.

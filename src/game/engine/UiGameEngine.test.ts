@@ -68,6 +68,28 @@ describe('UiGameEngine', () => {
     expect(rewardState.augSlotPresentation?.targetAugment?.id).toBe(rewardState.rewardCandidates[0].id)
   })
 
+  it('chooses structured rewards and returns the UI to map progression', () => {
+    const engine = new GameEngine('lethal-ui-24')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    const chosenRewardId = rewardState.rewardCandidates[0].id
+
+    const afterChoose = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    expect(afterChoose.screen).toBe('MAP')
+    expect(afterChoose.rewardCandidates).toEqual([])
+    expect(afterChoose.augSlotPresentation).toBeNull()
+    expect(afterChoose.wave).toBe(2)
+    expect(afterChoose.enemy.hp).toBeGreaterThan(0)
+    expect([
+      ...afterChoose.build.augments.map((augment) => augment.id),
+      ...afterChoose.build.items,
+    ]).toContain(chosenRewardId)
+  })
+
   it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
     const engine = new GameEngine('slot-ui')
 
