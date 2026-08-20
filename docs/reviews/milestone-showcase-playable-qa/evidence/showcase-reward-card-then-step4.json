@@ -1,0 +1,38 @@
+{
+  "commit": "fed924e",
+  "viewport": "1280x720",
+  "seed": "showcase_seed_2026",
+  "commandSequence": [
+    "click Showcase Mode",
+    "click NEXT STEP to step 2",
+    "click NEXT STEP to step 3/reward",
+    "click first .reward-card-pixel",
+    "click NEXT STEP to step 4"
+  ],
+  "checks": {
+    "step3VisibleBeforeReward": true,
+    "cardCount": 3,
+    "step3VisibleAfterReward": true,
+    "step4Visible": true,
+    "executeVisible": true
+  },
+  "consoleMessages": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+    }
+  ],
+  "pageErrors": []
+}

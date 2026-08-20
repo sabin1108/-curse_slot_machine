@@ -1,0 +1,37 @@
+{
+  "commit": "fed924e",
+  "viewport": "1280x720",
+  "seed": "showcase_seed_2026",
+  "commandSequence": [
+    "click Showcase Mode",
+    "click NEXT STEP to step 2",
+    "click NEXT STEP to step 3/reward",
+    "attempt click NEXT STEP to step 4"
+  ],
+  "checks": {
+    "step2Visible": true,
+    "step3Visible": true,
+    "nextStepFromRewardModalResult": "blocked",
+    "step4Visible": false
+  },
+  "clickError": "locator.click: Timeout 2500ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /NEXT STEP/i })\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" class=\"k-btn showcase big glow-pulse\">▶️ 다음 시연 단계 (NEXT STEP)</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"reward-modal-backdrop\">…</div> from <div class=\"screen-transition-wrapper\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"reward-modal-backdrop\">…</div> from <div class=\"screen-transition-wrapper\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"reward-modal-backdrop\">…</div> from <div class=\"screen-transition-wrapper\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n",
+  "consoleMessages": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+    }
+  ],
+  "pageErrors": []
+}

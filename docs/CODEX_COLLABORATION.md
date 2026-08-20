@@ -556,5 +556,43 @@
 
 ### GitHub
 
-- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/18
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/18
+- User approved merging PR #18 on 2026-08-20.
+- PR #18 was marked ready and squash merged into `main`.
+- PR #18 squash merge commit: `fed924e`.
+- Merge policy: no later merge without explicit user approval.
+
+## 2026-08-20 - Showcase Playable QA
+
+### Human Direction
+
+- Merge PR #18 and continue the next work.
+- Run focused Showcase playable QA before broad structured-engine replacement.
+
+### Codex Work
+
+- Created `review/showcase-playable-qa` from updated `main` after PR #18 merge.
+- Read `DESIGN.md`, `docs/design/PLANNING_SUMMARY.md`, and `docs/reviews/README.md`.
+- Ran existing Playwright smoke test.
+- Captured Showcase browser evidence at 1280x720 under `docs/reviews/milestone-showcase-playable-qa/evidence/`.
+- Wrote `docs/reviews/milestone-showcase-playable-qa/qa-review.md`.
+
+### Findings
+
+- `SHOWCASE-QA-001`: step 3 reward modal makes the visible overlay `NEXT STEP` button non-actionable until a reward is selected.
+- `SHOWCASE-QA-002`: reward choices are clickable divs rather than semantic buttons.
+- `SHOWCASE-QA-003`: step counter and title can visually run together.
+- `SHOWCASE-QA-004`: Google Fonts request fails in network-restricted review.
+
+### Verification
+
+- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
+- Browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 55 tests across 10 files.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR pending creation for `review/showcase-playable-qa`.
 - Merge policy: no merge without explicit user approval.

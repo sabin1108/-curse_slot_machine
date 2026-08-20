@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/showcase-ui-entry-overlay`
-- Current PR: draft PR #18 - https://github.com/sabin1108/-curse_slot_machine/pull/18
+- Current branch: `review/showcase-playable-qa`
+- Current PR: pending draft PR creation
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -18,6 +18,7 @@ Last updated: 2026-08-20
 - PR #15 status: merged into `main` with squash commit `eae8337`.
 - PR #16 status: merged into `main` with squash commit `2165922`.
 - PR #17 status: merged into `main` with squash commit `5d1a89b`.
+- PR #18 status: merged into `main` with squash commit `fed924e`.
 
 ## Completed Branches
 
@@ -37,35 +38,36 @@ Last updated: 2026-08-20
 | `feature/ui-adapter-event-node-entry` | #15 | `eae8337` | Merged |
 | `feature/ui-adapter-event-choice-command` | #16 | `2165922` | Merged |
 | `feature/ui-adapter-showcase-slot-guard` | #17 | `5d1a89b` | Merged |
+| `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
 
 ## Current Branch
 
-`feature/showcase-ui-entry-overlay` is pushed and open as draft PR #18.
+`review/showcase-playable-qa` is local and contains review-only artifacts; draft PR creation is pending.
 
 Implemented:
 
-- Title screen now exposes a user-facing Showcase Mode button.
-- The button dispatches the existing `START_SHOWCASE` command.
-- `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
-- Overlay next-step input continues through the existing `NEXT_SHOWCASE_STEP` command path.
+- Showcase playable QA review artifact under `docs/reviews/milestone-showcase-playable-qa/`.
+- Screenshot and JSON evidence for title entry, overlay steps, reward modal obstruction, reward selection, step 4 battle presentation, and failed external font request.
+- Review findings only; no production source code changed on this branch.
 
 Current branch commits:
 
-- `f3422ca` - `docs: plan showcase ui entry overlay`
-- `4846552` - `feat: wire showcase ui entry overlay`
+- none yet; review artifacts are pending commit/push/PR.
 
 ## Verification
 
-Latest verification on `feature/showcase-ui-entry-overlay`:
+Latest verification on `review/showcase-playable-qa`:
 
-- Targeted `npm.cmd run test:run -- src/app/App.test.tsx`: failed first because the Showcase Mode button did not exist, then passed with 3 tests after implementation.
+- `npm.cmd run test:e2e`: passed, 1 Chromium smoke test.
+- Browser QA at 1280x720 repeated the step 3 modal/overlay obstruction.
+- Browser QA confirmed reward-card click allows progression to step 4 battle.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd run test:run`: passed, 55 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/app/App.test.tsx` failed first because title-screen Showcase entry and App-level overlay rendering were missing.
+- Not applicable; this is a review-only branch with no production implementation.
 
 ## Architecture Decisions Preserved
 
@@ -81,7 +83,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #18 draft until review and explicit merge approval.
-2. Continue with a small UI/UX review or seed-based playable Showcase QA after this branch lands.
+1. Commit, push, and open a draft PR for `review/showcase-playable-qa`.
+2. If findings are accepted, implement fixes in a separate TDD branch.
 
 Do not merge later PRs without explicit user approval.
