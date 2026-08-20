@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, `feature/ui-adapter-confirm-result`, `feature/ui-adapter-map-node`, `feature/ui-adapter-select-map-node`, `feature/ui-adapter-node-type-routing`, `feature/ui-adapter-event-node-entry`, `feature/ui-adapter-event-choice-command`, `feature/ui-adapter-showcase-slot-guard`, `feature/showcase-ui-entry-overlay`, `review/showcase-playable-qa`, `feature/showcase-reward-modal-accessibility`, and `feature/showcase-step-header-spacing` are merged; current work is `feature/offline-font-fallback`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. Branches through `feature/offline-font-fallback` are merged; `feature/ui-adapter-synergy-progress` is open as draft PR #23. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -31,7 +31,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
 - Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `feature/offline-font-fallback`.
+- Current branch: `feature/ui-adapter-synergy-progress`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/offline-font-fallback`
+- Current branch: `feature/ui-adapter-synergy-progress`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -68,8 +68,9 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/showcase-ui-entry-overlay` | `fed924e` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Merged |
 | `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Merged |
 | `feature/showcase-reward-modal-accessibility` | `428b1ca` | https://github.com/sabin1108/-curse_slot_machine/pull/20 | Merged |
-| `feature/showcase-step-header-spacing` | `8ba4287` | https://github.com/sabin1108/-curse_slot_machine/pull/21 | Merged |
-| `feature/offline-font-fallback` | `fe42c8a` | https://github.com/sabin1108/-curse_slot_machine/pull/22 | Draft |
+| `feature/showcase-step-header-spacing` | `605b62d` | https://github.com/sabin1108/-curse_slot_machine/pull/21 | Merged |
+| `feature/offline-font-fallback` | `00a810c` | https://github.com/sabin1108/-curse_slot_machine/pull/22 | Merged |
+| `feature/ui-adapter-synergy-progress` | see PR #23 | https://github.com/sabin1108/-curse_slot_machine/pull/23 | Draft |
 
 ## Verification Commands
 
@@ -170,11 +171,10 @@ Latest completed verification:
 - `feature/showcase-step-header-spacing`: full `npm.cmd run test:run` passed with 58 tests across 11 files.
 - `feature/showcase-step-header-spacing`: `npm.cmd run build` passed.
 - `feature/showcase-step-header-spacing`: focused Playwright browser check passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
-- `feature/offline-font-fallback`: targeted `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` failed first because `src/styles.css` imported Google Fonts, then passed after removing the external import and using a system fallback stack.
-- `feature/offline-font-fallback`: `npm.cmd run typecheck` passed.
-- `feature/offline-font-fallback`: full `npm.cmd run test:run` passed with 59 tests across 12 files.
-- `feature/offline-font-fallback`: `npm.cmd run build` passed.
-- `feature/offline-font-fallback`: focused Playwright browser check passed; title screen loaded with `failedCount: 0` and `fontFailures: []`.
+- `feature/offline-font-fallback`: targeted `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` failed first because `src/styles.css` imported Google Fonts, then passed after removing the external font dependency.
+- `feature/offline-font-fallback`: `npm.cmd run typecheck`, full `npm.cmd run test:run`, and `npm.cmd run build` passed; focused browser check reported no Google Fonts failures.
+- `feature/ui-adapter-synergy-progress`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `combo_engine` progress stayed at `current: 0`, then passed with 16 tests after adapter projection used structured progress.
+- `feature/ui-adapter-synergy-progress`: `npm.cmd run typecheck`, full `npm.cmd run test:run` with 59 tests, and `npm.cmd run build` passed.
 
 ## Remaining Problems
 
@@ -189,8 +189,8 @@ Latest completed verification:
 - `feature/showcase-ui-entry-overlay` was merged through PR #18.
 - `review/showcase-playable-qa` was merged through PR #19.
 - `feature/showcase-reward-modal-accessibility` was merged through PR #20.
-- `feature/showcase-step-header-spacing` was merged through PR #21.
-- `feature/offline-font-fallback` is pushed and open as draft PR #22.
+- `feature/offline-font-fallback` was merged through PR #22.
+- `feature/ui-adapter-synergy-progress` is pushed and open as draft PR #23.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
@@ -429,8 +429,20 @@ Latest completed verification:
 - Branch: `feature/offline-font-fallback`
 - Base: `main` after PR #21 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `fe42c8a`
+- Commit: `00a810c`
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/22
-- Implemented: removed Google Fonts `@import`, added offline-safe Korean/system font fallback stack, and added an offline browser asset policy test.
-- Verification: targeted RED/GREEN policy test, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, and focused Playwright failed-request check passed on 2026-08-20.
-- Remaining issues: draft PR #22; do not merge without explicit user approval.
+- Implemented: removed the external Google Fonts import, added an offline-safe Korean/system display font stack, and added an offline asset policy regression test.
+- Verification: targeted RED/GREEN offline asset policy test, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, and a focused browser network check passed on 2026-08-20.
+- Merge result: user approved merging PR #22 on 2026-08-20; PR #22 was marked ready and squash merged into `main`.
+- Squash merge commit: `00a810c`.
+
+### feature/ui-adapter-synergy-progress
+
+- Branch: `feature/ui-adapter-synergy-progress`
+- Base: `main` after PR #22 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: see PR #23 branch head after PR #22 merge reconciliation.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/23
+- Implemented: `UiGameEngine` projects structured `BuildState.synergies.progress` values into legacy UI `build.synergyProgress`; `toUiSynergyProgress` now accepts structured progress.
+- Verification: targeted RED/GREEN `UiGameEngine` test, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed on 2026-08-20.
+- Remaining issues: draft PR #23; do not merge without explicit user approval. Next structured migration slice should address item-specific UI projection.

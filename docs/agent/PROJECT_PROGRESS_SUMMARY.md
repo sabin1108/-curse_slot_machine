@@ -7,8 +7,8 @@ Last updated: 2026-08-20
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/offline-font-fallback`
-- Current PR: draft PR #22 - https://github.com/sabin1108/-curse_slot_machine/pull/22
+- Current branch: `feature/ui-adapter-synergy-progress`
+- Current PR: draft PR #23 - https://github.com/sabin1108/-curse_slot_machine/pull/23
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 - PR #11 status: merged into `main` with squash commit `e8c5884`.
@@ -22,6 +22,7 @@ Last updated: 2026-08-20
 - PR #19 status: merged into `main` with squash commit `f1145c6`.
 - PR #20 status: merged into `main` with squash commit `61744f1`.
 - PR #21 status: merged into `main` with squash commit `605b62d`.
+- PR #22 status: merged into `main` with squash commit `00a810c`.
 
 ## Completed Branches
 
@@ -45,35 +46,37 @@ Last updated: 2026-08-20
 | `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
 | `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
 | `feature/showcase-step-header-spacing` | #21 | `605b62d` | Merged |
+| `feature/offline-font-fallback` | #22 | `00a810c` | Merged |
 
 ## Current Branch
 
-`feature/offline-font-fallback` is pushed and open as draft PR #22.
+`feature/ui-adapter-synergy-progress` is open as draft PR #23.
 
 Implemented:
 
-- Removed the Google Fonts `@import` that caused failed network requests in restricted/offline review.
-- Added `--font-display` with Korean/system font fallbacks.
-- Added an offline browser asset policy test to prevent reintroducing Google Fonts URLs.
+- `UiGameEngine` projects real structured `BuildState.synergies.progress` values into the legacy UI build panel state.
+- `toUiSynergyProgress` accepts structured progress while preserving catalog-derived fallback values.
+- React remains display/input only; synergy calculation stays in the pure TypeScript build system.
 
 Current branch commits:
 
-- `cc52bad` - `docs: plan offline font fallback`
-- `fe42c8a` - `fix: remove external font dependency`
+- `4742591` - `docs: plan ui synergy progress projection`
+- `4d44cda` - `fix: project structured synergy progress`
+- `b0811e6` - `docs: update ui synergy progress pr handoff`
+- latest branch head: see PR #23 after PR #22 merge reconciliation.
 
 ## Verification
 
-Latest verification on `feature/offline-font-fallback`:
+Latest verification on `feature/ui-adapter-synergy-progress`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 59 tests across 12 files.
+- `npm.cmd run test:run`: passed, 59 tests across 11 files.
 - `npm.cmd run build`: passed.
-- Focused Playwright browser check: passed; title screen loaded with `failedCount: 0` and `fontFailures: []`.
 
 TDD evidence:
 
-- RED: `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` failed because `src/styles.css` imported `https://fonts.googleapis.com/css2?family=Jua&display=swap`.
-- GREEN: `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` passed after removing the import and adding the fallback stack.
+- RED: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed because `combo_engine` UI progress stayed at `current: 0`.
+- GREEN: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` passed with 16 tests after passing structured progress through the adapter projection.
 
 ## Architecture Decisions Preserved
 
@@ -89,7 +92,7 @@ TDD evidence:
 
 Next planned work:
 
-1. Keep PR #22 draft until review and explicit merge approval.
-2. Next recommended slice after PR #22: continue structured-engine UI migration.
+1. Finish merging PR #23 after conflict resolution and verification.
+2. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
 
 Do not merge later PRs without explicit user approval.

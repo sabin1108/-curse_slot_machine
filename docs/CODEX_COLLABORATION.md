@@ -685,5 +685,35 @@
 ### GitHub
 
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/22
-- Head commit: `fe42c8a`.
+- Head commit: `51822c8`.
+- Merge result: user approved merging PR #22 on 2026-08-20; PR #22 was marked ready and squash merged into `main`.
+- Squash merge commit: `00a810c`.
+- Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - UI Adapter Synergy Progress
+
+### Human Direction
+
+- Continue structured-engine UI migration after fixing `SHOWCASE-QA-004`.
+- Keep React as display/input only and keep synergy calculation in pure TypeScript systems.
+
+### Codex Work
+
+- Created `feature/ui-adapter-synergy-progress` from `main`.
+- Added `docs/superpowers/plans/2026-08-20-ui-adapter-synergy-progress.md`.
+- Wrote a failing `UiGameEngine` adapter test proving legacy UI synergy progress stayed at zero.
+- Updated `toUiSynergyProgress` to accept structured progress values.
+- Updated `UiGameEngine.projectStructuredBuild()` to pass `build.synergies.progress` into the UI projection helper.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `combo_engine` progress stayed at `current: 0`, then passed with 16 tests.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 59 tests.
+- `npm.cmd run build`: passed.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/23
+- Head commit: updated after PR #22 merge; see PR #23.
 - Merge policy: no merge without explicit user approval.
