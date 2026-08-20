@@ -1,22 +1,20 @@
-import type {
-  AugmentItem,
-  GameCommand as UiGameCommand,
-  GameState as UiGameState,
-  ReelSymbol,
-  SlotResult,
-  SynergyProgress as UiSynergyProgress,
-} from '../../types/game'
+import type { GameCommand as UiGameCommand, GameState as UiGameState } from '../../types/game'
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
-import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
-import type { BuildRewardDefinition, SynergyDefinition, SynergyTag } from '../build/BuildTypes'
-import type { RewardOption } from '../build/RewardSystem'
+import type { BuildRewardDefinition } from '../build/BuildTypes'
 import type { CombatEvent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
 import { GameEngine as StructuredGameEngine } from './GameEngine'
+import {
+  getReelIndex,
+  toUiAugment,
+  toUiReward,
+  toUiSlotResult,
+  toUiSynergyProgress,
+} from './UiProjection'
 import type { GameEvent } from './events'
-import { createSeededRng, type RngSeed, type SeededRng } from './rng'
+import { createSeededRng, type SeededRng } from './rng'
 
 export class GameEngine {
   private legacy: LegacyGameEngine
@@ -236,106 +234,6 @@ function getRequiredStructuredReward(id: string, kind: BuildRewardDefinition['ki
     throw new Error(`Missing structured ${kind} reward: ${id}`)
   }
   return reward
-}
-
-function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
-  return {
-    id: reward.id,
-    name: reward.name,
-    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
-    tags: reward.tags,
-    description: reward.description,
-    icon: '◆',
-    effectValue: reward.effectId ?? reward.effects?.[0]?.id ?? 'EFFECT',
-  }
-}
-
-function toUiReward(reward: RewardOption): AugmentItem {
-  return {
-    id: reward.id,
-    name: reward.name,
-    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
-    tags: reward.tags,
-    description: reward.description,
-    icon: reward.kind === 'item' ? '◇' : '◆',
-    effectValue: `score ${reward.score.total}`,
-  }
-}
-
-function toUiSlotResult(slotResult: CombatSlotResult): SlotResult {
-  const action = getUiActionSymbol(slotResult.action)
-  const target = getUiTargetSymbol(slotResult.target)
-  const modifier = getUiModifierSymbol(slotResult.modifier)
-  const calculatedValue = getUiSlotAmount(slotResult)
-
-  return {
-    action,
-    target,
-    modifier,
-    isMiss: false,
-    calculatedValue,
-    finalEffectText: `${slotResult.action}/${slotResult.target}/${slotResult.modifier}: ${calculatedValue}`,
-  }
-}
-
-function getUiActionSymbol(action: CombatSlotResult['action']): ReelSymbol {
-  return getRequiredSymbol(ACTION_SYMBOLS, action)
-}
-
-function getUiTargetSymbol(target: CombatSlotResult['target']): ReelSymbol {
-  if (target === 'enemy') {
-    return TARGET_SYMBOLS.find((symbol) => symbol.type === 'ENEMY') ?? createTargetSymbol('enemy', 'ENEMY')
-  }
-
-  return createTargetSymbol(target, target === 'self' ? 'SELF' : 'ALL')
-}
-
-function getUiModifierSymbol(modifier: CombatSlotResult['modifier']): ReelSymbol {
-  return getRequiredSymbol(MODIFIER_SYMBOLS, modifier)
-}
-
-function getRequiredSymbol(symbols: ReelSymbol[], id: string): ReelSymbol {
-  const symbol = symbols.find((candidate) => candidate.id === id)
-  if (!symbol) {
-    throw new Error(`Missing UI reel symbol: ${id}`)
-  }
-  return symbol
-}
-
-function createTargetSymbol(id: CombatSlotResult['target'], type: 'SELF' | 'ALL' | 'ENEMY'): ReelSymbol {
-  return {
-    id,
-    name: type,
-    type,
-    category: 'TARGET',
-    baseValue: 0,
-    icon: type === 'SELF' ? 'SELF' : type === 'ALL' ? 'ALL' : 'ENEMY',
-    color: '#cccccc',
-    description: type,
-  }
-}
-
-function getUiSlotAmount(slotResult: CombatSlotResult): number {
-  const base = slotResult.action === 'bullet' ? 6 : slotResult.action === 'shield' ? 5 : 4
-  const multiplier = slotResult.modifier === 'x1' ? 1 : slotResult.modifier === 'x2' ? 2 : 3
-
-  return base * multiplier
-}
-
-function getReelIndex(symbols: ReelSymbol[], id: string): number {
-  return Math.max(0, symbols.findIndex((symbol) => symbol.id === id))
-}
-
-function toUiSynergyProgress(synergy: SynergyDefinition): UiSynergyProgress {
-  return {
-    synergyId: synergy.id,
-    name: synergy.name,
-    tag: synergy.requiredTags[0]?.tag ?? ('COMBO' satisfies SynergyTag),
-    current: 0,
-    required: synergy.requiredTags.reduce((sum, requirement) => sum + requirement.count, 0),
-    completed: false,
-    effectDescription: synergy.description,
-  }
 }
 
 function mapUiSlotResult(state: UiGameState): CombatSlotResult | null {

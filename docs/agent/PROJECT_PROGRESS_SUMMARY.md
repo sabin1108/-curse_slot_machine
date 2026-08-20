@@ -8,7 +8,7 @@ Last updated: 2026-08-20
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
 - Current branch: `feature/ui-adapter-confirm-result`
-- Current PR: not opened yet
+- Current PR: #11 draft, https://github.com/sabin1108/-curse_slot_machine/pull/11
 - PR #8 status: merged into `main` with squash commit `ca51454`.
 - PR #10 status: merged into `main` with squash commit `8be060c`.
 
@@ -26,29 +26,35 @@ Last updated: 2026-08-20
 
 ## Current Branch
 
-`feature/ui-adapter-confirm-result` is local only and not yet pushed.
+`feature/ui-adapter-confirm-result` is pushed and open as draft PR #11.
 
 Implemented:
 
 - `CONFIRM_SLOT_RESULT` now prefers the adapter-owned pure combat slot result over mutable UI `currentResult`.
 - `UiGameEngine` structured confirm tests now spin through the adapter instead of mutating presentation state.
+- UI projection helpers for structured slot results, rewards, augments, synergies, and reel indexes now live in `src/game/engine/UiProjection.ts`.
+- `UiGameEngine` now keeps orchestration and adapter state projection code while delegating reusable UI shape conversion to the pure projection module.
 
 Current branch commits:
 
-- none yet; local changes are verified and pending commit/push/PR approval.
+- `1b68c65` - `fix: confirm adapter-owned slot result`
+- follow-up UI projection extraction changes are verified for draft PR #11.
 
 ## Verification
 
 Latest verification on `feature/ui-adapter-confirm-result`:
 
 - Targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because confirm used mutable UI `currentResult`, then passed with 5 tests after implementation.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: failed first because `UiProjection.ts` did not exist.
+- Targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts`: passed, 7 tests across 2 files after helper extraction.
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 41 tests across 9 files.
+- `npm.cmd run test:run`: passed, 43 tests across 10 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
 - `src/game/engine/UiGameEngine.test.ts` failed first because confirm used mutable UI `currentResult`, then passed after using adapter-owned `currentStructuredSlot`.
+- `src/game/engine/UiProjection.test.ts` failed first because the projection module did not exist, then passed after extracting pure projection helpers.
 
 ## Architecture Decisions Preserved
 
@@ -64,7 +70,7 @@ TDD evidence:
 
 Next planned work:
 
-1. If approved, commit, push, and open a draft PR for `feature/ui-adapter-confirm-result`.
-2. Keep map/shop/rest/showcase migration as separate TDD slices.
+1. Keep map/shop/rest/showcase migration as separate TDD slices.
+2. Keep PR #11 draft until review/merge approval.
 
 Do not merge later PRs without explicit user approval.

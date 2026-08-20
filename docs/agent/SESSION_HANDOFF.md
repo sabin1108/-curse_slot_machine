@@ -58,7 +58,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
 | `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
 | `feature/content-effect-schema-pilot` | `8be060c` | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Merged |
-| `feature/ui-adapter-confirm-result` | local only | not opened | In progress |
+| `feature/ui-adapter-confirm-result` | `1b68c65` plus projection extraction follow-up | https://github.com/sabin1108/-curse_slot_machine/pull/11 | Draft |
 
 ## Verification Commands
 
@@ -109,22 +109,24 @@ Latest completed verification:
 - `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 40 tests across 9 files.
 - `feature/content-effect-schema-pilot`: `npm.cmd run build` passed.
 - `feature/ui-adapter-confirm-result`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because confirm used mutable UI `currentResult`, then passed with 5 tests after implementation.
+- `feature/ui-adapter-confirm-result`: targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts` failed first because `UiProjection.ts` did not exist.
+- `feature/ui-adapter-confirm-result`: targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts` passed with 7 tests after helper extraction.
 - `feature/ui-adapter-confirm-result`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-confirm-result`: full `npm.cmd run test:run` passed with 41 tests across 9 files.
+- `feature/ui-adapter-confirm-result`: full `npm.cmd run test:run` passed with 43 tests across 10 files.
 - `feature/ui-adapter-confirm-result`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
 - `feature/content-effect-schema-pilot` was merged through PR #10.
-- `feature/ui-adapter-confirm-result` is local only and not yet pushed/opened.
+- `feature/ui-adapter-confirm-result` is open as draft PR #11 and must not be merged without explicit user approval.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. If approved, commit, push, and open a draft PR for `feature/ui-adapter-confirm-result`.
-2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+1. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+2. Keep PR #11 draft until review/merge approval.
 
 ## Branch Log
 
@@ -211,8 +213,9 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-confirm-result`
 - Base: `main` after PR #10 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `1b68c65` plus projection helper extraction follow-up.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/11 (draft).
 - Implemented: `CONFIRM_SLOT_RESULT` now prefers adapter-owned pure `currentStructuredSlot` instead of mutable UI `currentResult`.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Remaining issues: projection helper extraction and map/shop/rest/showcase migration remain future slices.
+- Implemented: `UiProjection.ts` now owns reusable pure conversions for structured slot results, rewards, augments, synergies, and reel indexes.
+- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
+- Remaining issues: map/shop/rest/showcase migration remain future slices.
