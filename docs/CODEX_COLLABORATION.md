@@ -433,5 +433,5 @@
 
 ### GitHub
 
-- Draft PR pending creation for `feature/ui-adapter-node-type-routing`.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/14
 - Merge policy: no merge without explicit user approval.

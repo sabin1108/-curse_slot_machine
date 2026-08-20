@@ -61,7 +61,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/ui-adapter-confirm-result` | `e8c5884` | https://github.com/sabin1108/-curse_slot_machine/pull/11 | Merged |
 | `feature/ui-adapter-map-node` | `9955372` | https://github.com/sabin1108/-curse_slot_machine/pull/12 | Merged |
 | `feature/ui-adapter-select-map-node` | `1877c21` | https://github.com/sabin1108/-curse_slot_machine/pull/13 | Merged |
-| `feature/ui-adapter-node-type-routing` | local changes | not opened | In progress |
+| `feature/ui-adapter-node-type-routing` | `723e0c1` | https://github.com/sabin1108/-curse_slot_machine/pull/14 | Draft |
 
 ## Verification Commands
 
@@ -136,14 +136,14 @@ Latest completed verification:
 - `feature/ui-adapter-confirm-result` was merged through PR #11.
 - `feature/ui-adapter-map-node` was merged through PR #12.
 - `feature/ui-adapter-select-map-node` was merged through PR #13.
-- `feature/ui-adapter-node-type-routing` is local and verified; draft PR creation is pending.
+- `feature/ui-adapter-node-type-routing` is pushed and open as draft PR #14.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Commit, push, and open a draft PR for `feature/ui-adapter-node-type-routing`.
+1. Keep PR #14 draft until review and explicit merge approval.
 2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until event/showcase state is covered.
 
 ## Branch Log
@@ -271,8 +271,8 @@ Latest completed verification:
 - Branch: `feature/ui-adapter-node-type-routing`
 - Base: `main` after PR #13 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: local changes only; not committed or pushed yet.
-- PR: not opened yet.
+- Commit: `723e0c1`
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/14
 - Implemented: `SELECT_MAP_NODE` accepts optional `nodeType`, `UiGameEngine` routes typed map nodes to `SHOP`, `REST`, or battle entry, and `DungeonMapScreen` stops dispatching duplicate `NAVIGATE` commands for battle/shop/rest node selections.
 - Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
 - Remaining issues: event/showcase migration remain future slices.
