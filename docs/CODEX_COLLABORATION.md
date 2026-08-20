@@ -627,3 +627,33 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/20
 - Head commit: `428b1ca`.
 - Merge policy: no merge without explicit user approval.
+
+## 2026-08-20 - Showcase Step Header Spacing
+
+### Human Direction
+
+- User approved merging PR #20 and continuing with the next accepted Showcase QA polish slice.
+- Keep the fix scoped to `SHOWCASE-QA-003`.
+
+### Codex Work
+
+- Merged PR #20 after approval; squash merge commit on `main`: `61744f1`.
+- Created `feature/showcase-step-header-spacing` from updated `main`.
+- Added `docs/superpowers/plans/2026-08-20-showcase-step-header-spacing.md`.
+- Wrote a failing `ShowcaseOverlay` component test for dedicated step heading separation.
+- Updated `ShowcaseOverlay` to render separate `.step-num`, `.step-separator`, and `.step-title` elements.
+- Added CSS spacing/wrapping hooks so the step counter and Korean title do not visually run together.
+
+### Verification
+
+- `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx`: failed first because `.showcase-step-heading` did not exist, then passed after implementation.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 58 tests across 11 files.
+- `npm.cmd run build`: passed.
+- Focused Playwright browser check passed: step 4 heading visible, separator renders `•`, computed heading gap is `10px`.
+
+### GitHub
+
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/21
+- Head commit: `8ba4287`.
+- Merge policy: no merge without explicit user approval.

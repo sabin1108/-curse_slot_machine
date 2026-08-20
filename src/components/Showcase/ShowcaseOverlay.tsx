@@ -21,8 +21,11 @@ export const ShowcaseOverlay: React.FC<ShowcaseOverlayProps> = ({ currentStepInd
       <div className="showcase-badge">🏆 3분 대회 시연 모드 (SHOWCASE MODE)</div>
 
       <div className="showcase-step-info">
-        <span className="step-num">STEP {currentStep.stepIndex} / {steps.length}</span>
-        <strong>{currentStep.title}</strong>
+        <div className="showcase-step-heading">
+          <span className="step-num">STEP {currentStep.stepIndex} / {steps.length}</span>
+          <span className="step-separator" aria-hidden="true">•</span>
+          <strong className="step-title">{currentStep.title}</strong>
+        </div>
         <p>{currentStep.instruction}</p>
         <div className="highlight-callout">⚡ {currentStep.highlightMessage}</div>
       </div>
