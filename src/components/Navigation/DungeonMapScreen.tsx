@@ -110,6 +110,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
   const handleSelectNode = (node: MapNodeData) => {
     soundManager.playClick();
     if (node.type === 'EVENT') {
+      onDispatch({ type: 'SELECT_MAP_NODE', nodeId: node.id, nodeType: node.type });
       setActiveEventNode(node);
       return;
     }

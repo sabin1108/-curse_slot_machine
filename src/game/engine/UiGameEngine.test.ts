@@ -164,6 +164,31 @@ describe('UiGameEngine', () => {
     expect(afterInvalidConfirm.screen).toBe('REST')
   })
 
+  it('selects an event map node into clean map event entry without resolving a stale slot', () => {
+    const engine = new GameEngine('lethal-ui-24')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    const chosenRewardId = rewardState.rewardCandidates[0].id
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    const eventState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
+    const enemyHpBeforeConfirm = eventState.enemy.hp
+
+    expect(eventState.screen).toBe('MAP')
+    expect(eventState.visitedNodePath).toContain(6)
+    expect(eventState.currentResult).toBeNull()
+    expect(eventState.hasSpunThisTurn).toBe(false)
+    expect(eventState.lockedReels.size).toBe(0)
+
+    const afterInvalidConfirm = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(afterInvalidConfirm.enemy.hp).toBe(enemyHpBeforeConfirm)
+    expect(afterInvalidConfirm.screen).toBe('MAP')
+  })
+
   it('confirms the adapter-owned pure slot result even if UI currentResult is mutated', () => {
     const engine = new GameEngine('slot-ui')
 
