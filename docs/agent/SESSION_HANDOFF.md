@@ -56,7 +56,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
 | `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
 | `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
-| `feature/content-effect-schema-pilot` | `5ba1851` plus pending follow-up | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Draft PR open |
+| `feature/content-effect-schema-pilot` | `a261089` | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Draft PR open |
 
 ## Verification Commands
 
@@ -115,8 +115,8 @@ Latest completed verification:
 
 ## Next Session Work
 
-1. Commit and push the verified reward projection follow-up to PR #10.
-2. Expand adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+1. Expand adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
+2. Keep PR #10 draft until review and explicit human merge approval.
 3. Continue `feature/showcase-mode` after the effect pilot decision.
 
 ## Branch Log
@@ -191,7 +191,7 @@ Latest completed verification:
 - Branch: `feature/content-effect-schema-pilot`
 - Base: `main` after PR #8 merge.
 - Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `5ba1851` plus reward projection follow-up pending commit.
+- Commit: `a261089`.
 - PR: https://github.com/sabin1108/-curse_slot_machine/pull/10 (draft).
 - Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, and structured victory reward projection for the RewardModal contract.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.

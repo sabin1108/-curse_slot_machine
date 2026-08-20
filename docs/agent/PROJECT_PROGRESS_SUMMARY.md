@@ -43,7 +43,7 @@ Implemented:
 Current branch commits:
 
 - `5ba1851` - `feat: add bounded content effect pilot`
-- follow-up reward projection changes are verified and pending commit.
+- `a261089` - `feat: project structured rewards to ui adapter`
 
 ## Verification
 
@@ -75,8 +75,8 @@ TDD evidence:
 
 Next planned work:
 
-1. Finish verification, commit, and push the reward projection follow-up to PR #10.
-2. Expand adapter coverage only where needed: structured slot spinning and map/shop/rest migration should stay separate TDD slices.
-3. Continue with `feature/showcase-mode` after the effect pilot is reviewed.
+1. Expand adapter coverage only where needed: structured slot spinning and map/shop/rest migration should stay separate TDD slices.
+2. Continue with `feature/showcase-mode` after the effect pilot is reviewed.
+3. Keep PR #10 draft until human review/approval.
 
 Do not merge later PRs without explicit user approval.
