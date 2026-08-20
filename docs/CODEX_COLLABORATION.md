@@ -236,3 +236,53 @@
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/8
 - Implementation commit: `e57b615`; PR documentation updates are included on the branch.
 - Merge policy: no merge without explicit user approval.
+
+### Merge Result
+
+- User approved merging PR #8 on 2026-08-20.
+- PR #8 was marked ready and squash merged into `main`.
+- PR #8 squash merge commit: `ca51454`.
+
+## 2026-08-20 - Content Effect Schema Pilot
+
+### Human Direction
+
+- Merge PR #8 and continue the next work.
+- Use the meeting feedback about insufficient item/augment/synergy logic.
+- Keep new gameplay logic in pure TypeScript systems and avoid large structure changes without approval.
+
+### Codex Work
+
+- Created `feature/content-effect-schema-pilot` from updated `main` after PR #8 merge.
+- Added content logic analysis and design documents:
+  - `docs/agent/CONTENT_LOGIC_ANALYSIS.md`
+  - `docs/design/CONTENT_EFFECT_SCHEMA_PLAN.md`
+  - `docs/design/PILOT_AUGMENT_ITEM_SYNERGY_SETS.md`
+  - `docs/design/MVP_REWARD_AND_STAGE_FLOW.md`
+  - `docs/agent/feedback/*`
+- Added a branch implementation plan under `docs/superpowers/plans/`.
+- Wrote failing `BuildSystem` test before adding `getActiveEffects`.
+- Added bounded `EffectDefinition` and `EffectCondition` types.
+- Implemented active effect resolution from owned rewards and completed synergies.
+- Wrote failing `CombatSystem` tests before adding combat effect context.
+- Implemented initial combat effects for action amount adjustment, bullet extra hit, and curse gain adjustment.
+- Wrote failing pure `GameEngine` test before passing active build effects into combat.
+- Added a default `combo_engine` structured extra-hit effect and pure engine integration.
+- Used a read-only `explore` subagent to verify the UI/engine split before adapter work.
+- Wrote failing `UiGameEngine` adapter test before adding a UI-facing bridge to structured reward/combat effects.
+- Switched `App.tsx` to import the adapter after the existing App render test passed.
+
+### Verification
+
+- `npm.cmd run test:run -- src/game/build/BuildSystem.test.ts`: failed first because `getActiveEffects` did not exist, then passed with 4 tests.
+- `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts`: failed first because combat effects were ignored, then passed with 7 tests.
+- `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts`: failed first because active build effects were not passed into combat, then passed with 6 tests.
+- `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts`: failed first because `UiGameEngine` did not exist, then passed with 1 test.
+- `npm.cmd run test:run -- src/app/App.test.tsx`: passed before and after the adapter import switch.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 37 tests across 9 files.
+- `npm.cmd run build`: passed.
+
+### Remaining Gap
+
+- The visible React app imports `src/game/engine/UiGameEngine.ts`, which preserves the current UI state contract and delegates ordinary legacy commands while exposing a narrow structured combo-effect combat path. Full legacy engine retirement remains out of scope for this branch.

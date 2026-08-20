@@ -1,15 +1,15 @@
 # Project Progress Summary
 
-Last updated: 2026-08-19
+Last updated: 2026-08-20
 
 ## Repository
 
 - GitHub: https://github.com/sabin1108/-curse_slot_machine
 - Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 - Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/augment-slot-machine`
-- Current PR: https://github.com/sabin1108/-curse_slot_machine/pull/8
-- PR #8 status: open draft, not merged.
+- Current branch: `feature/content-effect-schema-pilot`
+- Current PR: not opened yet
+- PR #8 status: merged into `main` with squash commit `ca51454`.
 
 ## Completed Branches
 
@@ -20,39 +20,43 @@ Last updated: 2026-08-19
 | `feature/combat-slot-machine` | #3 | `6edc91d` | Merged |
 | `feature/combat-resolution` | #6 | `445265a` | Merged |
 | `feature/build-reward-synergy` | #7 | `622f52f` | Merged |
+| `feature/augment-slot-machine` | #8 | `ca51454` | Merged |
 
 ## Current Branch
 
-`feature/augment-slot-machine` is implemented and pushed as draft PR #8.
+`feature/content-effect-schema-pilot` is implemented locally and not yet pushed.
 
 Implemented:
 
-- Pure `AugmentSlotMachine` presentation module under `src/game/slot`.
-- `AugmentSlotPresentation` types with three reels: primary tag, rarity, reward name.
-- Hidden reward presentation creation from a preselected `RewardOption`.
-- Immutable reveal helper.
-- Random API guard test proving augment slot presentation does not decide reward RNG.
-- `GameEngine` reward state integration through `rewards.augmentSlot`.
-- `REWARDS_GENERATED` event now carries the same augment slot presentation.
-- `CHOOSE_REWARD` clears reward options and augment slot presentation.
+- Content logic analysis and MVP schema/design documents under `docs/agent` and `docs/design`.
+- Agent feedback documents and cumulative feedback index under `docs/agent/feedback`.
+- Bounded `EffectDefinition` and `EffectCondition` types under `src/game/effects`.
+- `BuildSystem.getActiveEffects(build, catalog)` for owned reward effects and completed synergy effects.
+- Optional combat effect context in `CombatSystem`.
+- Initial supported combat effects: `combat.action_amount.add`, `combat.action_amount.add_pct`, `combat.bullet.extra_hit`, and `combat.curse_gain.add`.
+- Default `combo_engine` now has a bounded `combo_extra_hit` structured effect.
+- Pure `GameEngine` passes active build effects into combat resolution.
+- UI adapter `src/game/engine/UiGameEngine.ts` bridges structured reward/combat results into the current React-facing state contract for a narrow combo-effect path.
+- `src/app/App.tsx` now imports the UI adapter while unsupported UI commands continue to delegate to the legacy engine.
 
 Current branch commits:
 
-- `e57b615` - `feat: add augment slot machine`
-- `22a40f9` - `docs: record augment slot PR`
+- none yet; local changes are verified but uncommitted.
 
 ## Verification
 
-Latest verification on `feature/augment-slot-machine`:
+Latest verification on `feature/content-effect-schema-pilot`:
 
 - `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 27 tests across 8 files.
+- `npm.cmd run test:run`: passed, 37 tests across 9 files.
 - `npm.cmd run build`: passed.
 
 TDD evidence:
 
-- `src/game/slot/AugmentSlotMachine.test.ts` failed first because the module did not exist, then passed after implementation.
-- `src/game/engine/GameEngine.test.ts` failed first because reward state/events did not include augment slot presentation, then passed after integration.
+- `src/game/build/BuildSystem.test.ts` failed first because `getActiveEffects` did not exist, then passed after implementation.
+- `src/game/combat/CombatSystem.test.ts` failed first because combat effects were ignored, then passed after implementation.
+- `src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed after integration.
+- `src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed after adding the adapter.
 
 ## Architecture Decisions Preserved
 
@@ -62,13 +66,14 @@ TDD evidence:
 - `RewardSystem` owns reward option generation.
 - `AugmentSlotMachine` only presents a preselected reward result and must not call random APIs to decide rewards.
 - Showcase Mode remains separate and must not mutate normal combat balance.
+- Content effects are bounded typed data, not free-form scripts.
 
 ## Remaining Work
 
-Next planned branch after PR #8 is approved and merged:
+Next planned work:
 
-1. `feature/showcase-mode`
-2. `feature/ui-ux-battle-flow`
-3. `feature/e2e-release-checks`
+1. Commit and push `feature/content-effect-schema-pilot`, then open a draft PR if approved.
+2. Expand adapter coverage only where needed: reward candidate projection, structured slot spinning, and map/shop/rest migration should stay separate TDD slices.
+3. Continue with `feature/showcase-mode` after the effect pilot is reviewed.
 
-Do not merge PR #8 or later PRs without explicit user approval.
+Do not merge later PRs without explicit user approval.

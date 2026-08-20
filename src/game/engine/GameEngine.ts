@@ -1,4 +1,4 @@
-import { applyReward } from '../build/BuildSystem'
+import { applyReward, getActiveEffects } from '../build/BuildSystem'
 import { generateRewardOptions } from '../build/RewardSystem'
 import { resolveCombatSlot } from '../combat/CombatSystem'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
@@ -74,7 +74,9 @@ export class GameEngine {
   }
 
   private resolveCombatSlot(command: Extract<GameCommand, { type: 'RESOLVE_COMBAT_SLOT' }>): GameEvent[] {
-    const resolution = resolveCombatSlot(this.state.combat, command.result)
+    const resolution = resolveCombatSlot(this.state.combat, command.result, {
+      effects: getActiveEffects(this.state.build),
+    })
     const turn = this.state.turn + 1
     const rewards = resolution.outcome === 'victory' ? generateRewardOptions(this.state.build) : []
     const augmentSlot = rewards.length > 0 ? createAugmentSlotPresentation(rewards[0]) : null

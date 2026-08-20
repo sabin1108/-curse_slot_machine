@@ -58,6 +58,13 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
         { tag: 'MULTI_HIT', count: 1, source: 'item' },
       ],
       effectId: 'combo_damage_bonus',
+      effects: [
+        {
+          id: 'combo_extra_hit',
+          type: 'combat.bullet.extra_hit',
+          params: { percent: 50 },
+        },
+      ],
     },
     {
       id: 'risk_engine',
