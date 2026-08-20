@@ -84,6 +84,7 @@ export class GameEngine {
     if (command.type === 'CHOOSE_REWARD') {
       const reward = getStructuredReward(command.augmentId)
       if (reward) {
+        const shouldAdvanceMapShell = this.presentation.screen === 'REWARD'
         this.structured.dispatch({
           type: 'CHOOSE_REWARD',
           reward: {
@@ -91,7 +92,11 @@ export class GameEngine {
             id: reward.id,
           },
         })
+        if (shouldAdvanceMapShell) {
+          this.presentation = this.legacy.dispatch(command)
+        }
         this.projectStructuredBuild()
+        this.projectStructuredRewards()
         this.presentation.combatLogs.push(`[Reward] ${reward.name}`)
         return this.presentation
       }

@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, and `feature/content-effect-schema-pilot` are merged; current work is `feature/ui-adapter-confirm-result`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. `feature/project-baseline`, `feature/game-engine-core`, `feature/combat-slot-machine`, `feature/combat-resolution`, `feature/build-reward-synergy`, `feature/augment-slot-machine`, `feature/content-effect-schema-pilot`, and `feature/ui-adapter-confirm-result` are merged; current work is `feature/ui-adapter-map-node`. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
 
 ## Source Documents Read
 
@@ -31,7 +31,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 - Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
 - Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
 - Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `feature/ui-adapter-confirm-result`.
+- Current branch: `feature/ui-adapter-map-node`.
 - Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
 - `gh auth status` succeeds for `kimcheolhui9846`.
 - Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
@@ -43,7 +43,7 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
 - Base branch: `main`
-- Current branch: `feature/ui-adapter-confirm-result`
+- Current branch: `feature/ui-adapter-map-node`
 - Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
 - Merge policy: no PR merge without explicit user approval.
 
@@ -58,7 +58,8 @@ Implement the Curse Slot Machine web game prototype branch by branch from a fres
 | `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
 | `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
 | `feature/content-effect-schema-pilot` | `8be060c` | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Merged |
-| `feature/ui-adapter-confirm-result` | `1b68c65` plus projection extraction follow-up | https://github.com/sabin1108/-curse_slot_machine/pull/11 | Draft |
+| `feature/ui-adapter-confirm-result` | `e8c5884` | https://github.com/sabin1108/-curse_slot_machine/pull/11 | Merged |
+| `feature/ui-adapter-map-node` | `e897a7e` | https://github.com/sabin1108/-curse_slot_machine/pull/12 | Draft |
 
 ## Verification Commands
 
@@ -114,19 +115,24 @@ Latest completed verification:
 - `feature/ui-adapter-confirm-result`: `npm.cmd run typecheck` passed.
 - `feature/ui-adapter-confirm-result`: full `npm.cmd run test:run` passed with 43 tests across 10 files.
 - `feature/ui-adapter-confirm-result`: `npm.cmd run build` passed.
+- `feature/ui-adapter-map-node`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured reward selection left UI on `REWARD`, then passed with 6 tests after implementation.
+- `feature/ui-adapter-map-node`: `npm.cmd run typecheck` passed.
+- `feature/ui-adapter-map-node`: full `npm.cmd run test:run` passed with 44 tests across 10 files.
+- `feature/ui-adapter-map-node`: `npm.cmd run build` passed.
 
 ## Remaining Problems
 
 - `feature/content-effect-schema-pilot` was merged through PR #10.
-- `feature/ui-adapter-confirm-result` is open as draft PR #11 and must not be merged without explicit user approval.
+- `feature/ui-adapter-confirm-result` was merged through PR #11.
+- `feature/ui-adapter-map-node` is pushed and open as draft PR #12; do not merge without explicit user approval.
 - The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
 - Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
 - `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
 
 ## Next Session Work
 
-1. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
-2. Keep PR #11 draft until review/merge approval.
+1. Keep PR #12 draft until review/merge approval.
+2. Continue adapter coverage only through small TDD slices; do not directly swap React to the structured engine until map/shop/rest/showcase state is covered.
 
 ## Branch Log
 
@@ -218,4 +224,17 @@ Latest completed verification:
 - Implemented: `CONFIRM_SLOT_RESULT` now prefers adapter-owned pure `currentStructuredSlot` instead of mutable UI `currentResult`.
 - Implemented: `UiProjection.ts` now owns reusable pure conversions for structured slot results, rewards, augments, synergies, and reel indexes.
 - Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
+- Merge result: user approved merging PR #11 on 2026-08-20; PR #11 was marked ready and squash merged into `main`.
+- Squash merge commit: `e8c5884`.
 - Remaining issues: map/shop/rest/showcase migration remain future slices.
+
+### feature/ui-adapter-map-node
+
+- Branch: `feature/ui-adapter-map-node`
+- Base: `main` after PR #11 merge.
+- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
+- Commit: `e897a7e`.
+- PR: https://github.com/sabin1108/-curse_slot_machine/pull/12 (draft).
+- Implemented: structured reward selection now returns the visible UI to `MAP`, clears reward candidates and augment slot presentation, advances legacy map/wave/enemy shell state, and preserves projected structured build ownership.
+- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
+- Remaining issues: deeper map node semantics, shop/rest/showcase migration remain future slices.
