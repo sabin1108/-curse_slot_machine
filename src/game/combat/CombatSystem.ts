@@ -19,6 +19,8 @@ const COMBAT_BASE_VALUES = {
   shieldBlock: 5,
   heartHealing: 4,
   enemyAttack: 4,
+  enemyDefense: 1,
+  enemyBlockCap: 2,
 } as const
 
 const MODIFIER_MULTIPLIER = {
@@ -63,7 +65,7 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     enemyIntent: {
       type: enemyIntentType,
       baseAmount: enemyIntentBaseAmount,
-      amount: overrides.enemyIntent?.amount ?? (enemyIntentType === 'wait' ? 0 : enemyIntentBaseAmount),
+      amount: overrides.enemyIntent?.amount ?? getIntentAmount(enemyIntentType, enemyIntentBaseAmount, 0),
     },
     statuses: {
       player: (overrides.statuses?.player ?? []).map((status) => ({ ...status })),
@@ -259,8 +261,12 @@ export function resolveCombatSlot(
         blocked: resolved.blocked,
         healthLost: resolved.healthLost,
       })
-    } else {
+    } else if (enemyIntent.type === 'wait') {
       events.push({ type: 'ENEMY_WAITED' })
+    } else {
+      const defenseGained = Math.min(COMBAT_BASE_VALUES.enemyDefense, Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block))
+      enemy = { ...enemy, block: enemy.block + defenseGained }
+      events.push({ type: 'ENEMY_DEFENDED', amount: defenseGained })
     }
   }
 
@@ -585,15 +591,21 @@ export function getCurseAttackBonus(value: number): number {
 function getPressuredIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
   return {
     ...intent,
-    amount: intent.type === 'wait' ? 0 : intent.baseAmount + getCurseAttackBonus(curseValue),
+    amount: getIntentAmount(intent.type, intent.baseAmount, curseValue),
   }
 }
 
 function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
   return getPressuredIntent({
     ...intent,
-    type: intent.type === 'attack' ? 'wait' : 'attack',
+    type: intent.type === 'attack' ? 'wait' : intent.type === 'wait' ? 'defend' : 'attack',
   }, curseValue)
+}
+
+function getIntentAmount(type: CombatState['enemyIntent']['type'], baseAmount: number, curseValue: number): number {
+  if (type === 'wait') return 0
+  if (type === 'defend') return COMBAT_BASE_VALUES.enemyDefense
+  return baseAmount + getCurseAttackBonus(curseValue)
 }
 
 function getPreviewWarnings(state: CombatState, resolution: CombatResolution): string[] {

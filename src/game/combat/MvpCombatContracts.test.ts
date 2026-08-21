@@ -61,7 +61,7 @@ describe('MVP combat contracts', () => {
     expect(preview.endReason).toBe(resolved.endReason)
   })
 
-  it('alternates an enemy attack with a harmless wait intent', () => {
+  it('cycles enemy attack, wait, and low defense intents', () => {
     const attack = resolveCombatSlot(createCombatState({
       enemy: { maxHealth: 99, health: 99 },
     }), safeShot)
@@ -76,7 +76,13 @@ describe('MVP combat contracts', () => {
     expect(wait.player).toMatchObject({ health: healthAfterAttack, block: blockAfterAttack })
     expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
     expect(wait.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
-    expect(wait.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 4, amount: 4 })
+    expect(wait.enemyIntent).toMatchObject({ type: 'defend', baseAmount: 4, amount: 1 })
+
+    const defend = resolveCombatSlot(wait, { action: 'shield', target: 'self', modifier: 'x1' })
+
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(defend.enemy.block).toBe(1)
+    expect(defend.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 4, amount: 4 })
   })
 
   it('previews a wait as zero enemy damage without mutating combat state', () => {
@@ -92,6 +98,20 @@ describe('MVP combat contracts', () => {
     expect(state).toEqual(before)
     expect(preview.enemyAttack).toBe(0)
     expect(preview.playerHealthDelta).toBe(0)
+  })
+
+  it('previews low enemy defense and caps accumulated block at two', () => {
+    const state = createCombatState({
+      enemy: { maxHealth: 99, health: 99, block: 1 },
+      enemyIntent: { type: 'defend', baseAmount: 7, amount: 1 },
+    })
+
+    const preview = previewCombatSlot(state, { action: 'shield', target: 'self', modifier: 'x1' })
+    const result = resolveCombatSlot(state, { action: 'shield', target: 'self', modifier: 'x1' })
+
+    expect(preview).toMatchObject({ enemyAttack: 0, enemyBlockDelta: 1, playerHealthDelta: 0 })
+    expect(result.enemy.block).toBe(2)
+    expect(result.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
   })
 
   it('still ends the run at curse ten during a wait', () => {
@@ -118,7 +138,10 @@ describe('MVP combat contracts', () => {
     expect(preview.enemyAttack).toBe(7)
     expect(preview.warnings).toEqual(['저주 5: 다음 적 공격 +1'])
     expect(resolved.enemyIntent).toMatchObject({ type: 'wait', baseAmount: 7, amount: 0 })
-    expect(resolveCombatSlot(resolved, safeShot).enemyIntent).toMatchObject({ type: 'attack', baseAmount: 7, amount: 8 })
+    const waited = resolveCombatSlot(resolved, safeShot)
+    expect(waited.enemyIntent).toMatchObject({ type: 'defend', baseAmount: 7, amount: 1 })
+    const defended = resolveCombatSlot(waited, { action: 'shield', target: 'self', modifier: 'x1' })
+    expect(defended.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 7, amount: 8 })
   })
 
   it('moves the boss to phase two at half health and attacks for 10 on that turn', () => {
@@ -140,7 +163,7 @@ describe('MVP combat contracts', () => {
     expect(result.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED', amount: 10 }))
   })
 
-  it('keeps a boss wait intent through phase two and uses the new attack next turn', () => {
+  it('keeps the boss support cycle through phase two before using the new attack', () => {
     const phaseChange = resolveCombatSlot(createCombatState({
       enemy: {
         name: 'House Sovereign',
@@ -155,9 +178,13 @@ describe('MVP combat contracts', () => {
 
     expect(phaseChange.events).toContainEqual({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: 10 })
     expect(phaseChange.events).toContainEqual({ type: 'ENEMY_WAITED' })
-    expect(phaseChange.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 10, amount: 10 })
+    expect(phaseChange.enemyIntent).toMatchObject({ type: 'defend', baseAmount: 10, amount: 1 })
 
-    const nextTurn = resolveCombatSlot(phaseChange, safeShot)
+    const defend = resolveCombatSlot(phaseChange, { action: 'shield', target: 'self', modifier: 'x1' })
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(defend.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 10, amount: 10 })
+
+    const nextTurn = resolveCombatSlot(defend, safeShot)
     expect(nextTurn.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED', amount: 10 }))
   })
 

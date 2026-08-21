@@ -6,9 +6,9 @@ type OriginDemoTrace = { seed: string; tokens: readonly TraceToken[]; commands: 
 
 const TRACE_DATA: Record<OriginId, { seed: string; tokens: readonly TraceToken[] }> = {
   SWORDSMAN: {
-    seed: 'origin-wait-demo-swordsman-749',
+    seed: 'origin-defense-demo-swordsman-6399',
     tokens: [
-      'origin:SWORDSMAN','start','enter','spin','reroll','reroll','confirm','reward:cursed_lens','enter','spin','confirm','reward:safety_valve','enter','rest:purify','enter','leave','enter','spin','reroll','reroll','confirm','reward:debt_collector','enter','event:rest','enter','spin','reroll','confirm','reward:retaliation_matrix','enter','rest:purify','enter','spin','confirm','spin','confirm','reward:mirror_buckler','enter','leave','enter','spin','confirm','reward:combo_finisher','enter','rest:purify','enter','spin','confirm','reward:hexed_clutch','enter','event:rest','enter','spin','reroll','reroll','confirm','spin','reroll','confirm','spin','confirm','spin','confirm','spin','confirm',
+      'origin:SWORDSMAN','start','enter','spin','reroll','confirm','spin','reroll','reroll','confirm','reward:cursed_lens','enter','spin','confirm','spin','confirm','reward:safety_valve','enter','rest:purify','enter','leave','enter','spin','confirm','spin','reroll','confirm','reward:debt_collector','enter','event:rest','enter','spin','reroll','reroll','confirm','reward:retaliation_matrix','enter','rest:purify','enter','spin','confirm','spin','confirm','reward:mirror_buckler','enter','leave','enter','spin','confirm','reward:combo_finisher','enter','rest:purify','enter','spin','confirm','reward:hexed_clutch','enter','event:rest','enter','spin','confirm','spin','confirm','spin','reroll','reroll','confirm','spin','confirm',
     ],
   },
   GAMBLER: {

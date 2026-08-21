@@ -22,4 +22,15 @@ describe('UiProjection enemy intent', () => {
       description: '이번 턴에는 공격하지 않습니다.',
     })
   })
+
+  it('projects a low defense intent', () => {
+    expect(toUiEnemyIntent({ type: 'defend', baseAmount: 7, amount: 1 })).toEqual({
+      id: 'defend',
+      name: '방어 태세',
+      type: 'DEFEND',
+      value: 1,
+      icon: '🛡️',
+      description: '방어를 최대 1 얻습니다. (상한 2)',
+    })
+  })
 })

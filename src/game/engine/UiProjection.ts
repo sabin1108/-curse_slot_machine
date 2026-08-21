@@ -111,6 +111,16 @@ export function toUiEnemyIntent(intent: CoreEnemyIntent): UiGameState['enemy']['
       description: '이번 턴에는 공격하지 않습니다.',
     }
   }
+  if (intent.type === 'defend') {
+    return {
+      id: 'defend',
+      name: '방어 태세',
+      type: 'DEFEND',
+      value: intent.amount,
+      icon: '🛡️',
+      description: '방어를 최대 1 얻습니다. (상한 2)',
+    }
+  }
   return {
     id: 'attack',
     name: '예고된 공격',

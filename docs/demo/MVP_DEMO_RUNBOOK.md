@@ -6,7 +6,7 @@
 - 대표 seed: `origin-wait-demo-gambler-457`
 - 경로: 코어가 소유하는 고정 15스테이지 normal run
 - 명령 fixture: `src/game/demo/OriginDemoTraces.ts`
-- 오리진별 seed: 검사 `origin-wait-demo-swordsman-749`, 도박사 `origin-wait-demo-gambler-457`, 사제 `origin-demo-367`
+- 오리진별 seed: 검사 `origin-defense-demo-swordsman-6399`, 도박사 `origin-wait-demo-gambler-457`, 사제 `origin-demo-367`
 
 ## 실행
 
@@ -19,11 +19,12 @@ npm run dev -- --host 127.0.0.1
 ## 시연 포인트
 
 1. Stage 1에서 세 릴을 돌리고 잠금·리롤·정확한 preview를 확인한다. 도박사의 첫 리롤은 저주가 없다.
-2. 적 intent가 `공격 → 숨 고르기`로 교대하고, 숨 고르기 턴의 preview 공격량과 실제 피해가 0인지 확인한다.
-3. 전투 보상으로 증강과 아이템을 확보해 빌드 효과가 실제 전투 계산에 적용되는지 확인한다.
-4. 저주 5 경고와 다음 공격 증가를 확인하고 rest에서 저주를 정화한다.
-5. 상점 상품·가격·구매 수가 UI가 아니라 엔진 상태에서 오는지 확인한다.
-6. Stage 15에서 House Sovereign의 phase 2와 공격 10을 확인한 뒤 victory까지 진행한다.
+2. 적 intent가 `공격 → 숨 고르기 → 방어 태세`로 순환하고, 숨 고르기 턴의 preview 공격량과 실제 피해가 0인지 확인한다.
+3. 이어지는 `방어 태세`에서 적이 방어 1을 얻고, 누적 방어가 2를 넘지 않는지 확인한다.
+4. 전투 보상으로 증강과 아이템을 확보해 빌드 효과가 실제 전투 계산에 적용되는지 확인한다.
+5. 저주 5 경고와 다음 공격 증가를 확인하고 rest에서 저주를 정화한다.
+6. 상점 상품·가격·구매 수가 UI가 아니라 엔진 상태에서 오는지 확인한다.
+7. Stage 15에서 House Sovereign의 phase 2와 공격 10을 확인한 뒤 victory까지 진행한다.
 
 ## 자동 판정 증거
 
