@@ -21,7 +21,7 @@ describe('GameEngine', () => {
     const commands = [
       { type: 'START_RUN' },
       { type: 'ENTER_NEXT_STAGE' },
-      { type: 'ADVANCE_TURN' },
+      { type: 'SPIN_COMBAT_SLOT' },
     ] as const
     const first = new GameEngine('lucky-curse')
     const second = new GameEngine('lucky-curse')
@@ -33,7 +33,7 @@ describe('GameEngine', () => {
     expect(first.getState()).toEqual(second.getState())
     expect(first.getState()).toMatchObject({
       phase: 'battle',
-      turn: 1,
+      turn: 0,
       log: expect.arrayContaining([expect.any(Number)]),
     })
   })
@@ -363,8 +363,10 @@ describe('GameEngine', () => {
 
     engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
     const goldBefore = engine.getState().economy.gold
-    engine.dispatch({ type: 'BUY_SHOP_ITEM', rewardId: 'steadfast_latch' })
-    expect(goldBefore - engine.getState().economy.gold).toBe(60)
+    const offer = engine.getState().shop.offers[0]
+    engine.dispatch({ type: 'BUY_SHOP_ITEM', rewardId: offer.reward.id })
+    expect(goldBefore - engine.getState().economy.gold).toBe(offer.price)
+    expect(offer.price).toBe(Math.floor(offer.basePrice * 0.75))
     expect(engine.getState().economy).toMatchObject({
       pendingShopDiscountPct: 0,
       pendingPurchaseCurseReduction: 0,
@@ -388,9 +390,10 @@ describe('GameEngine', () => {
     engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
     expect(engine.getState().phase).toBe('shop')
     const goldBeforePurchase = engine.getState().economy.gold
-    engine.dispatch({ type: 'BUY_SHOP_ITEM', rewardId: 'guard_core' })
+    const shopOffer = engine.getState().shop.offers.find((offer) => offer.price <= goldBeforePurchase)!
+    engine.dispatch({ type: 'BUY_SHOP_ITEM', rewardId: shopOffer.reward.id })
     expect(engine.getState().economy.gold).toBeLessThan(goldBeforePurchase)
-    expect(engine.getState().build.augments).toContain('guard_core')
+    expect(engine.getState().build[`${shopOffer.reward.kind}s`]).toContain(shopOffer.reward.id)
     engine.dispatch({ type: 'LEAVE_SHOP' })
     expect(engine.getState()).toMatchObject({ phase: 'map', run: { completedStageIds: [1, 2, 3, 4] } })
 
@@ -417,6 +420,7 @@ describe('GameEngine', () => {
           engine.dispatch({
             type: 'RESOLVE_COMBAT_SLOT',
             result: { action: 'bullet', target: 'enemy', modifier: 'x3' },
+            originTrait: 'gambler',
           })
           combatTurns += 1
         }
@@ -445,6 +449,7 @@ function completeCombatStage(engine: GameEngine): void {
   engine.dispatch({
     type: 'RESOLVE_COMBAT_SLOT',
     result: { action: 'bullet', target: 'enemy', modifier: 'x3' },
+    originTrait: 'gambler',
   })
 
   const reward = engine.getState().rewards.options[0]

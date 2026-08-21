@@ -10,15 +10,21 @@ export type CombatActorState = {
   maxHealth: number
   health: number
   block: number
+  phase?: 1 | 2
+  phaseTwoThreshold?: number
+  phaseTwoAttack?: number
 }
 
 export type EnemyIntent = {
   type: 'attack'
+  baseAmount: number
   amount: number
 }
 
 export type CurseState = {
   value: number
+  max: 10
+  attackBonus: number
 }
 
 export type CombatStatusStack = {
@@ -40,6 +46,20 @@ export type CombatState = {
 }
 
 export type CombatOutcome = 'ongoing' | 'victory' | 'defeat'
+
+export type CombatEndReason = 'enemy_defeated' | 'player_defeated' | 'curse_overload'
+
+export type CombatPreview = {
+  playerHealthDelta: number
+  playerBlockDelta: number
+  enemyHealthDelta: number
+  enemyBlockDelta: number
+  curseDelta: number
+  enemyAttack: number
+  outcome: CombatOutcome
+  endReason?: CombatEndReason
+  warnings: string[]
+}
 
 export type CombatEvent =
   | {
@@ -74,6 +94,7 @@ export type CombatEvent =
   | {
       type: 'COMBAT_ENDED'
       outcome: Exclude<CombatOutcome, 'ongoing'>
+      reason: CombatEndReason
     }
   | {
       type: 'STATUS_APPLIED'
@@ -91,10 +112,21 @@ export type CombatEvent =
       type: 'CURSE_PREVENTED'
       effectId: string
     }
+  | {
+      type: 'CURSE_THRESHOLD_REACHED'
+      threshold: 5 | 8 | 10
+      attackBonus: number
+    }
+  | {
+      type: 'BOSS_PHASE_CHANGED'
+      phase: 2
+      attack: number
+    }
 
 export type CombatResolution = CombatState & {
   events: CombatEvent[]
   outcome: CombatOutcome
+  endReason?: CombatEndReason
 }
 
 export type CombatEffectContext = {

@@ -2,7 +2,7 @@ import { createBuildState } from '../build/BuildSystem'
 import type { BuildState } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import { createCombatState } from '../combat/CombatSystem'
-import type { CombatState } from '../combat/CombatTypes'
+import type { CombatPreview, CombatState } from '../combat/CombatTypes'
 import type { AugmentSlotPresentation } from '../slot/AugmentSlotTypes'
 import type { CombatSlotLocks, CombatSlotResult } from '../slot/CombatSlotTypes'
 import { createSeededRng, type RngSeed, type RngSnapshot } from './rng'
@@ -11,6 +11,12 @@ import type { RunState } from '../run/RunTypes'
 import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 
 export type GamePhase = 'idle' | 'map' | 'battle' | 'reward' | 'shop' | 'rest' | 'event' | 'victory' | 'defeat'
+
+export type ShopOffer = {
+  reward: RewardOption
+  basePrice: number
+  price: number
+}
 
 export type GameState = {
   seed: RngSeed
@@ -28,8 +34,12 @@ export type GameState = {
   }
   slot: {
     current: CombatSlotResult | null
+    preview: CombatPreview | null
     locks: Required<CombatSlotLocks>
     hasSpun: boolean
+  }
+  shop: {
+    offers: ShopOffer[]
   }
   combat: CombatState
   build: BuildState
@@ -55,6 +65,7 @@ export function createInitialGameState(seed: RngSeed): GameState {
       pendingPurchaseCurseReduction: 0,
     },
     slot: createEmptySlotState(),
+    shop: { offers: [] },
     combat: createCombatState(),
     build: createBuildState({}, MVP_BUILD_CATALOG),
     rewards: {
@@ -67,6 +78,7 @@ export function createInitialGameState(seed: RngSeed): GameState {
 export function createEmptySlotState(): GameState['slot'] {
   return {
     current: null,
+    preview: null,
     locks: { action: false, target: false, modifier: false },
     hasSpun: false,
   }

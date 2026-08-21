@@ -2138,6 +2138,11 @@ html, body {
 .slot-sentence .locked { color: #19120b; background: #d79a42; border-color: #ffd37c; }
 .slot-sentence strong, .slot-sentence b { font: 800 24px/1 var(--font-display); text-transform: uppercase; }
 .slot-sentence small, .slot-sentence span { font-size: 11px; text-transform: uppercase; }
+.mvp-warning { padding: 10px 14px; color: #ffd9c7 !important; background: #4b1720; border: 1px solid #d85b68; border-radius: 6px; font-weight: 800; }
+.mvp-preview { display: grid; gap: 6px; margin: -10px 0 18px; padding: 14px; text-align: left; background: #111722; border: 1px solid #47708b; border-radius: 6px; }
+.mvp-preview h2 { margin: 0 0 4px; color: #7fd8ff; font: 700 13px/1 var(--font-display); letter-spacing: .12em; }
+.mvp-preview p { margin: 0; color: #c7d9e3; }
+.mvp-preview strong { color: #ff9c86; }
 .reward-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
 .reward-grid button { display: grid; gap: 10px; min-height: 180px; text-align: left; }
 .reward-grid strong { color: #ffd37c; font-size: 18px; }

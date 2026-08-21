@@ -4,7 +4,9 @@ import type {
   CombatActorState,
   CombatEvent,
   CombatEffectContext,
+  CombatEndReason,
   CombatOutcome,
+  CombatPreview,
   CombatResolution,
   CombatState,
   CombatStateOverrides,
@@ -52,9 +54,12 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     enemy,
     curse: {
       value: overrides.curse?.value ?? 0,
+      max: 10,
+      attackBonus: getCurseAttackBonus(overrides.curse?.value ?? 0),
     },
     enemyIntent: {
       type: overrides.enemyIntent?.type ?? 'attack',
+      baseAmount: overrides.enemyIntent?.baseAmount ?? overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack,
       amount: overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack,
     },
     statuses: {
@@ -63,6 +68,25 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     },
     effectUses: [...(overrides.effectUses ?? [])],
     ...(overrides.lastSlotResult ? { lastSlotResult: overrides.lastSlotResult } : {}),
+  }
+}
+
+export function previewCombatSlot(
+  state: CombatState,
+  slotResult: CombatSlotResult,
+  context: CombatEffectContext = {},
+): CombatPreview {
+  const resolution = resolveCombatSlot(state, slotResult, context)
+  return {
+    playerHealthDelta: resolution.player.health - state.player.health,
+    playerBlockDelta: resolution.player.block - state.player.block,
+    enemyHealthDelta: resolution.enemy.health - state.enemy.health,
+    enemyBlockDelta: resolution.enemy.block - state.enemy.block,
+    curseDelta: resolution.curse.value - state.curse.value,
+    enemyAttack: resolution.events.find((event) => event.type === 'ENEMY_ATTACKED')?.amount ?? 0,
+    outcome: resolution.outcome,
+    ...(resolution.endReason ? { endReason: resolution.endReason } : {}),
+    warnings: getPreviewWarnings(state, resolution),
   }
 }
 
@@ -78,6 +102,7 @@ export function resolveCombatSlot(
   const statuses = cloneStatuses(state.statuses)
   const effectUses = [...state.effectUses]
   let statusConsumed = false
+  let enemyIntent = getPressuredIntent(state.enemyIntent, state.curse.value)
 
   const burnStacks = getStatusStacks(statuses.enemy, 'burn')
   if (burnStacks > 0 && enemy.health > 0) {
@@ -195,17 +220,33 @@ export function resolveCombatSlot(
     }
   }
 
+  if (
+    enemy.phase === 1
+    && enemy.phaseTwoThreshold !== undefined
+    && enemy.phaseTwoAttack !== undefined
+    && enemy.health <= enemy.phaseTwoThreshold
+  ) {
+    const phaseTwoAttack = enemy.phaseTwoAttack
+    enemy = { ...enemy, health: Math.max(1, enemy.health), phase: 2 }
+    enemyIntent = getPressuredIntent({
+      type: 'attack',
+      baseAmount: phaseTwoAttack,
+      amount: phaseTwoAttack,
+    }, state.curse.value)
+    events.push({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: phaseTwoAttack })
+  }
+
   let fullBlock = false
   let blockDepleted = false
   if (enemy.health > 0 && player.health > 0) {
     const blockBeforeAttack = player.block
-    const resolved = applyDamage(player, state.enemyIntent.amount)
+    const resolved = applyDamage(player, enemyIntent.amount)
     player = resolved.actor
-    fullBlock = state.enemyIntent.amount > 0 && resolved.blocked === state.enemyIntent.amount && resolved.healthLost === 0
+    fullBlock = enemyIntent.amount > 0 && resolved.blocked === enemyIntent.amount && resolved.healthLost === 0
     blockDepleted = blockBeforeAttack > 0 && player.block === 0
     events.push({
       type: 'ENEMY_ATTACKED',
-      amount: state.enemyIntent.amount,
+      amount: enemyIntent.amount,
       blocked: resolved.blocked,
       healthLost: resolved.healthLost,
     })
@@ -256,8 +297,11 @@ export function resolveCombatSlot(
     events.push({ type: 'CURSE_PREVENTED', effectId: prevention.id })
   }
   const jackpotCurseReduction = context.originTrait === 'gambler' && effectiveSlotResult.modifier === 'x3' ? 1 : 0
+  const curseValue = clamp(state.curse.value + curseGain - jackpotCurseReduction, 0, 10)
   const curse = {
-    value: Math.max(0, state.curse.value + curseGain - jackpotCurseReduction),
+    value: curseValue,
+    max: 10 as const,
+    attackBonus: getCurseAttackBonus(curseValue),
   }
   events.push({
     type: 'CURSE_INCREASED',
@@ -265,11 +309,19 @@ export function resolveCombatSlot(
     value: curse.value,
   })
 
-  const outcome = getOutcome(player, enemy)
+  for (const threshold of [5, 8, 10] as const) {
+    if (state.curse.value < threshold && curse.value >= threshold) {
+      events.push({ type: 'CURSE_THRESHOLD_REACHED', threshold, attackBonus: getCurseAttackBonus(threshold) })
+    }
+  }
+
+  const endReason = getEndReason(player, enemy, curse)
+  const outcome = getOutcome(endReason)
   if (outcome !== 'ongoing') {
     events.push({
       type: 'COMBAT_ENDED',
       outcome,
+      reason: endReason!,
     })
   }
 
@@ -277,12 +329,13 @@ export function resolveCombatSlot(
     player,
     enemy,
     curse,
-    enemyIntent: state.enemyIntent,
+    enemyIntent: getPressuredIntent(enemyIntent, curse.value),
     lastSlotResult: slotResult,
     statuses,
     effectUses,
     events,
     outcome,
+    ...(endReason ? { endReason } : {}),
   }
 }
 
@@ -492,14 +545,41 @@ function applyDamage(
   }
 }
 
-function getOutcome(player: CombatActorState, enemy: CombatActorState): CombatOutcome {
-  if (enemy.health <= 0) {
-    return 'victory'
-  }
+function getEndReason(
+  player: CombatActorState,
+  enemy: CombatActorState,
+  curse: CombatState['curse'],
+): CombatEndReason | undefined {
+  if (curse.value >= curse.max) return 'curse_overload'
+  if (enemy.health <= 0) return 'enemy_defeated'
+  if (player.health <= 0) return 'player_defeated'
+  return undefined
+}
 
-  if (player.health <= 0) {
-    return 'defeat'
-  }
-
+function getOutcome(reason: CombatEndReason | undefined): CombatOutcome {
+  if (reason === 'enemy_defeated') return 'victory'
+  if (reason) return 'defeat'
   return 'ongoing'
+}
+
+export function getCurseAttackBonus(value: number): number {
+  if (value >= 8) return 2
+  if (value >= 5) return 1
+  return 0
+}
+
+function getPressuredIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  return {
+    ...intent,
+    amount: intent.baseAmount + getCurseAttackBonus(curseValue),
+  }
+}
+
+function getPreviewWarnings(state: CombatState, resolution: CombatResolution): string[] {
+  const warnings: string[] = []
+  if (state.curse.value < 5 && resolution.curse.value >= 5) warnings.push('저주 5: 적 공격 +1')
+  if (state.curse.value < 8 && resolution.curse.value >= 8) warnings.push('저주 8: 적 공격 +2')
+  if (resolution.endReason === 'curse_overload') warnings.push('저주 10: 즉시 패배')
+  if (resolution.events.some((event) => event.type === 'BOSS_PHASE_CHANGED')) warnings.push('보스 2페이즈: 공격 10')
+  return warnings
 }

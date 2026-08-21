@@ -2,11 +2,13 @@ import { applyReward, getActiveEffects } from '../build/BuildSystem'
 import type { RewardRef } from '../build/BuildTypes'
 import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 import { generateMvpRewardOptions } from '../build/MvpRewardSystem'
-import { createCombatState, resolveCombatSlot } from '../combat/CombatSystem'
+import { generateRewardOptions } from '../build/RewardSystem'
+import { getCurseAttackBonus, createCombatState, previewCombatSlot, resolveCombatSlot } from '../combat/CombatSystem'
+import { getMvpEnemyProfile } from '../combat/MvpEnemyCatalog'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
 import type { CombatSlotLocks } from '../slot/CombatSlotTypes'
-import { completeCurrentStage, createRunState, enterNextStage } from '../run/RunSystem'
+import { completeCurrentStage, enterNextStage } from '../run/RunSystem'
 import type { RunStageDefinition } from '../run/RunTypes'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
@@ -18,20 +20,24 @@ export class GameEngine {
 
   private rng: SeededRng
 
+  private readonly startingRewards: RewardRef[]
+
   constructor(seed: RngSeed, options: { startingRewards?: RewardRef[] } = {}) {
-    this.state = createInitialGameState(seed)
-    for (const reward of options.startingRewards ?? []) {
-      this.state.build = applyReward(this.state.build, reward, MVP_BUILD_CATALOG).build
-    }
+    this.startingRewards = structuredClone(options.startingRewards ?? [])
+    this.state = this.createConfiguredInitialState(seed)
     this.rng = createSeededRngFromSnapshot(this.state.rng)
   }
 
   dispatch(command: GameCommand): GameEvent[] {
+    if ((this.state.phase === 'victory' || this.state.phase === 'defeat') && command.type !== 'START_RUN') {
+      return this.reject(command.type, 'the run has ended; start a new run first')
+    }
+    if (command.type === 'START_RUN' && this.state.phase !== 'idle' && this.state.phase !== 'victory' && this.state.phase !== 'defeat') {
+      return this.reject('START_RUN', 'a run can only start from idle or a terminal phase')
+    }
     switch (command.type) {
       case 'START_RUN':
         return this.startRun()
-      case 'ADVANCE_TURN':
-        return this.advanceTurn()
       case 'ENTER_NEXT_STAGE':
         return this.enterNextStage()
       case 'SPIN_COMBAT_SLOT':
@@ -62,6 +68,8 @@ export class GameEngine {
   }
 
   private startRun(): GameEvent[] {
+    this.state = this.createConfiguredInitialState(this.state.seed)
+    this.rng = createSeededRngFromSnapshot(this.state.rng)
     const roll = this.consumeRoll()
 
     this.state = {
@@ -69,8 +77,6 @@ export class GameEngine {
       phase: 'map',
       rng: this.rng.snapshot(),
       log: [...this.state.log, roll],
-      run: createRunState(),
-      slot: createEmptySlotState(),
     }
 
     return [
@@ -82,6 +88,14 @@ export class GameEngine {
     ]
   }
 
+  private createConfiguredInitialState(seed: RngSeed): GameState {
+    const state = createInitialGameState(seed)
+    for (const reward of this.startingRewards) {
+      state.build = applyReward(state.build, reward, MVP_BUILD_CATALOG).build
+    }
+    return state
+  }
+
   private enterNextStage(): GameEvent[] {
     if (this.state.phase !== 'map') return this.reject('ENTER_NEXT_STAGE', 'next stage can only be entered from the map')
     const run = enterNextStage(this.state.run)
@@ -91,14 +105,13 @@ export class GameEngine {
       return []
     }
 
+    const shopOffers = stage.type === 'shop' ? createShopOffers(this.state) : []
     this.state = {
       ...this.state,
       phase: getPhaseForStage(stage),
       run,
       combat: isCombatStage(stage) ? createStageCombatState(this.state.combat, stage) : this.state.combat,
-      economy: stage.type === 'shop'
-        ? { ...this.state.economy, shopPurchases: 0 }
-        : this.state.economy,
+      shop: { offers: shopOffers },
       rewards: {
         options: [],
         augmentSlot: null,
@@ -118,6 +131,7 @@ export class GameEngine {
       slot: {
         ...this.state.slot,
         current: result,
+        preview: this.preview(result, this.state.slot.locks),
         hasSpun: true,
       },
     }
@@ -129,11 +143,13 @@ export class GameEngine {
       return this.reject('TOGGLE_REEL_LOCK', 'a combat result is required before locking reels')
     }
     const locked = !this.state.slot.locks[reel]
+    const locks = { ...this.state.slot.locks, [reel]: locked }
     this.state = {
       ...this.state,
       slot: {
         ...this.state.slot,
-        locks: { ...this.state.slot.locks, [reel]: locked },
+        locks,
+        preview: this.preview(this.state.slot.current, locks),
       },
     }
     return [{ type: 'REEL_LOCK_TOGGLED', reel, locked }]
@@ -152,20 +168,45 @@ export class GameEngine {
       : undefined
     const playerStatuses = this.state.combat.statuses.player.map((status) => ({ ...status }))
     if (rerollStatus) addEngineStatus(playerStatuses, rerollStatus.params.status, rerollStatus.params.stacks)
+    const previousCurse = this.state.combat.curse.value
+    const curseValue = Math.min(10, previousCurse + curseCost)
+    const attackBonus = getCurseAttackBonus(curseValue)
+    const crossedThresholds = ([5, 8, 10] as const).filter(
+      (threshold) => previousCurse < threshold && curseValue >= threshold,
+    )
+    const defeated = curseValue >= 10
     this.state = {
       ...this.state,
+      phase: defeated ? 'defeat' : this.state.phase,
       rng: this.rng.snapshot(),
       combat: {
         ...this.state.combat,
-        curse: { value: this.state.combat.curse.value + curseCost },
+        curse: { value: curseValue, max: 10, attackBonus },
+        enemyIntent: {
+          ...this.state.combat.enemyIntent,
+          amount: this.state.combat.enemyIntent.baseAmount + attackBonus,
+        },
         statuses: {
           ...this.state.combat.statuses,
           player: playerStatuses,
         },
       },
-      slot: { ...this.state.slot, current: result },
+      slot: {
+        ...this.state.slot,
+        current: result,
+        preview: null,
+      },
     }
-    return [{ type: 'COMBAT_SLOT_REROLLED', result }]
+    if (!defeated) this.state.slot.preview = this.preview(result, this.state.slot.locks)
+    return [
+      { type: 'COMBAT_SLOT_REROLLED', result },
+      ...crossedThresholds.map((threshold): GameEvent => ({
+        type: 'CURSE_THRESHOLD_REACHED',
+        threshold,
+        attackBonus: getCurseAttackBonus(threshold),
+      })),
+      ...(defeated ? [{ type: 'CURSE_DEFEAT', value: 10 } as const] : []),
+    ]
   }
 
   private confirmCombatSlot(): GameEvent[] {
@@ -181,7 +222,7 @@ export class GameEngine {
   private resolveRest(action: 'heal' | 'purify'): GameEvent[] {
     if (this.state.phase !== 'rest' || this.state.run.currentStage?.type !== 'rest') return []
 
-    const amount = action === 'heal' ? 10 : 3
+    const amount = action === 'heal' ? 15 : 5
     const restEffect = action === 'purify'
       ? getActiveEffects(this.state.build, MVP_BUILD_CATALOG).find(
           (effect) => effect.type === 'rest.purify.arm_shop_discount',
@@ -195,12 +236,7 @@ export class GameEngine {
             health: Math.min(this.state.combat.player.maxHealth, this.state.combat.player.health + amount),
           },
         }
-      : {
-          ...this.state.combat,
-          curse: {
-            value: Math.max(0, this.state.combat.curse.value - amount),
-          },
-        }
+      : updateCombatCurse(this.state.combat, Math.max(0, this.state.combat.curse.value - amount))
     const stage = this.state.run.currentStage
     this.state = {
       ...this.state,
@@ -223,35 +259,35 @@ export class GameEngine {
   }
 
   private buyShopItem(rewardId: string): GameEvent[] {
-    if (this.state.phase !== 'shop' || this.state.economy.shopPurchases >= 4) return []
-    const definition = MVP_BUILD_CATALOG.rewards.find((reward) => reward.id === rewardId)
-    if (!definition || this.state.economy.purchasedRewardIds.includes(rewardId)) return []
+    if (this.state.phase !== 'shop') return this.reject('BUY_SHOP_ITEM', 'items can only be purchased in a shop')
+    if (this.state.economy.shopPurchases >= 4) return this.reject('BUY_SHOP_ITEM', 'the run-wide shop purchase cap is 4')
+    const offer = this.state.shop.offers.find((candidate) => candidate.reward.id === rewardId)
+    if (!offer) return this.reject('BUY_SHOP_ITEM', 'item must be purchased from the active shop offer')
+    if (this.state.economy.gold < offer.price) return this.reject('BUY_SHOP_ITEM', 'not enough gold for this offer')
 
-    const basePrice = getRewardPrice(definition.rarity)
-    const price = Math.floor(basePrice * (1 - this.state.economy.pendingShopDiscountPct / 100))
-    if (this.state.economy.gold < price) return []
-
-    const reward = { kind: definition.kind, id: definition.id } as const
+    const reward = { kind: offer.reward.kind, id: offer.reward.id } as const
     const result = applyReward(this.state.build, reward, MVP_BUILD_CATALOG)
+    const remainingOffers = this.state.shop.offers
+      .filter((candidate) => candidate.reward.id !== rewardId)
+      .map((candidate) => ({ ...candidate, price: candidate.basePrice }))
     this.state = {
       ...this.state,
       build: result.build,
       economy: {
-        gold: this.state.economy.gold - price,
+        gold: this.state.economy.gold - offer.price,
         shopPurchases: this.state.economy.shopPurchases + 1,
         purchasedRewardIds: [...this.state.economy.purchasedRewardIds, rewardId],
         pendingShopDiscountPct: 0,
         pendingPurchaseCurseReduction: 0,
       },
-      combat: {
-        ...this.state.combat,
-        curse: {
-          value: Math.max(0, this.state.combat.curse.value - this.state.economy.pendingPurchaseCurseReduction),
-        },
-      },
+      combat: updateCombatCurse(
+        this.state.combat,
+        Math.max(0, this.state.combat.curse.value - this.state.economy.pendingPurchaseCurseReduction),
+      ),
+      shop: { offers: remainingOffers },
     }
 
-    return [{ type: 'SHOP_ITEM_PURCHASED', reward, price }]
+    return [{ type: 'SHOP_ITEM_PURCHASED', reward, price: offer.price }]
   }
 
   private leaveShop(): GameEvent[] {
@@ -261,6 +297,7 @@ export class GameEngine {
       ...this.state,
       phase: 'map',
       run: completeCurrentStage(this.state.run),
+      shop: { offers: [] },
     }
     return [{ type: 'STAGE_COMPLETED', stage }]
   }
@@ -273,7 +310,7 @@ export class GameEngine {
           ...this.state.combat,
           player: {
             ...this.state.combat.player,
-            health: Math.min(this.state.combat.player.maxHealth, this.state.combat.player.health + 6),
+            health: Math.min(this.state.combat.player.maxHealth, this.state.combat.player.health + 15),
           },
         }
       : this.state.combat
@@ -302,26 +339,6 @@ export class GameEngine {
     return [
       { type: 'EVENT_RESOLVED', choice },
       { type: 'STAGE_COMPLETED', stage },
-    ]
-  }
-
-  private advanceTurn(): GameEvent[] {
-    const roll = this.consumeRoll()
-    const turn = this.state.turn + 1
-
-    this.state = {
-      ...this.state,
-      turn,
-      rng: this.rng.snapshot(),
-      log: [...this.state.log, roll],
-    }
-
-    return [
-      {
-        type: 'TURN_ADVANCED',
-        turn,
-        roll,
-      },
     ]
   }
 
@@ -377,9 +394,15 @@ export class GameEngine {
         turn,
         result: command.result,
         outcome: resolution.outcome,
+        ...(resolution.endReason ? { endReason: resolution.endReason } : {}),
         combatEvents: resolution.events,
       },
     ]
+
+    for (const event of resolution.events) {
+      if (event.type === 'CURSE_THRESHOLD_REACHED') events.push(event)
+      if (event.type === 'BOSS_PHASE_CHANGED') events.push(event)
+    }
 
     if (completedStage) {
       events.push({ type: 'STAGE_COMPLETED', stage: completedStage })
@@ -440,6 +463,13 @@ export class GameEngine {
     return this.rng.nextInt(100)
   }
 
+  private preview(result: NonNullable<GameState['slot']['current']>, locks: CombatSlotLocks): NonNullable<GameState['slot']['preview']> {
+    return previewCombatSlot(this.state.combat, result, {
+      effects: getActiveEffects(this.state.build, MVP_BUILD_CATALOG),
+      lockedReels: locks,
+    })
+  }
+
   private reject(command: string, reason: string): GameEvent[] {
     return [{ type: 'COMMAND_REJECTED', command, reason }]
   }
@@ -477,12 +507,8 @@ function addEngineStatus(
 }
 
 function createStageCombatState(previous: GameState['combat'], stage: RunStageDefinition): GameState['combat'] {
-  const profile = {
-    combat: { maxHealth: 18, attack: 4, name: 'Cursed Drudge' },
-    elite: { maxHealth: 24, attack: 5, name: 'Vault Enforcer' },
-    gate: { maxHealth: 27, attack: 6, name: 'Gate Warden' },
-    boss: { maxHealth: 36, attack: 7, name: 'House Sovereign' },
-  }[stage.type as 'combat' | 'elite' | 'gate' | 'boss']
+  const profile = getMvpEnemyProfile(stage.type)
+  const attackBonus = getCurseAttackBonus(previous.curse.value)
 
   return createCombatState({
     player: {
@@ -495,8 +521,38 @@ function createStageCombatState(previous: GameState['combat'], stage: RunStageDe
       maxHealth: profile.maxHealth,
       health: profile.maxHealth,
       block: 0,
+      ...(profile.phaseTwo ? {
+        phase: 1,
+        phaseTwoThreshold: profile.phaseTwo.thresholdHealth,
+        phaseTwoAttack: profile.phaseTwo.attack,
+      } : {}),
     },
     curse: { value: previous.curse.value },
-    enemyIntent: { amount: profile.attack },
+    enemyIntent: { baseAmount: profile.attack, amount: profile.attack + attackBonus },
   })
+}
+
+function createShopOffers(state: GameState): GameState['shop']['offers'] {
+  return generateRewardOptions(state.build, { count: 6, catalog: MVP_BUILD_CATALOG })
+    .filter((reward) => !state.economy.purchasedRewardIds.includes(reward.id))
+    .map((reward) => {
+      const basePrice = getRewardPrice(reward.rarity)
+      return {
+        reward,
+        basePrice,
+        price: Math.floor(basePrice * (1 - state.economy.pendingShopDiscountPct / 100)),
+      }
+    })
+}
+
+function updateCombatCurse(combat: GameState['combat'], value: number): GameState['combat'] {
+  const attackBonus = getCurseAttackBonus(value)
+  return {
+    ...combat,
+    curse: { value, max: 10, attackBonus },
+    enemyIntent: {
+      ...combat.enemyIntent,
+      amount: combat.enemyIntent.baseAmount + attackBonus,
+    },
+  }
 }

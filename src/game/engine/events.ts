@@ -1,6 +1,6 @@
 import type { BuildEvent, RewardRef } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
-import type { CombatEvent, CombatOutcome } from '../combat/CombatTypes'
+import type { CombatEndReason, CombatEvent, CombatOutcome } from '../combat/CombatTypes'
 import type { AugmentSlotPresentation } from '../slot/AugmentSlotTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import type { RunStageDefinition } from '../run/RunTypes'
@@ -8,11 +8,6 @@ import type { RunStageDefinition } from '../run/RunTypes'
 export type GameEvent =
   | {
       type: 'RUN_STARTED'
-      turn: number
-      roll: number
-    }
-  | {
-      type: 'TURN_ADVANCED'
       turn: number
       roll: number
     }
@@ -57,6 +52,7 @@ export type GameEvent =
       turn: number
       result: CombatSlotResult
       outcome: CombatOutcome
+      endReason?: CombatEndReason
       combatEvents: CombatEvent[]
     }
   | {
@@ -68,4 +64,18 @@ export type GameEvent =
       type: 'REWARD_CHOSEN'
       reward: RewardRef
       buildEvents: BuildEvent[]
+    }
+  | {
+      type: 'CURSE_THRESHOLD_REACHED'
+      threshold: 5 | 8 | 10
+      attackBonus: number
+    }
+  | {
+      type: 'CURSE_DEFEAT'
+      value: 10
+    }
+  | {
+      type: 'BOSS_PHASE_CHANGED'
+      phase: 2
+      attack: number
     }

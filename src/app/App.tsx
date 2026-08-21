@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { MVP_BUILD_CATALOG } from '../game/build/MvpBuildCatalog'
-import type { BuildRewardDefinition } from '../game/build/BuildTypes'
+import { MVP_DEMO_SEED } from '../game/demo/MvpDemoTrace'
 import { GameEngine } from '../game/engine/GameEngine'
 import type { GameEvent } from '../game/engine/events'
 import type { GameState } from '../game/engine/GameState'
 import { MVP_ROUTE } from '../game/run/RunSystem'
 import '../styles.css'
 
-const DEFAULT_SEED = 'curse-slot-mvp'
+const DEFAULT_SEED = MVP_DEMO_SEED
 type Dispatch = (command: Parameters<GameEngine['dispatch']>[0]) => void
 
 export function App() {
@@ -59,7 +59,7 @@ export function App() {
     <main className="mvp-shell">
       <header className="mvp-header">
         <div><span className="mvp-kicker">CURSE SLOT MACHINE</span><strong>시드 {String(state.seed)}</strong></div>
-        <div className="mvp-stat"><span>HP {state.combat.player.health}/{state.combat.player.maxHealth}</span><span>저주 {state.combat.curse.value}</span><span>골드 {state.economy.gold}</span></div>
+        <div className="mvp-stat"><span>HP {state.combat.player.health}/{state.combat.player.maxHealth}</span><span>저주 {state.combat.curse.value}/{state.combat.curse.max}</span><span>골드 {state.economy.gold}</span></div>
       </header>
       <div className="mvp-layout">
         <section className="mvp-stage" aria-live="polite"><PhaseView state={state} dispatch={dispatch} /></section>
@@ -82,8 +82,8 @@ function PhaseView({ state, dispatch }: { state: GameState; dispatch: Dispatch }
     case 'battle': return <Battle state={state} dispatch={dispatch} />
     case 'reward': return <Rewards state={state} dispatch={dispatch} />
     case 'shop': return <Shop state={state} dispatch={dispatch} />
-    case 'rest': return <section className="mvp-room"><p className="mvp-kicker">REST</p><h1>저주받은 모닥불</h1><p>회복은 HP 10, 정화는 저주 3을 제거합니다.</p><div className="mvp-actions"><button className="mvp-primary" onClick={() => dispatch({ type: 'RESOLVE_REST', action: 'heal' })} type="button">HP 10 회복</button><button onClick={() => dispatch({ type: 'RESOLVE_REST', action: 'purify' })} type="button">저주 3 정화</button></div></section>
-    case 'event': return <section className="mvp-room"><p className="mvp-kicker">EVENT</p><h1>금이 간 행운의 제단</h1><p>보상, 골드, 휴식 중 하나를 고르거나 지나칩니다.</p><div className="mvp-actions"><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'reward' })} type="button">보상 탐색</button><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'gold' })} type="button">골드 50</button><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'rest' })} type="button">HP 6 회복</button><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'skip' })} type="button">지나치기</button></div></section>
+    case 'rest': return <section className="mvp-room"><p className="mvp-kicker">REST</p><h1>저주받은 모닥불</h1><p>회복은 HP 15, 정화는 저주 5를 제거합니다.</p><div className="mvp-actions"><button className="mvp-primary" onClick={() => dispatch({ type: 'RESOLVE_REST', action: 'heal' })} type="button">HP 15 회복</button><button onClick={() => dispatch({ type: 'RESOLVE_REST', action: 'purify' })} type="button">저주 5 정화</button></div></section>
+    case 'event': return <section className="mvp-room"><p className="mvp-kicker">EVENT</p><h1>금이 간 행운의 제단</h1><p>보상, 골드, 휴식 중 하나를 고르거나 지나칩니다.</p><div className="mvp-actions"><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'reward' })} type="button">보상 탐색</button><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'gold' })} type="button">골드 50</button><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'rest' })} type="button">HP 15 회복</button><button onClick={() => dispatch({ type: 'RESOLVE_EVENT', choice: 'skip' })} type="button">지나치기</button></div></section>
     case 'victory': return <EndScreen title="HOUSE DEFEATED" copy="15개 방을 모두 돌파했습니다. 동일 시드와 명령으로 결과를 재현할 수 있습니다." />
     case 'defeat': return <EndScreen title="THE HOUSE WINS" copy="빌드와 잠금 타이밍을 바꿔 다시 도전하세요." />
     default: return null
@@ -95,10 +95,12 @@ function Battle({ state, dispatch }: { state: GameState; dispatch: Dispatch }) {
   return (
     <section className="mvp-room">
       <p className="mvp-kicker">STAGE {state.run.currentStage?.id} · {stageName(state.run.currentStage?.type)}</p>
-      <div className="combatants"><div><h2>PLAYER</h2><strong>{state.combat.player.health} HP</strong><span>방어 {state.combat.player.block}</span></div><div><h2>{state.combat.enemy.name}</h2><strong>{state.combat.enemy.health} HP</strong><span>다음 공격 {state.combat.enemyIntent.amount}</span></div></div>
+      <div className="combatants"><div><h2>PLAYER</h2><strong>{state.combat.player.health} HP</strong><span>방어 {state.combat.player.block}</span></div><div><h2>{state.combat.enemy.name}{state.combat.enemy.phase ? ` · PHASE ${state.combat.enemy.phase}` : ''}</h2><strong>{state.combat.enemy.health} HP</strong><span>다음 공격 {state.combat.enemyIntent.amount}</span></div></div>
+      {state.combat.curse.value >= 5 && <p className="mvp-warning" role="status">{state.combat.curse.value >= 8 ? '위험: 저주로 적 공격 +2 · 10에서 즉시 패배' : '주의: 저주로 적 공격 +1 · 8부터 +2'}</p>}
       <div className="slot-sentence">
         {(['action', 'target', 'modifier'] as const).map((reel) => <button key={reel} className={state.slot.locks[reel] ? 'locked' : ''} disabled={!slot} onClick={() => dispatch({ type: 'TOGGLE_REEL_LOCK', reel })} type="button"><small>{reel}</small><strong>{slot?.[reel] ?? '?'}</strong><span>{state.slot.locks[reel] ? '잠금됨' : '클릭해 잠금'}</span></button>)}
       </div>
+      {state.slot.preview && <section className="mvp-preview" aria-label="결과 미리보기"><h2>결과 미리보기</h2><p>플레이어 HP {signed(state.slot.preview.playerHealthDelta)} · 방어 {signed(state.slot.preview.playerBlockDelta)}</p><p>적 HP {signed(state.slot.preview.enemyHealthDelta)} · 적 반격 {state.slot.preview.enemyAttack}</p><p>저주 {signed(state.slot.preview.curseDelta)} · 예상 {state.slot.preview.outcome}</p>{state.slot.preview.warnings.map((warning) => <strong key={warning}>{warning}</strong>)}</section>}
       <div className="mvp-actions">{!slot && <button className="mvp-primary" onClick={() => dispatch({ type: 'SPIN_COMBAT_SLOT' })} type="button">릴 돌리기</button>}{slot && <><button onClick={() => dispatch({ type: 'REROLL_UNLOCKED' })} type="button">미잠금 재굴림 (저주 +{Object.values(state.slot.locks).filter(Boolean).length + 1})</button><button className="mvp-primary" onClick={() => dispatch({ type: 'CONFIRM_COMBAT_SLOT' })} type="button">문장 실행</button></>}</div>
       <p>상태: 플레이어 {formatStatuses(state.combat.statuses.player)} · 적 {formatStatuses(state.combat.statuses.enemy)}</p>
     </section>
@@ -110,8 +112,7 @@ function Rewards({ state, dispatch }: { state: GameState; dispatch: Dispatch }) 
 }
 
 function Shop({ state, dispatch }: { state: GameState; dispatch: Dispatch }) {
-  const offers = MVP_BUILD_CATALOG.rewards.filter((reward) => !state.economy.purchasedRewardIds.includes(reward.id) && !ownsReward(state, reward)).slice(0, 6)
-  return <section className="mvp-room"><p className="mvp-kicker">BLACK MARKET · {state.economy.shopPurchases}/4 PURCHASES</p><h1>저주 상점</h1><div className="reward-grid">{offers.map((reward) => { const price = rewardPrice(reward, state.economy.pendingShopDiscountPct); return <button key={reward.id} disabled={state.economy.gold < price || state.economy.shopPurchases >= 4} onClick={() => dispatch({ type: 'BUY_SHOP_ITEM', rewardId: reward.id })} type="button"><small>{price} GOLD</small><strong>{reward.name}</strong><span>{reward.description}</span></button> })}</div><button className="mvp-primary" onClick={() => dispatch({ type: 'LEAVE_SHOP' })} type="button">상점 나가기</button></section>
+  return <section className="mvp-room"><p className="mvp-kicker">BLACK MARKET · {state.economy.shopPurchases}/4 PURCHASES</p><h1>저주 상점</h1><div className="reward-grid">{state.shop.offers.map((offer) => <button key={offer.reward.id} disabled={state.economy.gold < offer.price || state.economy.shopPurchases >= 4} onClick={() => dispatch({ type: 'BUY_SHOP_ITEM', rewardId: offer.reward.id })} type="button"><small>{offer.price} GOLD{offer.price < offer.basePrice ? ` · ${offer.basePrice}에서 할인` : ''}</small><strong>{offer.reward.name}</strong><span>{offer.reward.description}</span></button>)}</div><button className="mvp-primary" onClick={() => dispatch({ type: 'LEAVE_SHOP' })} type="button">상점 나가기</button></section>
 }
 
 function RoutePanel({ state }: { state: GameState }) {
@@ -132,10 +133,9 @@ function EndScreen({ title, copy }: { title: string; copy: string }) {
   return <section className="mvp-room"><p className="mvp-kicker">RUN ENDED</p><h1>{title}</h1><p>{copy}</p><button onClick={() => window.location.reload()} type="button">새 런</button></section>
 }
 
-function ownsReward(state: GameState, reward: BuildRewardDefinition): boolean { return state.build[`${reward.kind}s`].includes(reward.id) }
-function rewardPrice(reward: BuildRewardDefinition, discount: number): number { return Math.floor(({ common: 60, uncommon: 80, rare: 100, cursed: 70, legendary: 130 }[reward.rarity]) * (1 - discount / 100)) }
 function stageName(type?: string): string { return ({ combat: '전투', elite: '엘리트', rest: '휴식', shop: '상점', event: '이벤트', gate: '관문', boss: '보스' } as Record<string, string>)[type ?? ''] ?? '완료' }
 function formatStatuses(statuses: GameState['combat']['statuses']['player']): string { return statuses.length ? statuses.map((status) => `${status.id}×${status.stacks}`).join(', ') : '없음' }
+function signed(value: number): string { return value > 0 ? `+${value}` : String(value) }
 
 function formatEvent(event: GameEvent): string {
   switch (event.type) {
@@ -149,6 +149,9 @@ function formatEvent(event: GameEvent): string {
     case 'REST_RESOLVED': return `휴식: ${event.action} ${event.amount}`
     case 'EVENT_RESOLVED': return `이벤트: ${event.choice}`
     case 'COMMAND_REJECTED': return `거부됨: ${event.reason}`
+    case 'CURSE_THRESHOLD_REACHED': return `저주 ${event.threshold} 도달: 적 공격 +${event.attackBonus}`
+    case 'CURSE_DEFEAT': return '저주 10 도달: 런 패배'
+    case 'BOSS_PHASE_CHANGED': return `보스 2페이즈: 공격 ${event.attack}`
     default: return event.type.replaceAll('_', ' ').toLowerCase()
   }
 }
