@@ -212,19 +212,19 @@ export interface GameState {
 }
 
 export type GameCommand =
-  | { type: 'START_RUN'; seed?: string; mode?: GameMode }
-  | { type: 'OPEN_PROLOGUE' }
+  | { type: 'START_RUN'; seed?: string }
   | { type: 'SELECT_ORIGIN'; originId: OriginId }
-  | { type: 'SELECT_MAP_NODE'; nodeId: number; nodeType?: MapNodeType }
+  | { type: 'ENTER_NEXT_STAGE' }
   | { type: 'SPIN_COMBAT_SLOT' }
-  | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
+  | { type: 'TOGGLE_REEL_LOCK'; reel: ReelId }
   | { type: 'REROLL_UNLOCKED' }
-  | { type: 'CONFIRM_SLOT_RESULT' }
-  | { type: 'CHOOSE_REWARD'; augmentId: string }
+  | { type: 'CONFIRM_COMBAT_SLOT' }
+  | { type: 'CHOOSE_REWARD'; rewardId: string }
+  | { type: 'RESOLVE_EVENT'; choice: 'reward' | 'gold' | 'rest' | 'skip' }
+  | { type: 'BUY_SHOP_ITEM'; rewardId: string }
+  | { type: 'LEAVE_SHOP' }
+  | { type: 'RESOLVE_REST'; action: 'heal' | 'purify' }
   | { type: 'NAVIGATE'; screen: GameScreen }
   | { type: 'START_SHOWCASE'; scenarioId?: string }
-  | { type: 'NEXT_SHOWCASE_STEP' }
-  | { type: 'RESOLVE_EVENT_CHOICE'; choice: EventChoice }
-  | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
-  | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
+  | { type: 'NEXT_SHOWCASE_STEP' };
 

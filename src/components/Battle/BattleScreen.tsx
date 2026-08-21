@@ -324,9 +324,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               hasSpunThisTurn={state.hasSpunThisTurn}
               currentResult={state.currentResult}
               onSpin={() => onDispatch({ type: 'SPIN_COMBAT_SLOT' })}
-              onToggleLock={(reelId: ReelId) => onDispatch({ type: 'TOGGLE_LOCK_REEL', reelId })}
+              onToggleLock={(reel: ReelId) => onDispatch({ type: 'TOGGLE_REEL_LOCK', reel })}
               onReroll={() => onDispatch({ type: 'REROLL_UNLOCKED' })}
-              onConfirm={() => onDispatch({ type: 'CONFIRM_SLOT_RESULT' })}
+              onConfirm={() => onDispatch({ type: 'CONFIRM_COMBAT_SLOT' })}
               isFreeRerollAvailable={state.originTraitState.freeRerollAvailable}
               multiplierMax={currentMultiplierMax}
             />

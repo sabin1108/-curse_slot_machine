@@ -19,7 +19,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
   const handleSelectReward = (augment: AugmentItem) => {
     setSelectedAug(augment);
     soundManager.playJackpotSound();
-    onDispatch({ type: 'CHOOSE_REWARD', augmentId: augment.id });
+    onDispatch({ type: 'CHOOSE_REWARD', rewardId: augment.id });
   };
 
   const getCardFrame = (rarity: string) => {
@@ -86,6 +86,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
             return (
               <button
                 key={aug.id}
+                data-reward-id={aug.id}
                 className={`reward-card-pixel ${isSelected ? 'selected' : ''}`}
                 style={{ backgroundImage: `url(${getCardFrame(aug.rarity)})` }}
                 type="button"

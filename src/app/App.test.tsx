@@ -1,63 +1,53 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
-import { App } from './App';
+import { fireEvent, render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { describe, expect, it } from 'vitest'
+import { App } from './App'
 
 describe('App', () => {
-  it('renders the cursed slot machine UI shell', () => {
-    render(<App />);
+  it('starts a seeded normal run through prologue and canonical origin selection', () => {
+    render(<App />)
 
-    expect(screen.getByText(/START/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /showcase mode/i })).toBeInTheDocument();
-  });
+    fireEvent.change(screen.getByLabelText('Run seed'), { target: { value: 'ui-origin-seed' } })
+    fireEvent.click(screen.getByText(/START GAME/i))
+    fireEvent.click(screen.getByRole('button', { name: /Skip/i }))
 
-  it('starts showcase mode from the title screen and shows the overlay', () => {
-    render(<App />);
+    expect(screen.getByText('몰락한 검사')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /몰락한 검사.*시작/ }))
 
-    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
+    expect(screen.getByText(/1 \/ 15 스테이지/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Stage 1 전투/ })).toBeEnabled()
+    expect(screen.queryByText(/보스 보기/)).not.toBeInTheDocument()
+  })
 
-    expect(screen.getByText(/SHOWCASE MODE/i)).toBeInTheDocument();
-    expect(screen.getByText(/STEP 1 \/ 4/i)).toBeInTheDocument();
-  });
+  it('keeps showcase as a presentation-only overlay', () => {
+    render(<App />)
 
-  it('advances showcase overlay steps through the existing command path', () => {
-    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }))
+    expect(screen.getByText(/STEP 1 \/ 4/i)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }))
+    expect(screen.getByText(/STEP 2 \/ 4/i)).toBeInTheDocument()
+    expect(screen.getByText(/START GAME/i)).toBeInTheDocument()
+  })
 
-    expect(screen.getByText(/STEP 1 \/ 4/i)).toBeInTheDocument();
+  it('accepts the next spin immediately after confirming the previous result', () => {
+    const { container } = render(<App />)
+    fireEvent.change(screen.getByLabelText('Run seed'), { target: { value: 'origin-demo-334' } })
+    fireEvent.click(screen.getByText(/START GAME/i))
+    fireEvent.click(screen.getByRole('button', { name: /Skip/i }))
+    fireEvent.click(screen.getByRole('button', { name: /몰락한 검사.*시작/ }))
+    fireEvent.click(container.querySelector('.map-node-card.avail')!)
 
-    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
+    fireEvent.click(container.querySelector('.slot-action-area .k-btn.primary')!)
+    fireEvent.click(container.querySelector('.slot-action-area .k-btn.success')!)
+    fireEvent.click(container.querySelector('.slot-action-area .k-btn.primary')!)
 
-    expect(screen.queryByText(/STEP 1 \/ 4/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/STEP 2 \/ 4/i)).toBeInTheDocument();
-  });
-
-  it('hides showcase overlay controls while reward selection owns input', () => {
-    render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
-    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
-    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
-
-    expect(screen.getByText(/전투 보상/i)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /NEXT STEP/i })).not.toBeInTheDocument();
-  });
-
-  it('offers reward choices as semantic buttons in showcase reward step', () => {
-    render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }));
-    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
-    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
-
-    expect(screen.getByRole('button', { name: /\uBC29\uBCBD \uCF54\uC5B4 \uC120\uD0DD/ })).toBeInTheDocument();
-  });
+    expect(container.querySelector('.slot-action-area .k-btn.success')).toBeInTheDocument()
+  })
 
   it('uses local font fallbacks instead of external Google Fonts', () => {
-    const css = readFileSync('src/styles.css', 'utf8');
-
-    expect(css).not.toContain('fonts.googleapis.com');
-    expect(css).toContain('--font-display');
-  });
-});
+    const css = readFileSync('src/styles.css', 'utf8')
+    expect(css).not.toContain('fonts.googleapis.com')
+    expect(css).toContain('--font-display')
+  })
+})

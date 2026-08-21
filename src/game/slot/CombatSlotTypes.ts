@@ -8,10 +8,6 @@ export type CombatSlotResult = {
   action: CombatActionSymbol
   target: CombatTargetSymbol
   modifier: CombatModifierSymbol
-  attackRoll?: number
-  defenseRoll?: number
-  attackModifier?: CombatModifierSymbol
-  defenseModifier?: CombatModifierSymbol
 }
 
 export type CombatSlotLocks = {

@@ -15,6 +15,7 @@ export type RewardScore = {
   synergyValue: number
   completionValue: number
   futureValue: number
+  contentValue: number
   total: number
 }
 
@@ -94,14 +95,31 @@ function scoreReward(
   const synergyValue = getSynergyValue(build, definition, catalog)
   const completionValue = completedNow * 100 + tierActivatedNow * 35
   const futureValue = getFutureValue(build, definition, catalog)
+  const contentValue = getContentValue(build, definition)
 
   return {
     immediatePower,
     synergyValue,
     completionValue,
     futureValue,
-    total: immediatePower + synergyValue + completionValue + futureValue,
+    contentValue,
+    total: immediatePower + synergyValue + completionValue + futureValue + contentValue,
   }
+}
+
+function getContentValue(build: BuildState, reward: BuildRewardDefinition): number {
+  return (reward.effects ?? [])
+    .filter((effect) => effect.type === 'reward.score.add')
+    .filter((effect) => (effect.conditions ?? []).every((condition) => {
+      if (condition.type === 'reward.kind_is') return reward.kind === condition.params.kind
+      if (condition.type === 'reward.rarity_is') return reward.rarity === condition.params.rarity
+      if (condition.type === 'reward.has_tag') return reward.tags.includes(condition.params.tag)
+      if (condition.type === 'build.synergy_active') {
+        return build.synergies.active.some((synergy) => synergy.synergyId === condition.params.synergyId)
+      }
+      return false
+    }))
+    .reduce((sum, effect) => sum + effect.params.amount, 0)
 }
 
 function getSynergyValue(
