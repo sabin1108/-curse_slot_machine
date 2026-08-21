@@ -24,11 +24,15 @@ npm run dev -- --host 127.0.0.1
 4. 상점 상품·가격·구매 수가 UI가 아니라 엔진 상태에서 오는지 확인한다.
 5. Stage 15에서 House Sovereign의 phase 2와 공격 10을 확인한 뒤 victory까지 진행한다.
 
-## 판정 증거
+## 자동 판정 증거
 
 - fixture를 두 번 replay했을 때 state/event digest가 같다.
 - UI는 `rewardId`와 command만 보내며 피해량·가격·stage 결과를 계산하지 않는다.
-- 음소거와 애니메이션 상태는 game digest를 바꾸지 않는다.
-- 브라우저 console error, page error, 1280×720 가로 overflow가 없다.
+- 브라우저 console error와 page error가 없다.
 
 세 오리진 trace 모두 같은 테스트에서 두 번 replay해 state/event digest와 Stage 15 victory를 검증한다.
+
+## 시연 전 수동 확인
+
+- 1280×720에서 가로 overflow와 잘린 주요 CTA가 없는지 확인한다.
+- 음소거와 reduced-motion 설정에서 normal run 결과가 달라지지 않는지 확인한다.
