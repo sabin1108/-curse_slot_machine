@@ -25,14 +25,16 @@ describe('UiGameEngine', () => {
       action: { id: 'bullet' },
       target: { type: 'ENEMY' },
       modifier: { id: 'x2' },
-      calculatedValue: 16,
+      calculatedValue: expect.any(Number),
       defenseValue: expect.any(Number),
-      attackRoll: 8,
+      attackRoll: expect.any(Number),
       defenseRoll: expect.any(Number),
       multiplierValue: 2,
       attackMultiplierValue: 2,
       defenseMultiplierValue: expect.any(Number),
     })
+    expect(state.currentResult?.attackRoll).toBeLessThanOrEqual(5)
+    expect(state.currentResult?.defenseRoll).toBeLessThanOrEqual(5)
   })
 
   it('applies defense roulette block even before any augment is chosen', () => {
@@ -388,15 +390,42 @@ describe('UiGameEngine', () => {
     engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1501, nodeType: 'BOSS' })
     const spunState = engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
     const expectedDamage = spunState.currentResult?.calculatedValue
+    const expectedHits = spunState.currentResult?.attackMultiplierValue
+    expect(expectedDamage).toBeDefined()
+    expect(expectedHits).toBeDefined()
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
     expect(resolvedState.enemy.hp).toBeLessThan(resolvedState.enemy.maxHp)
     expect(resolvedState.isEnemyAttacking).toBe(true)
-    expect(resolvedState.lastEnemyDamagePop).toEqual(
-      expect.objectContaining({
-        value: expectedDamage,
-      }),
-    )
+    expect(resolvedState.enemyDamagePops.map((pop) => pop.value).reduce((sum, value) => sum + value, 0)).toBe(expectedDamage!)
+    expect(resolvedState.enemyDamagePops).toHaveLength(expectedHits!)
+    expect(resolvedState.lastEnemyDamagePop).toEqual(resolvedState.enemyDamagePops.at(-1))
+  })
+
+  it('projects multiplier caps from item and matching limit synergy', () => {
+    const engine = new GameEngine('limit-break-ui')
+    const forcedSlot = {
+      action: 'bullet' as const,
+      target: 'enemy' as const,
+      modifier: 'x3' as const,
+      attackRoll: 5,
+      defenseRoll: 5,
+      attackModifier: 'x3' as const,
+      defenseModifier: 'x3' as const,
+    }
+
+    engine.dispatch({ type: 'START_RUN', seed: 'limit-break-ui' })
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'limit_breaker' })
+    ;(engine as any).projectStructuredSlot(forcedSlot)
+    const itemOnlyState = engine.getState()
+    expect(itemOnlyState.currentResult?.attackMultiplierValue).toBeLessThanOrEqual(5)
+
+    engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'limit_core' })
+    ;(engine as any).projectStructuredSlot(forcedSlot)
+    const synergyState = engine.getState()
+
+    expect(synergyState.build.activeSynergies).toContain('한계 돌파')
+    expect(synergyState.currentResult?.attackMultiplierValue).toBe(10)
   })
 })

@@ -12,7 +12,7 @@ import type {
 import type { EffectCondition, EffectDefinition } from '../effects/EffectTypes'
 
 const COMBAT_BASE_VALUES = {
-  bulletDamage: 6,
+  bulletDamage: 5,
   shieldBlock: 5,
   heartHealing: 4,
   enemyAttack: 4,
@@ -335,9 +335,13 @@ function getEffectiveMultiplier(
     .filter((effect) => effect.type === 'combat.multiplier.add')
     .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
+  const maxMultiplier = effects
+    .filter((effect) => effect.type === 'combat.multiplier.max')
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
+    .reduce((max, effect) => Math.max(max, effect.params.max), 3)
 
   const minimumMultiplier = typeof slotResult.attackRoll === 'number' && typeof slotResult.defenseRoll === 'number' ? 2 : 1
-  return clamp(MODIFIER_MULTIPLIER[slotResult.modifier] + bonus, minimumMultiplier, 5)
+  return clamp(MODIFIER_MULTIPLIER[slotResult.modifier] + bonus, minimumMultiplier, maxMultiplier)
 }
 
 function getNextCurse(

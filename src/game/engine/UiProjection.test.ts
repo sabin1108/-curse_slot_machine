@@ -14,7 +14,7 @@ describe('UiProjection', () => {
       target: { type: 'ENEMY' },
       modifier: { id: 'x2' },
       isMiss: false,
-      calculatedValue: 12,
+      calculatedValue: 10,
     })
   })
 

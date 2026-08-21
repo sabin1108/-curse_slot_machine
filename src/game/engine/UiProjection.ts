@@ -43,16 +43,29 @@ export function toUiReward(reward: RewardOption): AugmentItem {
   }
 }
 
-export function toUiSlotResult(slotResult: CombatSlotResult): SlotResult {
+type SlotProjectionOptions = {
+  multiplierBonus?: number
+  multiplierMax?: number
+}
+
+export function toUiSlotResult(slotResult: CombatSlotResult, options: SlotProjectionOptions = {}): SlotResult {
   const action = getUiActionSymbol(slotResult.action)
   const target = getUiTargetSymbol(slotResult.target)
   const modifier = getUiModifierSymbol(slotResult.modifier)
-  const attackMultiplierValue = getUiMultiplier(slotResult.attackModifier ?? slotResult.modifier)
-  const defenseMultiplierValue = getUiMultiplier(slotResult.defenseModifier ?? slotResult.modifier)
+  const attackMultiplierValue = getUiMultiplier(
+    slotResult.attackModifier ?? slotResult.modifier,
+    options.multiplierBonus ?? 0,
+    options.multiplierMax ?? 3,
+  )
+  const defenseMultiplierValue = getUiMultiplier(
+    slotResult.defenseModifier ?? slotResult.modifier,
+    options.multiplierBonus ?? 0,
+    options.multiplierMax ?? 3,
+  )
   const multiplierValue = attackMultiplierValue
-  const calculatedValue = getUiSlotAmount(slotResult, 'attack')
+  const calculatedValue = getUiSlotAmount(slotResult, 'attack', options)
   const defenseValue = typeof slotResult.defenseRoll === 'number'
-    ? getUiSlotAmount(slotResult, 'defense')
+    ? getUiSlotAmount(slotResult, 'defense', options)
     : undefined
 
   return {
@@ -141,6 +154,8 @@ function localizeReward(reward: Pick<BuildRewardDefinition, 'id' | 'name' | 'des
     lucky_receipt: { name: '행운 영수증', description: '낮은 결과도 버릴 수 없게 만드는 연계형 자원 아이템입니다.', effectLabel: '낮은 배수 공격 +5' },
     crit_die: { name: '치명 주사위', description: 'x3 공격을 노리는 치명 빌드의 시작점입니다.', effectLabel: 'x3 공격 +45%' },
     loaded_multiplier: { name: '조작된 배수추', description: '공격과 수비 룰렛의 최종 배수를 1 올립니다.', effectLabel: '배수 +1' },
+    limit_core: { name: '한계 증폭핵', description: '한계 돌파석과 함께 쓰면 최종 배수 상한을 10까지 엽니다.', effectLabel: '한계 시너지 핵' },
+    limit_breaker: { name: '한계 돌파석', description: '배수를 2 올리고 아이템 단계 상한을 x5까지 엽니다.', effectLabel: '배수 +2, 최대 x5' },
     glass_cannon: { name: '유리 대포', description: '방어를 포기하고 공격 피해를 크게 끌어올립니다.', effectLabel: '공격 +45%' },
     royal_joker: { name: '왕실 조커', description: '치명 연계 빌드의 x3 잭팟 보상입니다.', effectLabel: 'x3 공격 +80%' },
     safe_cracker: { name: '금고 따개', description: '공격과 회복을 동시에 조금씩 보강합니다.', effectLabel: '공격 +2, 회복 +2' },
@@ -173,6 +188,8 @@ function localizeReward(reward: Pick<BuildRewardDefinition, 'id' | 'name' | 'des
     lucky_receipt: { name: '행운 영수증', description: '좋은 결과를 버리기 어렵게 만드는 연계 자원 아이템입니다.', effectLabel: '고배수 공격 +5' },
     crit_die: { name: '치명 주사위', description: 'x3 공격을 노리는 치명 빌드의 시작점입니다.', effectLabel: 'x3 공격 +45%' },
     loaded_multiplier: { name: '조작된 배수추', description: '공격과 방어 룰렛의 최종 배수를 1 올립니다.', effectLabel: '배수 +1' },
+    limit_core: { name: '한계 증폭핵', description: '한계 돌파석과 함께 쓰면 최종 배수 상한을 10까지 엽니다.', effectLabel: '한계 시너지 핵' },
+    limit_breaker: { name: '한계 돌파석', description: '배수를 2 올리고 아이템 단계 상한을 x5까지 엽니다.', effectLabel: '배수 +2, 최대 x5' },
     glass_cannon: { name: '유리 대포', description: '방어를 포기하고 공격 피해를 크게 끌어올립니다.', effectLabel: '공격 +45%' },
     royal_joker: { name: '왕실 조커', description: '치명 연계 빌드의 x3 잭팟 보상입니다.', effectLabel: 'x3 공격 +80%' },
     safe_cracker: { name: '금고 열쇠', description: '공격과 회복을 동시에 조금씩 보강합니다.', effectLabel: '공격 +2, 회복 +2' },
@@ -189,6 +206,7 @@ function localizeSynergy(
   activeTier?: NonNullable<SynergyDefinition['tiers']>[number],
 ): { name: string; description: string } {
   const localized: Record<string, { name: string; description: string }> = {
+    limit_break: { name: '한계 돌파', description: '한계 증폭핵과 한계 돌파석을 함께 모으면 배수 상한이 x10까지 열립니다.' },
     combo_engine: { name: '연계 엔진', description: 'COMBO 태그를 모으면 공격과 추가타가 단계적으로 강해집니다.' },
     burn_pressure: { name: '화상 압박', description: 'BURN 태그를 모으면 기본 공격에서 저주 기반 폭딜까지 성장합니다.' },
     fortress_loop: { name: '요새 순환', description: 'DEFENSE 태그를 모으면 수비와 저주 관리가 함께 강해집니다.' },
@@ -197,6 +215,7 @@ function localizeSynergy(
     jackpot_engine: { name: '잭팟 엔진', description: 'CRITICAL 태그를 모으면 x2/x3 결과가 강한 폭발력을 냅니다.' },
   }
   const korean: Record<string, { name: string; description: string }> = {
+    limit_break: { name: '한계 돌파', description: '한계 증폭핵과 한계 돌파석을 함께 모으면 배수 상한이 x10까지 열립니다.' },
     combo_engine: { name: '연계 엔진', description: 'COMBO 태그를 모으면 공격과 추가타가 단계적으로 강해집니다.' },
     burn_pressure: { name: '화상 압박', description: 'BURN 태그를 모으면 기본 공격에서 저주 기반 폭발까지 성장합니다.' },
     fortress_loop: { name: '요새 순환', description: 'DEFENSE 태그를 모으면 방어와 저주 관리가 함께 강해집니다.' },
@@ -220,6 +239,9 @@ function localizeEffectLabel(value: string): string {
     .replaceAll('CURSE', '저주')
     .replaceAll('RESOURCE', '자원')
     .replaceAll('CRITICAL', '치명')
+    .replaceAll('LIMIT', '한계')
+    .replaceAll('multiplier', '배수')
+    .replaceAll('max', '최대')
     .replaceAll('bullet', '공격')
     .replaceAll('shield', '방어막')
     .replaceAll('heart', '회복')
@@ -231,6 +253,7 @@ function localizeEffectLabel(value: string): string {
 function localizeSynergyName(synergyId: string, fallback: string): string {
   const baseId = synergyId.split(':')[0]
   const names: Record<string, string> = {
+    limit_break: '한계 돌파',
     combo_engine: '연계 엔진',
     burn_pressure: '화상 압박',
     fortress_loop: '요새 순환',
@@ -288,17 +311,26 @@ function createTargetSymbol(id: CombatSlotResult['target'], type: 'SELF' | 'ALL'
   }
 }
 
-function getUiSlotAmount(slotResult: CombatSlotResult, lane: 'attack' | 'defense' = 'attack'): number {
+function getUiSlotAmount(
+  slotResult: CombatSlotResult,
+  lane: 'attack' | 'defense' = 'attack',
+  options: SlotProjectionOptions = {},
+): number {
   const base = lane === 'attack'
-    ? slotResult.attackRoll ?? (slotResult.action === 'bullet' ? 6 : slotResult.action === 'shield' ? 5 : 4)
+    ? slotResult.attackRoll ?? (slotResult.action === 'bullet' ? 5 : slotResult.action === 'shield' ? 5 : 4)
     : slotResult.defenseRoll ?? 0
-  const multiplier = getUiMultiplier(lane === 'attack'
-    ? slotResult.attackModifier ?? slotResult.modifier
-    : slotResult.defenseModifier ?? slotResult.modifier)
+  const multiplier = getUiMultiplier(
+    lane === 'attack'
+      ? slotResult.attackModifier ?? slotResult.modifier
+      : slotResult.defenseModifier ?? slotResult.modifier,
+    options.multiplierBonus ?? 0,
+    options.multiplierMax ?? 3,
+  )
 
   return base * multiplier
 }
 
-function getUiMultiplier(modifier: CombatSlotResult['modifier']): number {
-  return modifier === 'x3' ? 3 : modifier === 'x2' ? 2 : 1
+function getUiMultiplier(modifier: CombatSlotResult['modifier'], bonus: number = 0, max: number = 3): number {
+  const base = modifier === 'x3' ? 3 : modifier === 'x2' ? 2 : 1
+  return Math.min(max, Math.max(2, base + bonus))
 }

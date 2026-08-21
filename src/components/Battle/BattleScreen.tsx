@@ -18,6 +18,7 @@ const TAG_LABELS: Record<string, string> = {
   CURSE: '저주',
   RISK: '위험',
   RESOURCE: '자원',
+  LIMIT: '한계',
 };
 
 function getTagLabel(tag: string): string {
@@ -34,11 +35,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
   const [hitBurstCount, setHitBurstCount] = useState(0);
   const [showBossEntrance, setShowBossEntrance] = useState(false);
   const lastHandledPopIdRef = useRef<number | null>(null);
-  const lastHandledEnemyPopIdRef = useRef<number | null>(null);
+  const lastHandledEnemyPopBatchRef = useRef<string>('');
 
   const hpPercent = Math.max(0, Math.min(100, Math.round((state.player.hp / state.player.maxHp) * 100)));
   const mobHpPercent = Math.max(0, Math.min(100, Math.round((state.enemy.hp / state.enemy.maxHp) * 100)));
   const mobShieldPercent = Math.max(0, Math.min(100, Math.round((state.enemy.shield / state.enemy.maxHp) * 100)));
+  const buildRewardIds = new Set([
+    ...state.build.augments.map((augment) => augment.id),
+    ...state.build.items,
+  ]);
+  const currentMultiplierMax = Math.max(
+    state.build.activeSynergies.includes('한계 돌파') || (buildRewardIds.has('limit_core') && buildRewardIds.has('limit_breaker')) ? 10 : 3,
+    buildRewardIds.has('limit_breaker') ? 5 : 3,
+    state.currentResult?.attackMultiplierValue ?? 0,
+    state.currentResult?.defenseMultiplierValue ?? 0,
+  );
 
   // Dynamic Theme Customization per Stage Wave
   const stageThemes: Record<number, { name: string; floorTile: string; wallTile: string; glowColor: string }> = {
@@ -86,12 +97,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
   }, [state.lastDamagePop, state.currentResult]);
 
   useEffect(() => {
-    if (!state.lastEnemyDamagePop || state.lastEnemyDamagePop.id === lastHandledEnemyPopIdRef.current) {
+    if (state.enemyDamagePops.length === 0) {
       return;
     }
 
-    lastHandledEnemyPopIdRef.current = state.lastEnemyDamagePop.id;
-    const hits = Math.max(1, Math.min(5, Math.round(state.currentResult?.multiplierValue ?? 1)));
+    const batchId = state.enemyDamagePops.map((pop) => pop.id).join(':');
+    if (batchId === lastHandledEnemyPopBatchRef.current) {
+      return;
+    }
+
+    lastHandledEnemyPopBatchRef.current = batchId;
+    const hits = Math.max(1, Math.min(8, state.enemyDamagePops.length));
     setHitBurstCount(hits);
     soundManager.playSlashAttack();
 
@@ -100,7 +116,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
         soundManager.playHitImpact();
       }, i * 120);
     }
-  }, [state.lastEnemyDamagePop, state.currentResult]);
+  }, [state.enemyDamagePops]);
 
   return (
     <div
@@ -265,15 +281,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
             <div
               className={`mob-zone ${state.isEnemyAttacking ? 'mob-lunge-attack' : ''} ${state.enemy.hp <= 0 || state.isEnemyDefeated ? 'mob-defeat-collapse' : ''}`}
             >
-              <div className={`impact-burst ${state.lastEnemyDamagePop ? 'play' : ''}`} />
-              {state.lastEnemyDamagePop && (
+              <div className={`impact-burst ${state.enemyDamagePops.length > 0 ? 'play' : ''}`} />
+              {state.enemyDamagePops.map((pop, index) => (
                 <div
-                  key={state.lastEnemyDamagePop.id}
-                  className={`mob-damage-pop ${getEnemyDamageTone(state.lastEnemyDamagePop.value)}`}
+                  key={pop.id}
+                  className={`mob-damage-pop ${getEnemyDamageTone(pop.value)}`}
+                  style={{
+                    '--pop-delay': `${index * 0.16}s`,
+                    '--pop-x': `${(index % 3 - 1) * 18}px`,
+                    '--pop-y': `${Math.min(index, 4) * -8}px`,
+                    '--pop-scale': `${Math.max(0.82, 1 - index * 0.035)}`,
+                  } as React.CSSProperties}
                 >
-                  -{state.lastEnemyDamagePop.value}
+                  {pop.value}
                 </div>
-              )}
+              ))}
 
               <img
                 className={`mob-sprite ${isBoss ? 'boss-sprite' : ''} ${isBoss && showBossEntrance ? 'boss-entrance-sprite' : ''} ${isBoss && state.isEnemyAttacking ? 'boss-attack-sprite' : ''}`}
@@ -306,6 +328,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               onReroll={() => onDispatch({ type: 'REROLL_UNLOCKED' })}
               onConfirm={() => onDispatch({ type: 'CONFIRM_SLOT_RESULT' })}
               isFreeRerollAvailable={state.originTraitState.freeRerollAvailable}
+              multiplierMax={currentMultiplierMax}
             />
 
             <div className="roulette-player-hp">

@@ -40,7 +40,8 @@ export type SynergyTag =
   | 'DEFENSE'
   | 'CURSE'
   | 'RISK'
-  | 'RESOURCE';
+  | 'RESOURCE'
+  | 'LIMIT';
 
 export interface AugmentItem {
   id: string;
@@ -200,6 +201,7 @@ export interface GameState {
   combatLogs: string[];
   lastDamagePop: { value: number; type: 'PLAYER_DMG' | 'ENEMY_DMG' | 'HEAL' | 'SHIELD'; id: number } | null;
   lastEnemyDamagePop: { value: number; id: number } | null;
+  enemyDamagePops: { value: number; id: number }[];
   
   // Showcase State
   showcase: {

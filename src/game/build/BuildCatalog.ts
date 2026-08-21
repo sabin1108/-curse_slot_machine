@@ -42,6 +42,12 @@ const multiplierAdd = (id: string, amount: number) => ({
   params: { amount },
 })
 
+const multiplierMax = (id: string, max: number) => ({
+  id,
+  type: 'combat.multiplier.max' as const,
+  params: { max },
+})
+
 export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
   rewards: [
     {
@@ -414,6 +420,30 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
       effects: [multiplierAdd('loaded_multiplier_plus_one', 1)],
     },
     {
+      id: 'limit_core',
+      kind: 'augment',
+      name: 'Limit Core',
+      rarity: 'legendary',
+      tags: ['LIMIT', 'CRITICAL'],
+      effectId: 'limit_core',
+      effectLabel: 'limit synergy core',
+      assetKey: 'item_limit_core',
+      description: 'A multiplier capstone augment that activates its true ceiling with a matching item.',
+      effects: [],
+    },
+    {
+      id: 'limit_breaker',
+      kind: 'item',
+      name: 'Limit Breaker',
+      rarity: 'legendary',
+      tags: ['LIMIT', 'CRITICAL'],
+      effectId: 'limit_breaker',
+      effectLabel: 'multiplier +2, max x5',
+      assetKey: 'item_limit_breaker',
+      description: 'A matching multiplier item that raises normal multiplier ceiling to x5.',
+      effects: [multiplierAdd('limit_breaker_plus_two', 2), multiplierMax('limit_breaker_multiplier_cap', 5)],
+    },
+    {
       id: 'glass_cannon',
       kind: 'augment',
       name: 'Glass Cannon',
@@ -524,6 +554,18 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
     },
   ],
   synergies: [
+    {
+      id: 'limit_break',
+      name: 'Limit Break',
+      description: 'A dedicated multiplier route that starts from a matching augment and item pair.',
+      requiredTags: [
+        { tag: 'LIMIT', count: 1, source: 'augment' },
+        { tag: 'LIMIT', count: 1, source: 'item' },
+      ],
+      tierTag: 'LIMIT',
+      effectId: 'limit_break_pair',
+      effects: [multiplierAdd('limit_break_pair_plus_five', 5), multiplierMax('limit_break_pair_multiplier_cap', 10)],
+    },
     {
       id: 'combo_engine',
       name: 'Combo Engine',

@@ -94,6 +94,7 @@ export class GameEngine {
       combatLogs: ['[시스템] 저주받은 던전에 진입했습니다.'],
       lastDamagePop: null,
       lastEnemyDamagePop: null,
+      enemyDamagePops: [],
       showcase: {
         active: false,
         currentStep: 0,
@@ -226,6 +227,7 @@ export class GameEngine {
     this.state.player.shield = 0;
     this.state.lastDamagePop = null;
     this.state.lastEnemyDamagePop = null;
+    this.state.enemyDamagePops = [];
     this.state.currentResult = null;
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
@@ -405,6 +407,7 @@ export class GameEngine {
           value: dmg,
           id: Date.now()
         };
+        this.state.enemyDamagePops = this.createEnemyDamagePops(dmg, res.modifier.baseValue);
         this.state.combatLogs.push(`[타격] ${this.state.enemy.name}에게 ${dmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
         const extraDmg = this.getLegacyExtraHitDamage(dmg, res.modifier.id);
         if (extraDmg > 0 && this.state.enemy.hp > 0) {
@@ -418,6 +421,10 @@ export class GameEngine {
             value: extraDmg,
             id: Date.now()
           };
+          this.state.enemyDamagePops = [
+            ...this.state.enemyDamagePops,
+            ...this.createEnemyDamagePops(extraDmg, 1)
+          ];
           this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
         }
         this.applySwordsmanBonusStrike(dmg);
@@ -504,7 +511,23 @@ export class GameEngine {
       value: bonusDamage,
       id: Date.now()
     };
+    this.state.enemyDamagePops = [
+      ...this.state.enemyDamagePops,
+      ...this.createEnemyDamagePops(bonusDamage, 1)
+    ];
     this.state.combatLogs.push(`[Origin:Swordsman] half-power follow-up ${bonusDamage} damage! (enemy HP: ${this.state.enemy.hp})`);
+  }
+
+  private createEnemyDamagePops(totalDamage: number, hitCount: number) {
+    const count = Math.max(1, Math.round(hitCount));
+    const base = Math.floor(totalDamage / count);
+    const remainder = totalDamage % count;
+    const startedAt = Date.now();
+
+    return Array.from({ length: count }, (_, index) => ({
+      value: base + (index < remainder ? 1 : 0),
+      id: startedAt + index
+    })).filter((pop) => pop.value > 0);
   }
 
   private applyPriestPurifyTrait(actionType: ReelSymbol['type']) {

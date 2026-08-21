@@ -80,6 +80,12 @@ export type EffectDefinition =
     }
   | {
       id: string
+      type: 'combat.multiplier.max'
+      params: { max: number }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
       type: 'reward.score.add'
       params: { amount: number }
       conditions?: EffectCondition[]

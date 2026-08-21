@@ -23,6 +23,7 @@ interface CombatSlotMachineViewProps {
   onReroll: () => void;
   onConfirm: () => void;
   isFreeRerollAvailable?: boolean;
+  multiplierMax?: number;
 }
 
 export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
@@ -37,6 +38,7 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
   onReroll,
   onConfirm,
   isFreeRerollAvailable = false,
+  multiplierMax = 3,
 }) => {
   const [leverPulled, setLeverPulled] = useState(false);
   const [reelSpinStates, setReelSpinStates] = useState({ action: false, target: false, modifier: false });
@@ -88,10 +90,10 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = window.setInterval(() => {
       setDisplayRolls((prev) => ({
-        attack: spinAttack ? Math.floor(Math.random() * 10) + 1 : prev.attack,
-        defense: spinDefense ? Math.floor(Math.random() * 10) + 1 : prev.defense,
-        attackMultiplier: spinMultiplier ? Math.floor(Math.random() * 2) + 2 : prev.attackMultiplier,
-        defenseMultiplier: spinMultiplier ? Math.floor(Math.random() * 2) + 2 : prev.defenseMultiplier,
+        attack: spinAttack ? Math.floor(Math.random() * 5) + 1 : prev.attack,
+        defense: spinDefense ? Math.floor(Math.random() * 5) + 1 : prev.defense,
+        attackMultiplier: spinMultiplier ? Math.floor(Math.random() * Math.max(1, multiplierMax - 1)) + 2 : prev.attackMultiplier,
+        defenseMultiplier: spinMultiplier ? Math.floor(Math.random() * Math.max(1, multiplierMax - 1)) + 2 : prev.defenseMultiplier,
       }));
       tickCounterRef.current += 1;
       if (tickCounterRef.current % 4 === 0) soundManager.playReelSpinTick();
@@ -161,8 +163,8 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
   const renderRouletteLane = (label: string, numberReelId: ReelId, rollValue: number, multiplierValue: number) => (
     <div className="dual-roulette-lane">
       <div className="dual-roulette-label">{label}</div>
-      {renderReelWindow(rollValue, reelSpinStates[numberReelId], numberReelId, '1-10', '숫자')}
-      {renderReelWindow(`x${multiplierValue}`, reelSpinStates.modifier, 'modifier', 'x2-x3', '배수')}
+      {renderReelWindow(rollValue, reelSpinStates[numberReelId], numberReelId, '1-5', '숫자')}
+      {renderReelWindow(`x${multiplierValue}`, reelSpinStates.modifier, 'modifier', `x2-x${multiplierMax}`, '배수')}
     </div>
   );
 

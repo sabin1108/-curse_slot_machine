@@ -23,6 +23,8 @@ const PUBLIC_ASSETS: Record<string, string> = {
   item_green_vial: '/assets/icons_rpg/potion_02d.png',
   item_lucky_receipt: '/assets/icons_rpg/scroll_01a.png',
   item_crit_die: '/assets/icons_rpg/gem_01h.png',
+  item_limit_core: '/assets/icons_rpg/gem_01j.png',
+  item_limit_breaker: '/assets/icons_rpg/gem_01i.png',
   item_glass_cannon: '/assets/icons_rpg/sword_02e.png',
   item_royal_joker: '/assets/icons_rpg/gem_01i.png',
   item_safe_cracker: '/assets/icons_rpg/key_02d.png',

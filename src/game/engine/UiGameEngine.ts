@@ -1,7 +1,9 @@
 import type { EventChoice, GameCommand as UiGameCommand, GameState as UiGameState, MapNodeType } from '../../types/game'
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
+import { getActiveEffects } from '../build/BuildSystem'
 import type { BuildRewardDefinition } from '../build/BuildTypes'
+import type { EffectDefinition } from '../effects/EffectTypes'
 import type { CombatEvent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
@@ -136,6 +138,7 @@ export class GameEngine {
       this.presentation.isSpinning = false
       this.presentation.isEnemyAttacking = false
       this.presentation.lastEnemyDamagePop = null
+      this.presentation.enemyDamagePops = []
       this.presentation.lockedReels.clear()
       this.presentation.player.shield = 0
       this.resetOriginTraitState()
@@ -168,7 +171,7 @@ export class GameEngine {
   }
 
   private projectStructuredSlot(slotResult: CombatSlotResult): void {
-    this.presentation.currentResult = toUiSlotResult(slotResult)
+    this.presentation.currentResult = toUiSlotResult(slotResult, getSlotProjectionOptions(getActiveEffects(this.structured.getState().build)))
     this.presentation.reelIndexes = {
       action: getReelIndex(this.presentation.reels.action, this.presentation.currentResult.action.id),
       target: getReelIndex(this.presentation.reels.target, this.presentation.currentResult.target.id),
@@ -178,6 +181,7 @@ export class GameEngine {
     this.presentation.isSpinning = false
     this.presentation.isEnemyAttacking = false
     this.presentation.lastEnemyDamagePop = null
+    this.presentation.enemyDamagePops = []
   }
 
   private hasStructuredBuild(): boolean {
@@ -211,6 +215,8 @@ export class GameEngine {
     this.presentation.currentResult = null
     this.presentation.isEnemyAttacking = combatEvents.some((event) => event.type === 'ENEMY_ATTACKED')
     this.presentation.isEnemyDefeated = combat.enemy.health <= 0
+    this.presentation.enemyDamagePops = createEnemyDamagePops(combatEvents, this.currentStructuredSlot)
+    this.presentation.lastEnemyDamagePop = this.presentation.enemyDamagePops.at(-1) ?? null
     this.presentation.lockedReels.clear()
     this.projectStructuredBuild()
     this.projectStructuredRewards()
@@ -324,10 +330,6 @@ export class GameEngine {
           type: 'ENEMY_DMG',
           id: Date.now(),
         }
-        this.presentation.lastEnemyDamagePop = {
-          value: event.amount,
-          id: Date.now(),
-        }
       } else {
         this.presentation.combatLogs.push(`플레이어가 ${event.healthLost} 피해를 받았습니다.`)
       }
@@ -405,6 +407,53 @@ function getRequiredStructuredReward(id: string, kind: BuildRewardDefinition['ki
     throw new Error(`Missing structured ${kind} reward: ${id}`)
   }
   return reward
+}
+
+function createEnemyDamagePops(
+  combatEvents: CombatEvent[],
+  slotResult: CombatSlotResult | null,
+): { value: number; id: number }[] {
+  const enemyDamageEvents = combatEvents.filter(isEnemyDamageEvent)
+  const startedAt = Date.now()
+  let idOffset = 0
+
+  return enemyDamageEvents.flatMap((event, eventIndex) => {
+    const values = eventIndex === 0 ? splitPrimaryDamage(event.amount, slotResult) : [event.amount]
+    return values.map((value) => ({
+      value,
+      id: startedAt + idOffset++,
+    }))
+  })
+}
+
+function isEnemyDamageEvent(
+  event: CombatEvent,
+): event is Extract<CombatEvent, { type: 'DAMAGE_APPLIED' }> & { target: 'enemy' } {
+  return event.type === 'DAMAGE_APPLIED' && event.target === 'enemy' && event.amount > 0
+}
+
+function splitPrimaryDamage(totalDamage: number, slotResult: CombatSlotResult | null): number[] {
+  if (!slotResult || slotResult.action !== 'bullet' || slotResult.target !== 'enemy' || !slotResult.attackRoll) {
+    return [totalDamage]
+  }
+
+  const hitCount = Math.max(1, Math.min(5, Math.round(totalDamage / slotResult.attackRoll)))
+  const base = Math.floor(totalDamage / hitCount)
+  const remainder = totalDamage % hitCount
+
+  return Array.from({ length: hitCount }, (_, index) => base + (index < remainder ? 1 : 0))
+    .filter((value) => value > 0)
+}
+
+function getSlotProjectionOptions(effects: EffectDefinition[]): { multiplierBonus: number; multiplierMax: number } {
+  return {
+    multiplierBonus: effects
+      .filter((effect) => effect.type === 'combat.multiplier.add')
+      .reduce((sum, effect) => sum + effect.params.amount, 0),
+    multiplierMax: effects
+      .filter((effect) => effect.type === 'combat.multiplier.max')
+      .reduce((max, effect) => Math.max(max, effect.params.max), 3),
+  }
 }
 
 function mapUiSlotResult(state: UiGameState): CombatSlotResult | null {

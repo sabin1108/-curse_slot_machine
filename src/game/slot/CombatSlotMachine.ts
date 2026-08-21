@@ -32,8 +32,8 @@ export function spinCombatSlot(rng: SeededRng): CombatSlotResult {
     action: 'bullet',
     target: 'enemy',
     modifier: attackModifier,
-    attackRoll: rng.nextInt(10) + 1,
-    defenseRoll: rng.nextInt(10) + 1,
+    attackRoll: rng.nextInt(5) + 1,
+    defenseRoll: rng.nextInt(5) + 1,
     attackModifier,
     defenseModifier,
   }
@@ -55,8 +55,8 @@ export function rerollCombatSlot(
     action: 'bullet',
     target: 'enemy',
     modifier: attackModifier,
-    attackRoll: locks.action ? previous.attackRoll : rng.nextInt(10) + 1,
-    defenseRoll: locks.target ? previous.defenseRoll : rng.nextInt(10) + 1,
+    attackRoll: locks.action ? previous.attackRoll : rng.nextInt(5) + 1,
+    defenseRoll: locks.target ? previous.defenseRoll : rng.nextInt(5) + 1,
     attackModifier,
     defenseModifier,
   }
