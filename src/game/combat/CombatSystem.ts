@@ -49,6 +49,9 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     overrides.enemy,
   )
 
+  const enemyIntentType = overrides.enemyIntent?.type ?? 'attack'
+  const enemyIntentBaseAmount = overrides.enemyIntent?.baseAmount ?? overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack
+
   return {
     player,
     enemy,
@@ -58,9 +61,9 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
       attackBonus: getCurseAttackBonus(overrides.curse?.value ?? 0),
     },
     enemyIntent: {
-      type: overrides.enemyIntent?.type ?? 'attack',
-      baseAmount: overrides.enemyIntent?.baseAmount ?? overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack,
-      amount: overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack,
+      type: enemyIntentType,
+      baseAmount: enemyIntentBaseAmount,
+      amount: overrides.enemyIntent?.amount ?? (enemyIntentType === 'wait' ? 0 : enemyIntentBaseAmount),
     },
     statuses: {
       player: (overrides.statuses?.player ?? []).map((status) => ({ ...status })),
@@ -235,9 +238,8 @@ export function resolveCombatSlot(
     const phaseTwoAttack = enemy.phaseTwoAttack
     enemy = { ...enemy, health: Math.max(1, enemy.health), phase: 2 }
     enemyIntent = getPressuredIntent({
-      type: 'attack',
+      ...enemyIntent,
       baseAmount: phaseTwoAttack,
-      amount: phaseTwoAttack,
     }, state.curse.value)
     events.push({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: phaseTwoAttack })
   }
@@ -245,17 +247,21 @@ export function resolveCombatSlot(
   let fullBlock = false
   let blockDepleted = false
   if (enemy.health > 0 && player.health > 0) {
-    const blockBeforeAttack = player.block
-    const resolved = applyDamage(player, enemyIntent.amount)
-    player = resolved.actor
-    fullBlock = enemyIntent.amount > 0 && resolved.blocked === enemyIntent.amount && resolved.healthLost === 0
-    blockDepleted = blockBeforeAttack > 0 && player.block === 0
-    events.push({
-      type: 'ENEMY_ATTACKED',
-      amount: enemyIntent.amount,
-      blocked: resolved.blocked,
-      healthLost: resolved.healthLost,
-    })
+    if (enemyIntent.type === 'attack') {
+      const blockBeforeAttack = player.block
+      const resolved = applyDamage(player, enemyIntent.amount)
+      player = resolved.actor
+      fullBlock = enemyIntent.amount > 0 && resolved.blocked === enemyIntent.amount && resolved.healthLost === 0
+      blockDepleted = blockBeforeAttack > 0 && player.block === 0
+      events.push({
+        type: 'ENEMY_ATTACKED',
+        amount: enemyIntent.amount,
+        blocked: resolved.blocked,
+        healthLost: resolved.healthLost,
+      })
+    } else {
+      events.push({ type: 'ENEMY_WAITED' })
+    }
   }
 
   if (fullBlock && enemy.health > 0) {
@@ -335,7 +341,9 @@ export function resolveCombatSlot(
     player,
     enemy,
     curse,
-    enemyIntent: getPressuredIntent(enemyIntent, curse.value),
+    enemyIntent: outcome === 'ongoing'
+      ? getNextEnemyIntent(enemyIntent, curse.value)
+      : getPressuredIntent(enemyIntent, curse.value),
     lastSlotResult: slotResult,
     statuses,
     effectUses,
@@ -577,8 +585,15 @@ export function getCurseAttackBonus(value: number): number {
 function getPressuredIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
   return {
     ...intent,
-    amount: intent.baseAmount + getCurseAttackBonus(curseValue),
+    amount: intent.type === 'wait' ? 0 : intent.baseAmount + getCurseAttackBonus(curseValue),
   }
+}
+
+function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  return getPressuredIntent({
+    ...intent,
+    type: intent.type === 'attack' ? 'wait' : 'attack',
+  }, curseValue)
 }
 
 function getPreviewWarnings(state: CombatState, resolution: CombatResolution): string[] {

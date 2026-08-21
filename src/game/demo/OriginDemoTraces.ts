@@ -6,15 +6,15 @@ type OriginDemoTrace = { seed: string; tokens: readonly TraceToken[]; commands: 
 
 const TRACE_DATA: Record<OriginId, { seed: string; tokens: readonly TraceToken[] }> = {
   SWORDSMAN: {
-    seed: 'origin-demo-334',
+    seed: 'origin-wait-demo-swordsman-749',
     tokens: [
-      'origin:SWORDSMAN','start','enter','spin','confirm','spin','confirm','reward:guard_core','enter','spin','confirm','spin','confirm','spin','confirm','spin','confirm','reward:ember_magazine','enter','rest:purify','enter','buy:combo_finisher','leave','enter','spin','reroll','confirm','reward:debt_collector','enter','event:rest','enter','spin','confirm','spin','confirm','spin','confirm','reward:retaliation_matrix','enter','rest:purify','enter','spin','reroll','confirm','spin','confirm','spin','reroll','confirm','reward:mirror_buckler','enter','leave','enter','spin','reroll','reroll','confirm','spin','confirm','spin','confirm','reward:multi_hit_charm','enter','rest:purify','enter','spin','confirm','spin','confirm','reward:black_market_stamp','enter','event:rest','enter','spin','reroll','reroll','confirm','spin','confirm',
+      'origin:SWORDSMAN','start','enter','spin','reroll','reroll','confirm','reward:cursed_lens','enter','spin','confirm','reward:safety_valve','enter','rest:purify','enter','leave','enter','spin','reroll','reroll','confirm','reward:debt_collector','enter','event:rest','enter','spin','reroll','confirm','reward:retaliation_matrix','enter','rest:purify','enter','spin','confirm','spin','confirm','reward:mirror_buckler','enter','leave','enter','spin','confirm','reward:combo_finisher','enter','rest:purify','enter','spin','confirm','reward:hexed_clutch','enter','event:rest','enter','spin','reroll','reroll','confirm','spin','reroll','confirm','spin','confirm','spin','confirm','spin','confirm',
     ],
   },
   GAMBLER: {
-    seed: 'origin-demo-3066',
+    seed: 'origin-wait-demo-gambler-457',
     tokens: [
-      'origin:GAMBLER','start','enter','spin','reroll','confirm','reward:combo_starter','enter','spin','confirm','spin','reroll','confirm','spin','confirm','reward:safety_valve','enter','rest:heal','enter','buy:ember_magazine','leave','enter','spin','reroll','confirm','reward:debt_collector','enter','event:reward','reward:combo_finisher','enter','spin','confirm','spin','confirm','reward:retaliation_matrix','enter','rest:purify','enter','spin','confirm','spin','confirm','reward:mirror_buckler','enter','buy:multi_hit_charm','leave','enter','spin','confirm','spin','confirm','reward:black_market_stamp','enter','rest:heal','enter','spin','reroll','confirm','spin','confirm','spin','reroll','confirm','reward:steadfast_latch','enter','event:reward','reward:guard_core','enter','spin','confirm','spin','confirm',
+      'origin:GAMBLER','start','enter','spin','confirm','spin','reroll','reroll','confirm','reward:cursed_lens','enter','spin','confirm','reward:safety_valve','enter','rest:purify','enter','leave','enter','spin','reroll','reroll','confirm','spin','confirm','spin','reroll','confirm','reward:debt_collector','enter','event:rest','enter','spin','reroll','reroll','confirm','spin','confirm','spin','reroll','reroll','confirm','spin','confirm','reward:retaliation_matrix','enter','rest:purify','enter','spin','confirm','spin','reroll','confirm','reward:mirror_buckler','enter','leave','enter','spin','reroll','confirm','spin','confirm','reward:combo_finisher','enter','rest:purify','enter','spin','reroll','reroll','confirm','spin','confirm','spin','confirm','spin','confirm','reward:ember_magazine','enter','event:rest','enter','spin','confirm','spin','reroll','confirm','spin','reroll','reroll','confirm',
     ],
   },
   PRIEST: {

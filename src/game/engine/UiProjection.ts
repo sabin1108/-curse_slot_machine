@@ -4,7 +4,7 @@ import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 import type { BuildRewardDefinition, SynergyDefinition, SynergyProgress as CoreSynergyProgress } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
-import type { CombatPreview } from '../combat/CombatTypes'
+import type { CombatPreview, EnemyIntent as CoreEnemyIntent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import type { GameState as CoreGameState } from './GameState'
 
@@ -44,9 +44,7 @@ export function projectUiGameState(state: CoreGameState, feedback: UiFeedback): 
       maxHp: state.combat.enemy.maxHealth,
       shield: state.combat.enemy.block,
       statuses: state.combat.statuses.enemy.map((status) => ({ type: status.id, duration: 1, value: status.stacks })),
-      intent: {
-        id: 'attack', name: '예고된 공격', type: 'ATTACK', value: state.combat.enemyIntent.amount, icon: '⚔', description: `다음 반격 ${state.combat.enemyIntent.amount}`,
-      },
+      intent: toUiEnemyIntent(state.combat.enemyIntent),
       spriteUrl: state.run.currentStage?.type === 'boss' ? getAsset('boss_common') : getAsset('ogre'),
     },
     curse: {
@@ -100,6 +98,27 @@ export function toUiScreen(phase: CoreGameState['phase']): GameScreen {
   if (phase === 'victory') return 'VICTORY'
   if (phase === 'defeat') return 'GAMEOVER'
   return 'MAP'
+}
+
+export function toUiEnemyIntent(intent: CoreEnemyIntent): UiGameState['enemy']['intent'] {
+  if (intent.type === 'wait') {
+    return {
+      id: 'wait',
+      name: '숨 고르기',
+      type: 'WAIT',
+      value: 0,
+      icon: '💤',
+      description: '이번 턴에는 공격하지 않습니다.',
+    }
+  }
+  return {
+    id: 'attack',
+    name: '예고된 공격',
+    type: 'ATTACK',
+    value: intent.amount,
+    icon: '⚔',
+    description: `다음 반격 ${intent.amount}`,
+  }
 }
 
 export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {

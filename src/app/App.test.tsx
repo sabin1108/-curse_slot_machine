@@ -40,6 +40,9 @@ describe('App', () => {
 
     fireEvent.click(container.querySelector('.slot-action-area .k-btn.primary')!)
     fireEvent.click(container.querySelector('.slot-action-area .k-btn.success')!)
+
+    expect(screen.getByText('숨 고르기')).toBeInTheDocument()
+
     fireEvent.click(container.querySelector('.slot-action-area .k-btn.primary')!)
 
     expect(container.querySelector('.slot-action-area .k-btn.success')).toBeInTheDocument()

@@ -82,7 +82,7 @@ export interface PlayerState {
 export interface EnemyIntent {
   id: string;
   name: string;
-  type: 'ATTACK' | 'DEFEND' | 'CURSE' | 'HEAL';
+  type: 'ATTACK' | 'WAIT' | 'DEFEND' | 'CURSE' | 'HEAL';
   value: number;
   icon: string;
   description: string;

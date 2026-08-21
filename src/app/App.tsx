@@ -143,6 +143,7 @@ export function App() {
 
 function reduceFeedback(previous: UiFeedback, events: GameEvent[], idRef: { current: number }): UiFeedback {
   const combatEvents = events.flatMap((event) => event.type === 'COMBAT_SLOT_RESOLVED' ? event.combatEvents : [])
+  const waitLogs = combatEvents.filter((event) => event.type === 'ENEMY_WAITED').map(() => '적이 숨을 고릅니다.')
   const enemyDamagePops: UiFeedback['enemyDamagePops'] = []
   let lastDamagePop: UiFeedback['lastDamagePop'] = null
   let isEnemyAttacking = false
@@ -160,7 +161,7 @@ function reduceFeedback(previous: UiFeedback, events: GameEvent[], idRef: { curr
   }
   return {
     ...previous,
-    combatLogs: [...previous.combatLogs, ...events.map(formatEvent)].slice(-40),
+    combatLogs: [...previous.combatLogs, ...events.map(formatEvent), ...waitLogs].slice(-40),
     enemyDamagePops,
     lastDamagePop,
     isEnemyAttacking,

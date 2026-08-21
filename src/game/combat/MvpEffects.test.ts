@@ -33,7 +33,7 @@ describe('MVP combat effects', () => {
     ]))
   })
 
-  it('runs full-block curse prevention, retaliation, and exposed modifier step-up', () => {
+  it('runs full-block effects on attacks and does not retrigger them on a wait', () => {
     const effects = effectsFor([
       { kind: 'augment', id: 'guard_core' },
       { kind: 'item', id: 'steadfast_latch' },
@@ -51,9 +51,10 @@ describe('MVP combat effects', () => {
     expect(shield.statuses.enemy).toContainEqual({ id: 'exposed', stacks: 1 })
 
     const attack = resolveCombatSlot(shield, { action: 'bullet', target: 'enemy', modifier: 'x1' }, { effects })
-    expect(attack.enemy.health).toBe(16)
+    expect(attack.enemy.health).toBe(22)
     expect(attack.events).toContainEqual(expect.objectContaining({ type: 'STATUS_CONSUMED', status: 'exposed' }))
-    expect(attack.statuses.enemy).toContainEqual({ id: 'exposed', stacks: 1 })
+    expect(attack.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(attack.statuses.enemy).not.toContainEqual({ id: 'exposed', stacks: 1 })
   })
 
   it('steps cursed x1 bullets and consumes debt for one extra hit', () => {

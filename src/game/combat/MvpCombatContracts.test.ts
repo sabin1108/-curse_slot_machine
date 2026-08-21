@@ -61,6 +61,51 @@ describe('MVP combat contracts', () => {
     expect(preview.endReason).toBe(resolved.endReason)
   })
 
+  it('alternates an enemy attack with a harmless wait intent', () => {
+    const attack = resolveCombatSlot(createCombatState({
+      enemy: { maxHealth: 99, health: 99 },
+    }), safeShot)
+    const healthAfterAttack = attack.player.health
+    const blockAfterAttack = attack.player.block
+
+    expect(attack.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED' }))
+    expect(attack.enemyIntent).toMatchObject({ type: 'wait', baseAmount: 4, amount: 0 })
+
+    const wait = resolveCombatSlot(attack, safeShot)
+
+    expect(wait.player).toMatchObject({ health: healthAfterAttack, block: blockAfterAttack })
+    expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(wait.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
+    expect(wait.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 4, amount: 4 })
+  })
+
+  it('previews a wait as zero enemy damage without mutating combat state', () => {
+    const state = createCombatState({
+      enemy: { maxHealth: 99, health: 99 },
+      enemyIntent: { type: 'wait', baseAmount: 7, amount: 0 },
+      curse: { value: 5 },
+    })
+    const before = structuredClone(state)
+
+    const preview = previewCombatSlot(state, safeShot)
+
+    expect(state).toEqual(before)
+    expect(preview.enemyAttack).toBe(0)
+    expect(preview.playerHealthDelta).toBe(0)
+  })
+
+  it('still ends the run at curse ten during a wait', () => {
+    const result = resolveCombatSlot(createCombatState({
+      enemy: { maxHealth: 99, health: 99 },
+      enemyIntent: { type: 'wait', baseAmount: 7, amount: 0 },
+      curse: { value: 9 },
+    }), safeShot)
+
+    expect(result.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(result.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
+    expect(result).toMatchObject({ outcome: 'defeat', endReason: 'curse_overload', curse: { value: 10 } })
+  })
+
   it('warns that newly crossed curse pressure applies to the next enemy attack', () => {
     const state = createCombatState({
       enemy: { maxHealth: 99, health: 99 },
@@ -72,7 +117,8 @@ describe('MVP combat contracts', () => {
 
     expect(preview.enemyAttack).toBe(7)
     expect(preview.warnings).toEqual(['저주 5: 다음 적 공격 +1'])
-    expect(resolved.enemyIntent).toMatchObject({ baseAmount: 7, amount: 8 })
+    expect(resolved.enemyIntent).toMatchObject({ type: 'wait', baseAmount: 7, amount: 0 })
+    expect(resolveCombatSlot(resolved, safeShot).enemyIntent).toMatchObject({ type: 'attack', baseAmount: 7, amount: 8 })
   })
 
   it('moves the boss to phase two at half health and attacks for 10 on that turn', () => {
@@ -89,9 +135,30 @@ describe('MVP combat contracts', () => {
     }), safeShot)
 
     expect(result.enemy).toMatchObject({ health: 14, phase: 2 })
-    expect(result.enemyIntent).toMatchObject({ baseAmount: 10, amount: 10 })
+    expect(result.enemyIntent).toMatchObject({ type: 'wait', baseAmount: 10, amount: 0 })
     expect(result.events).toContainEqual({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: 10 })
     expect(result.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED', amount: 10 }))
+  })
+
+  it('keeps a boss wait intent through phase two and uses the new attack next turn', () => {
+    const phaseChange = resolveCombatSlot(createCombatState({
+      enemy: {
+        name: 'House Sovereign',
+        maxHealth: 36,
+        health: 20,
+        phase: 1,
+        phaseTwoThreshold: 18,
+        phaseTwoAttack: 10,
+      },
+      enemyIntent: { type: 'wait', baseAmount: 7, amount: 0 },
+    }), safeShot)
+
+    expect(phaseChange.events).toContainEqual({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: 10 })
+    expect(phaseChange.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(phaseChange.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 10, amount: 10 })
+
+    const nextTurn = resolveCombatSlot(phaseChange, safeShot)
+    expect(nextTurn.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED', amount: 10 }))
   })
 
   it('prevents a phase-one overkill from skipping the boss second phase', () => {
