@@ -33,7 +33,11 @@ export function App() {
       return;
     }
 
-    if (state.screen === 'BATTLE' && (state.wave >= 15 || state.enemy.id === 'house_dealer_boss')) {
+    const isBossBattle =
+      state.screen === 'BATTLE'
+      && (state.wave >= 15 || state.enemy.id === 'house_dealer_boss' || state.enemy.name.includes('보스') || state.enemy.name.includes('BOSS'));
+
+    if (isBossBattle) {
       soundManager.startBossMusic();
       return;
     }
@@ -42,6 +46,7 @@ export function App() {
   };
 
   const handleDispatch = (command: GameCommand) => {
+    soundManager.unlockAudio();
     const updatedState = engine.dispatch(command);
     syncMusicForState(updatedState);
     // Clone state object to force React state trigger
@@ -108,11 +113,19 @@ export function App() {
           >
             휴식처
           </button>
+          <button
+            className="tab-btn boss-preview-tab"
+            onClick={() => handleDispatch({ type: 'SELECT_MAP_NODE', nodeId: 1502, nodeType: 'BOSS' })}
+            type="button"
+          >
+            보스 보기
+          </button>
         </div>
         <div className="music-control" aria-label="music volume control">
           <button
             className="music-toggle-btn"
             onClick={() => {
+              soundManager.unlockAudio();
               const nextEnabled = soundManager.toggleSound();
               setAudioEnabled(nextEnabled);
               syncMusicForState(gameState);

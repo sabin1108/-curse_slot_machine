@@ -2,12 +2,13 @@ type MusicTrack = 'backmusic' | 'boss';
 
 class SoundManager {
   private enabled = true;
-  private sfxVolume = 0.5;
-  private musicVolume = 0.45;
+  private sfxVolume = 1;
+  private musicVolume = 0.22;
   private audioCache: Record<string, HTMLAudioElement> = {};
   private activeSpinAudio: HTMLAudioElement | null = null;
   private musicAudio: HTMLAudioElement | null = null;
   private activeMusicTrack: MusicTrack | null = null;
+  private pendingMusicTrack: MusicTrack | null = null;
   private ctx: AudioContext | null = null;
 
   private initCtx() {
@@ -20,6 +21,18 @@ class SoundManager {
     if (this.ctx && this.ctx.state === 'suspended') {
       void this.ctx.resume();
     }
+  }
+
+  public unlockAudio() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (this.pendingMusicTrack) {
+      const track = this.pendingMusicTrack;
+      this.pendingMusicTrack = null;
+      this.startMusic(track);
+      return;
+    }
+    this.playSafely(this.musicAudio);
   }
 
   public toggleSound(force?: boolean): boolean {
@@ -64,15 +77,22 @@ class SoundManager {
   }
 
   private startMusic(track: MusicTrack) {
-    if (!this.enabled || this.activeMusicTrack === track) {
+    if (!this.enabled) {
+      return;
+    }
+
+    if (this.activeMusicTrack === track && this.musicAudio) {
+      this.playSafely(this.musicAudio);
       return;
     }
 
     this.pauseMusic();
+    this.pendingMusicTrack = null;
 
     const audio = new Audio(track === 'boss' ? '/sounds/boss_bgm_40.mp3' : '/sounds/backmusic.mp3');
     audio.volume = this.musicVolume;
     audio.loop = track === 'backmusic';
+    audio.preload = 'auto';
 
     if (track === 'boss') {
       audio.addEventListener('ended', () => {
@@ -98,6 +118,9 @@ class SoundManager {
       const result = audio.play();
       if (result && typeof result.catch === 'function') {
         result.catch(() => {
+          if (this.musicAudio === audio && this.activeMusicTrack) {
+            this.pendingMusicTrack = this.activeMusicTrack;
+          }
           if (fallbackOscillator) fallbackOscillator();
         });
       }
@@ -125,6 +148,7 @@ class SoundManager {
 
   private playAudioFile(fileName: string, volume: number = 0.3, fallbackOscillator?: () => void) {
     if (!this.enabled) return;
+    this.initCtx();
 
     try {
       const path = `/sounds/${fileName}`;
@@ -164,13 +188,15 @@ class SoundManager {
 
   public playLeverPull() {
     if (!this.enabled) return;
+    this.initCtx();
     try {
       if (this.activeSpinAudio) {
         this.activeSpinAudio.pause();
         this.activeSpinAudio.currentTime = 0;
       }
       const audio = new Audio('/sounds/slotmachine.mp3');
-      audio.volume = 0.12 * this.sfxVolume;
+      audio.preload = 'auto';
+      audio.volume = 0.78 * this.sfxVolume;
       this.activeSpinAudio = audio;
       this.playSafely(audio, () => this.playOscillatorLever());
     } catch {
@@ -206,31 +232,31 @@ class SoundManager {
   }
 
   public playReelSpinTick() {
-    this.playAudioFile('swish.mp3', 0.15);
+    this.playAudioFile('swish.mp3', 0.42, () => this.playOscillatorTick());
   }
 
   public playReelLock() {
-    this.playAudioFile('defense.mp3', 0.25);
+    this.playAudioFile('defense.mp3', 0.52, () => this.playOscillatorTick());
   }
 
   public playDefense() {
-    this.playAudioFile('defense.mp3', 0.3, () => this.playOscillatorHit());
+    this.playAudioFile('defense.mp3', 0.75, () => this.playOscillatorHit());
   }
 
   public playSlashAttack() {
-    this.playAudioFile('slash_attack.mp3', 0.3, () => this.playOscillatorHit());
+    this.playAudioFile('slash_attack.mp3', 0.82, () => this.playOscillatorHit());
   }
 
   public playHitImpact() {
-    this.playAudioFile('damage.mp3', 0.3, () => this.playOscillatorHit());
+    this.playAudioFile('damage.mp3', 0.72, () => this.playOscillatorHit());
   }
 
   public playHeavyPunch() {
-    this.playAudioFile('heavy_punch.mp3', 0.3, () => this.playOscillatorHit());
+    this.playAudioFile('heavy_punch.mp3', 0.78, () => this.playOscillatorHit());
   }
 
   public playBombExplosion() {
-    this.playAudioFile('final_attack.mp3', 0.3, () => this.playOscillatorBomb());
+    this.playAudioFile('final_attack.mp3', 0.88, () => this.playOscillatorBomb());
   }
 
   public playJackpotSound() {
@@ -275,6 +301,26 @@ class SoundManager {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.15);
+    } catch {}
+  }
+
+  private playOscillatorTick() {
+    this.initCtx();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(520, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(760, this.ctx.currentTime + 0.04);
+
+      gain.gain.setValueAtTime(0.09 * this.sfxVolume, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
     } catch {}
   }
 

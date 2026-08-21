@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ReelSymbol, ReelId } from '../../types/game';
+import React, { useEffect, useRef, useState } from 'react';
+import { ReelId, ReelSymbol, SlotResult } from '../../types/game';
 import { getAsset } from '../../assets/assetHelper';
 import { soundManager } from '../../utils/soundManager';
 
@@ -17,6 +17,7 @@ interface CombatSlotMachineViewProps {
   lockedReels: Set<ReelId>;
   isSpinning: boolean;
   hasSpunThisTurn: boolean;
+  currentResult?: SlotResult | null;
   onSpin: () => void;
   onToggleLock: (reelId: ReelId) => void;
   onReroll: () => void;
@@ -30,40 +31,36 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
   lockedReels,
   isSpinning,
   hasSpunThisTurn,
+  currentResult,
   onSpin,
   onToggleLock,
   onReroll,
   onConfirm,
-  isFreeRerollAvailable = false
+  isFreeRerollAvailable = false,
 }) => {
   const [leverPulled, setLeverPulled] = useState(false);
-  const [reelSpinStates, setReelSpinStates] = useState({
-    action: false,
-    target: false,
-    modifier: false
-  });
-
-  // State to hold temporary rapidly-changing display indexes ONLY during spin
-  const [displayIndexes, setDisplayIndexes] = useState({
-    action: reelIndexes.action,
-    target: reelIndexes.target,
-    modifier: reelIndexes.modifier
+  const [reelSpinStates, setReelSpinStates] = useState({ action: false, target: false, modifier: false });
+  const [displayRolls, setDisplayRolls] = useState({
+    attack: currentResult?.attackRoll ?? 1,
+    defense: currentResult?.defenseRoll ?? 1,
+    attackMultiplier: currentResult?.attackMultiplierValue ?? currentResult?.multiplierValue ?? 2,
+    defenseMultiplier: currentResult?.defenseMultiplierValue ?? currentResult?.multiplierValue ?? 2,
   });
 
   const intervalRef = useRef<number | null>(null);
+  const tickCounterRef = useRef(0);
 
-  // Sync display indexes strictly when reels are NOT spinning
   useEffect(() => {
-    if (!reelSpinStates.action && !reelSpinStates.target && !reelSpinStates.modifier) {
-      setDisplayIndexes({
-        action: reelIndexes.action,
-        target: reelIndexes.target,
-        modifier: reelIndexes.modifier
-      });
-    }
-  }, [reelIndexes, reelSpinStates]);
+    if (reelSpinStates.action || reelSpinStates.target || reelSpinStates.modifier) return;
 
-  // Clean up interval & stop spin sound on unmount
+    setDisplayRolls((prev) => ({
+      attack: currentResult?.attackRoll ?? prev.attack,
+      defense: currentResult?.defenseRoll ?? prev.defense,
+      attackMultiplier: currentResult?.attackMultiplierValue ?? currentResult?.multiplierValue ?? prev.attackMultiplier,
+      defenseMultiplier: currentResult?.defenseMultiplierValue ?? currentResult?.multiplierValue ?? prev.defenseMultiplier,
+    }));
+  }, [currentResult, reelIndexes, reelSpinStates]);
+
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -75,59 +72,52 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
     if (isSpinning || reelSpinStates.action || reelSpinStates.target || reelSpinStates.modifier) return;
 
     setLeverPulled(true);
+    tickCounterRef.current = 0;
     soundManager.playLeverPull();
-    setTimeout(() => setLeverPulled(false), 300);
+    window.setTimeout(() => setLeverPulled(false), 300);
 
-    const spinAction = !lockedReels.has('action');
-    const spinTarget = !lockedReels.has('target');
-    const spinModifier = !lockedReels.has('modifier');
+    const spinAttack = !lockedReels.has('action');
+    const spinDefense = !lockedReels.has('target');
+    const spinMultiplier = !lockedReels.has('modifier');
 
-    setReelSpinStates({
-      action: spinAction,
-      target: spinTarget,
-      modifier: spinModifier
-    });
+    setReelSpinStates({ action: spinAttack, target: spinDefense, modifier: spinMultiplier });
 
-    if (!hasSpunThisTurn) {
-      onSpin();
-    } else {
-      onReroll();
-    }
+    if (!hasSpunThisTurn) onSpin();
+    else onReroll();
 
-    // Start rapid "따랄라라라" symbol flipping ONLY while spinning
     if (intervalRef.current) clearInterval(intervalRef.current);
-
     intervalRef.current = window.setInterval(() => {
-      setDisplayIndexes((prev) => ({
-        action: spinAction ? Math.floor(Math.random() * reels.action.length) : prev.action,
-        target: spinTarget ? Math.floor(Math.random() * reels.target.length) : prev.target,
-        modifier: spinModifier ? Math.floor(Math.random() * reels.modifier.length) : prev.modifier
+      setDisplayRolls((prev) => ({
+        attack: spinAttack ? Math.floor(Math.random() * 10) + 1 : prev.attack,
+        defense: spinDefense ? Math.floor(Math.random() * 10) + 1 : prev.defense,
+        attackMultiplier: spinMultiplier ? Math.floor(Math.random() * 2) + 2 : prev.attackMultiplier,
+        defenseMultiplier: spinMultiplier ? Math.floor(Math.random() * 2) + 2 : prev.defenseMultiplier,
       }));
+      tickCounterRef.current += 1;
+      if (tickCounterRef.current % 4 === 0) soundManager.playReelSpinTick();
     }, 45);
 
-    // Reel 1 Stops at 700ms
-    setTimeout(() => {
+    window.setTimeout(() => {
       setReelSpinStates((prev) => ({ ...prev, action: false }));
-      setDisplayIndexes((prev) => ({ ...prev, action: reelIndexes.action }));
-      if (spinAction) soundManager.playReelLock();
+      setDisplayRolls((prev) => ({ ...prev, attack: currentResult?.attackRoll ?? prev.attack }));
+      if (spinAttack) soundManager.playReelLock();
     }, 700);
 
-    // Reel 2 Stops at 1400ms
-    setTimeout(() => {
+    window.setTimeout(() => {
       setReelSpinStates((prev) => ({ ...prev, target: false }));
-      setDisplayIndexes((prev) => ({ ...prev, target: reelIndexes.target }));
-      if (spinTarget) soundManager.playReelLock();
+      setDisplayRolls((prev) => ({ ...prev, defense: currentResult?.defenseRoll ?? prev.defense }));
+      if (spinDefense) soundManager.playReelLock();
     }, 1400);
 
-    // Reel 3 Stops at 2100ms -> Synchronized stop of slot machine audio!
-    setTimeout(() => {
+    window.setTimeout(() => {
       setReelSpinStates((prev) => ({ ...prev, modifier: false }));
-      setDisplayIndexes((prev) => ({ ...prev, modifier: reelIndexes.modifier }));
-      if (spinModifier) soundManager.playReelLock();
-
-      // Immediately stop slot machine audio spin sound!
+      setDisplayRolls((prev) => ({
+        ...prev,
+        attackMultiplier: currentResult?.attackMultiplierValue ?? currentResult?.multiplierValue ?? prev.attackMultiplier,
+        defenseMultiplier: currentResult?.defenseMultiplierValue ?? currentResult?.multiplierValue ?? prev.defenseMultiplier,
+      }));
+      if (spinMultiplier) soundManager.playReelLock();
       soundManager.stopSlotSpinSound();
-
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -140,69 +130,72 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
     onToggleLock(id);
   };
 
-  // Safe index lookup
-  const currentAction = reels.action[displayIndexes.action % reels.action.length] || reels.action[0];
-  const currentTarget = reels.target[displayIndexes.target % reels.target.length] || reels.target[0];
-  const currentModifier = reels.modifier[displayIndexes.modifier % reels.modifier.length] || reels.modifier[0];
-
   const rerollCurseCost = isFreeRerollAvailable ? 0 : lockedReels.size + 1;
 
-  const renderReelWindow = (symbol: ReelSymbol, isSpinningReel: boolean, reelId: ReelId, label: string) => {
+  const renderReelWindow = (
+    value: string | number,
+    isSpinningReel: boolean,
+    reelId: ReelId,
+    label: string,
+    resultLabel: string,
+  ) => {
     const isLocked = lockedReels.has(reelId);
     return (
       <div className={`reel-col-wrap ${isLocked ? 'is-locked' : ''}`}>
         <div className="reel-col-header">{label}</div>
-        <div className={`reel-window ${isSpinningReel ? 'spinning' : ''}`}>
-          <div className="symbol-cell">
-            <img className="symbol-img" src={symbol.imgUrl || getAsset('sword_gold')} alt={symbol.name} />
-            <div className="symbol-name">{symbol.name}</div>
-          </div>
-        </div>
-        {hasSpunThisTurn && (
-          <div
-            className={`lock-badge ${isLocked ? 'active' : ''}`}
-            onClick={() => handleLockToggle(reelId)}
-          >
-            {isLocked ? '🔒 잠금' : '🔓 잠금'}
-          </div>
-        )}
+        <button
+          className={`reel-window ${isSpinningReel ? 'spinning' : ''}`}
+          onClick={() => hasSpunThisTurn && handleLockToggle(reelId)}
+          type="button"
+        >
+          <span className="symbol-cell roll-symbol-cell">
+            <span className="roll-result-number">{value}</span>
+            <span className="symbol-name">{resultLabel}</span>
+          </span>
+          {hasSpunThisTurn && <span className={`lock-badge ${isLocked ? 'active' : ''}`}>{isLocked ? '잠금' : '고정'}</span>}
+        </button>
       </div>
     );
   };
+
+  const renderRouletteLane = (label: string, numberReelId: ReelId, rollValue: number, multiplierValue: number) => (
+    <div className="dual-roulette-lane">
+      <div className="dual-roulette-label">{label}</div>
+      {renderReelWindow(rollValue, reelSpinStates[numberReelId], numberReelId, '1-10', '숫자')}
+      {renderReelWindow(`x${multiplierValue}`, reelSpinStates.modifier, 'modifier', 'x2-x3', '배수')}
+    </div>
+  );
 
   return (
     <div className="cabinet-wrap">
       <div className="cabinet-row">
         <div className="cabinet">
-          <div className="cabinet-topper">COMBAT SLOT MACHINE</div>
-
-          {renderReelWindow(currentAction, reelSpinStates.action, 'action', '1. 행동 (스킬)')}
-          {renderReelWindow(currentTarget, reelSpinStates.target, 'target', '2. 수치 (위력)')}
-          {renderReelWindow(currentModifier, reelSpinStates.modifier, 'modifier', '3. 배수 (저주)')}
-
-          <div className="payline" />
+          <div className="cabinet-topper">공격 / 방어 룰렛</div>
+          <div className="dual-roulette-stack">
+            {renderRouletteLane('공격', 'action', displayRolls.attack, displayRolls.attackMultiplier)}
+            {renderRouletteLane('방어', 'target', displayRolls.defense, displayRolls.defenseMultiplier)}
+          </div>
         </div>
 
         <div className={`lever-wrap ${leverPulled ? 'pulled' : ''}`} onClick={handlePullLever}>
           <div className="lever-stick" />
           <img src={getAsset('dg_lever_left')} style={{ width: '28px', height: '28px' }} alt="lever base" />
-          <div className="lever-label">PULL</div>
+          <div className="lever-label">회전</div>
         </div>
       </div>
 
-      {/* Separated Slot Control Area (Zero Overlapping) */}
       <div className="slot-action-area">
         {!hasSpunThisTurn ? (
           <button className="k-btn big primary glow-pulse" onClick={handlePullLever} type="button">
-            🎰 PULL LEVER (1➔2➔3 순차 회전)
+            룰렛 돌리기
           </button>
         ) : (
           <div className="reroll-bar">
             <button className="k-btn warning" onClick={handlePullLever} type="button">
-              🎲 {isFreeRerollAvailable ? '무료 재회전 (저주 영향 없음)' : `재회전 (저주 +${rerollCurseCost})`}
+              {isFreeRerollAvailable ? '무료 재회전' : `재회전 (저주 +${rerollCurseCost})`}
             </button>
             <button className="k-btn success" onClick={onConfirm} type="button">
-              ⚔️ 결과 확정 (EXECUTE)
+              결과 확정
             </button>
           </div>
         )}

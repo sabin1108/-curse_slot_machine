@@ -222,6 +222,7 @@ export class GameEngine {
       this.state.enemy = this.generateEnemyForStage(this.state.floor, this.state.wave);
     }
     // Clear previous damage pop & result when entering a new room
+    this.state.player.shield = 0;
     this.state.lastDamagePop = null;
     this.state.currentResult = null;
     this.state.isEnemyDefeated = false;
@@ -318,14 +319,19 @@ export class GameEngine {
   private calculateSlotResult(action: ReelSymbol, target: ReelSymbol, modifier: ReelSymbol): SlotResult {
     let isMiss = false;
     let missReason = '';
-
-    if (action.type === 'HEART' && target.type === 'ENEMY') {
-      isMiss = true;
-      missReason = '적을 회복시킬 수 없습니다. (MISS)';
-    }
+    const effectiveTarget: ReelSymbol = action.type === 'HEART' && target.type === 'ENEMY'
+      ? {
+          ...target,
+          id: 'self',
+          name: 'SELF',
+          type: 'SELF',
+          baseValue: 0,
+          description: 'Healing is redirected to the player.'
+        }
+      : target;
 
     let multiplier = modifier.baseValue;
-    const baseValueSum = action.baseValue + target.baseValue;
+    const baseValueSum = action.baseValue + effectiveTarget.baseValue;
     const actionFlatBonus = this.getLegacyActionFlatBonus(action.type);
     const actionPctBonus = this.getLegacyActionPctBonus(action.type, modifier.id);
     const calculatedValue = isMiss
@@ -345,7 +351,7 @@ export class GameEngine {
 
     return {
       action,
-      target,
+      target: effectiveTarget,
       modifier,
       isMiss,
       missReason,
@@ -544,14 +550,25 @@ export class GameEngine {
       baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[idx]));
     }
 
-    // Dynamic Roguelike Level Design Scaling Formula
-    const hpScale = 1 + (wave - 1) * 0.16;
-    const dmgScale = 1 + (wave - 1) * 0.1;
-    const shieldBonus = (wave > 3 ? 8 : 0) + Math.floor(wave / 3) * 6 + (isBoss ? 32 : 0);
-
-    const scaledHp = Math.round(baseEnemy.maxHp * hpScale);
-    const scaledDmg = Math.round(baseEnemy.intent.value * dmgScale);
-    const scaledShield = Math.round(baseEnemy.shield + shieldBonus);
+    const normalHpCurve = 44 + wave * 14 + Math.floor(wave * wave * 1.2);
+    const eliteHpCurve = 135 + wave * 18 + Math.floor(wave * wave * 1.6);
+    const scaledHp = isBoss
+      ? 520
+      : isElite
+        ? eliteHpCurve
+        : normalHpCurve;
+    const scaledDmg = isBoss
+      ? 34
+      : isElite
+        ? 16 + Math.floor(wave * 1.25)
+        : 7 + Math.floor(wave * 0.9);
+    const scaledShield = isBoss
+      ? 55
+      : isElite
+        ? 18 + Math.floor(wave * 2.2)
+        : wave >= 4
+          ? 8 + Math.floor(wave * 1.4)
+          : baseEnemy.shield;
 
     return {
       ...baseEnemy,
@@ -584,6 +601,7 @@ export class GameEngine {
     }
 
     this.state.enemy = this.generateEnemyForStage(this.state.floor, this.state.wave);
+    this.state.player.shield = 0;
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
     this.resetOriginTraitState();

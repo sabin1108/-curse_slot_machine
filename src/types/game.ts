@@ -23,6 +23,12 @@ export interface SlotResult {
   isMiss: boolean;
   missReason?: string;
   calculatedValue: number;
+  defenseValue?: number;
+  attackRoll?: number;
+  defenseRoll?: number;
+  multiplierValue?: number;
+  attackMultiplierValue?: number;
+  defenseMultiplierValue?: number;
   finalEffectText: string;
 }
 

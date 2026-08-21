@@ -99,6 +99,11 @@ html, body {
   font-weight: bold;
 }
 
+.boss-preview-tab {
+  border-color: rgba(255, 51, 0, 0.75);
+  color: #ffd4c8;
+}
+
 /* ---------- 뷰포트 메인 스테이지 Container ---------- */
 .view-stage {
   width: 100%;
@@ -481,6 +486,58 @@ html, body {
   line-height: 1.5;
 }
 
+.synergy-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.synergy-progress-row {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(127, 216, 255, 0.18);
+  border-radius: 6px;
+  padding: 7px 8px;
+}
+
+.synergy-progress-row.active {
+  border-color: #ffb703;
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.22);
+}
+
+.synergy-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #f0e6d2;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.synergy-progress-head strong {
+  color: #7fd8ff;
+  flex-shrink: 0;
+}
+
+.synergy-progress-track {
+  height: 5px;
+  margin: 5px 0;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.synergy-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7fd8ff, #ffb703);
+}
+
+.synergy-progress-desc {
+  color: #a99f8d;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
 .center-battle-stage {
   flex: 1;
   display: flex;
@@ -495,7 +552,6 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
   padding: 10px 24px;
   border-radius: 10px;
   transition: all 0.15s ease;
@@ -504,26 +560,93 @@ html, body {
   position: relative;
 }
 
-.mob-zone:hover {
-  background: rgba(255, 183, 3, 0.15);
-  border-color: #ffb703;
-  transform: scale(1.02);
+.battle-log-panel {
+  width: 260px;
+  margin: 16px 16px 20px 0;
+  padding: 12px;
+  align-self: stretch;
+  background: rgba(5, 6, 10, 0.68);
+  border: 1px solid rgba(255, 183, 3, 0.28);
+  border-radius: 8px;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.45);
+  color: #f2e4c4;
+  backdrop-filter: blur(3px);
+  overflow: hidden;
 }
 
-.mob-zone.target-selected {
-  border: 2px solid #ffb703;
-  box-shadow: 0 0 20px rgba(255, 183, 3, 0.4);
-  background: rgba(255, 183, 3, 0.2);
+.battle-log-title {
+  color: #ffb703;
+  font-size: 13px;
+  font-weight: 800;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 183, 3, 0.22);
 }
 
-.target-indicator {
+.battle-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.battle-log-row {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: start;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.battle-log-row img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.roulette-player-hp {
+  width: min(440px, 92vw);
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(5, 6, 10, 0.72);
+  border: 1px solid rgba(255, 183, 3, 0.28);
+  border-radius: 8px;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.45);
+}
+
+.roulette-player-hp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #f5e2b8;
   font-size: 12px;
-  color: #ffd79a;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 4px 14px;
-  border-radius: 14px;
+  font-weight: 800;
   margin-bottom: 6px;
-  font-weight: bold;
+}
+
+.roulette-player-hp-track {
+  position: relative;
+  height: 16px;
+  overflow: hidden;
+  background: rgba(20, 8, 10, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.roulette-player-hp-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #b61f2e, #ff4d5f);
+  box-shadow: 0 0 12px rgba(255, 55, 70, 0.55);
+}
+
+.roulette-player-shield-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, rgba(80, 190, 255, 0.58), rgba(110, 220, 255, 0.78));
+  border-right: 2px solid rgba(180, 240, 255, 0.95);
+  box-shadow: 0 0 12px rgba(80, 190, 255, 0.65);
 }
 
 .mob-sprite {
@@ -642,8 +765,8 @@ html, body {
 }
 
 .cabinet {
-  width: 360px;
-  height: 210px;
+  width: min(440px, 92vw);
+  height: 224px;
   background: linear-gradient(180deg, #7a4a20, #4a2a10);
   border: 6px solid #1c0f04;
   border-radius: 12px;
@@ -654,6 +777,31 @@ html, body {
   justify-content: center;
   gap: 16px;
   padding: 12px;
+}
+
+.dual-roulette-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.dual-roulette-lane {
+  display: grid;
+  grid-template-columns: 64px repeat(2, minmax(104px, 1fr));
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.dual-roulette-label {
+  align-self: center;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 210, 90, 0.7), 2px 2px 0 #000;
 }
 
 .cabinet-topper {
@@ -675,6 +823,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 .reel-col-wrap.is-locked .reel-window {
@@ -690,8 +839,9 @@ html, body {
 }
 
 .reel-window {
-  width: 90px;
-  height: 140px;
+  width: 100%;
+  min-width: 72px;
+  height: 74px;
   background: #0c0c10;
   border: 3px solid #2a1808;
   border-radius: 6px;
@@ -735,15 +885,20 @@ html, body {
 }
 
 .lock-badge {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
   font-size: 11px;
   color: #aaa;
   background: rgba(0, 0, 0, 0.8);
-  padding: 4px 10px;
+  padding: 2px 8px;
   border-radius: 4px;
-  margin-top: 6px;
+  margin-top: 0;
   cursor: pointer;
   border: 1px solid #444;
   transition: all 0.15s ease;
+  z-index: 2;
 }
 
 .lock-badge.active {
@@ -2089,6 +2244,18 @@ html, body {
   z-index: 5;
 }
 
+.roll-symbol-cell {
+  gap: 3px;
+}
+
+.roll-result-number {
+  color: #ffea00;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(255, 234, 0, 0.8), 2px 2px 0 #000;
+}
+
 .impact-burst {
   position: absolute;
   left: 50%;
@@ -2172,15 +2339,37 @@ html, body {
 }
 
 .boss-sprite {
-  width: 168px;
-  height: 168px;
+  width: clamp(210px, 24vw, 310px);
+  height: clamp(210px, 24vw, 310px);
   object-fit: contain;
   animation: boss-idle-breathe 1.4s steps(2, end) infinite;
+  image-rendering: pixelated;
+  transform-origin: center bottom;
+}
+
+.boss-entrance-sprite {
+  animation: boss-entrance-rise 1.2s steps(6, end), boss-idle-breathe 1.4s steps(2, end) 1.2s infinite;
+}
+
+.boss-attack-sprite {
+  animation: boss-attack-snap 0.55s steps(4, end), boss-idle-breathe 1.4s steps(2, end) 0.55s infinite;
 }
 
 @keyframes boss-idle-breathe {
   0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.7)); }
   50% { transform: translateY(-5px) scale(1.04); filter: drop-shadow(0 12px 18px rgba(255, 30, 30, 0.45)); }
+}
+
+@keyframes boss-entrance-rise {
+  0% { transform: translateY(34px) scale(0.72); opacity: 0; filter: drop-shadow(0 0 0 rgba(255, 30, 30, 0)); }
+  45% { opacity: 1; }
+  100% { transform: translateY(0) scale(1.08); opacity: 1; filter: drop-shadow(0 16px 24px rgba(255, 30, 30, 0.6)); }
+}
+
+@keyframes boss-attack-snap {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(-18px) scale(1.08); }
+  100% { transform: translateX(0) scale(1); }
 }
 
 .battle-effect-sprite {

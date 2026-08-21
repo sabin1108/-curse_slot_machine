@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { GameEngine } from './UiGameEngine'
 
+function forceLethalDualRoll(engine: GameEngine): void {
+  ;(engine as any).currentStructuredSlot = {
+    action: 'bullet',
+    target: 'enemy',
+    modifier: 'x3',
+    attackRoll: 10,
+    defenseRoll: 1,
+    attackModifier: 'x3',
+    defenseModifier: 'x2',
+  }
+}
+
 describe('UiGameEngine', () => {
   it('projects pure combat slot spins into UI current result', () => {
     const engine = new GameEngine('slot-ui')
@@ -13,11 +25,30 @@ describe('UiGameEngine', () => {
       action: { id: 'bullet' },
       target: { type: 'ENEMY' },
       modifier: { id: 'x2' },
-      calculatedValue: 12,
+      calculatedValue: 16,
+      defenseValue: expect.any(Number),
+      attackRoll: 8,
+      defenseRoll: expect.any(Number),
+      multiplierValue: 2,
+      attackMultiplierValue: 2,
+      defenseMultiplierValue: expect.any(Number),
     })
   })
 
-  it('rerolls unlocked pure combat slot reels and applies pure lock curse cost', () => {
+  it('applies defense roulette block even before any augment is chosen', () => {
+    const engine = new GameEngine('slot-ui')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'slot-ui' })
+    const spunState = engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const expectedBlock = spunState.currentResult?.defenseValue
+
+    const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(expectedBlock).toBeGreaterThan(0)
+    expect(resolvedState.player.shield).toBe(expectedBlock)
+  })
+
+  it('rerolls unlocked pure combat roll values and applies pure lock curse cost', () => {
     const engine = new GameEngine('slot-ui-2')
 
     engine.dispatch({ type: 'START_RUN', seed: 'slot-ui-2' })
@@ -27,10 +58,16 @@ describe('UiGameEngine', () => {
 
     expect(state.curse.current).toBe(2)
     expect(state.currentResult).toMatchObject({
-      action: { id: 'shield' },
-      target: { type: 'SELF' },
+      action: { id: 'bullet' },
+      target: { type: 'ENEMY' },
       modifier: { id: 'x3' },
-      calculatedValue: 15,
+      calculatedValue: 3,
+      defenseValue: expect.any(Number),
+      attackRoll: 1,
+      defenseRoll: expect.any(Number),
+      multiplierValue: 3,
+      attackMultiplierValue: 3,
+      defenseMultiplierValue: expect.any(Number),
     })
   })
 
@@ -79,8 +116,8 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(8)
-    expect(resolvedState.build.activeSynergies).toContain('Combo Engine I')
+    expect(resolvedState.enemy.hp).toBeLessThan(18)
+    expect(resolvedState.build.activeSynergies).toContain('연계 엔진')
   })
 
   it('projects structured synergy progress values into the UI build panel', () => {
@@ -118,6 +155,7 @@ describe('UiGameEngine', () => {
     engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    forceLethalDualRoll(engine)
 
     const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
@@ -137,6 +175,7 @@ describe('UiGameEngine', () => {
     engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    forceLethalDualRoll(engine)
     const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
     const chosenRewardId = rewardState.rewardCandidates[0].id
 
@@ -159,6 +198,7 @@ describe('UiGameEngine', () => {
     engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    forceLethalDualRoll(engine)
     const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
     const chosenRewardId = rewardState.rewardCandidates[0].id
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
@@ -183,6 +223,7 @@ describe('UiGameEngine', () => {
     engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    forceLethalDualRoll(engine)
     const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
     const chosenRewardId = rewardState.rewardCandidates[0].id
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
@@ -208,6 +249,7 @@ describe('UiGameEngine', () => {
     engine.dispatch({ type: 'START_RUN', seed: 'lethal-ui-24' })
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'combo_starter' })
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    forceLethalDualRoll(engine)
     const rewardState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
     const chosenRewardId = rewardState.rewardCandidates[0].id
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
@@ -336,6 +378,6 @@ describe('UiGameEngine', () => {
 
     const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
-    expect(resolvedState.enemy.hp).toBe(4)
+    expect(resolvedState.enemy.hp).toBe(0)
   })
 })

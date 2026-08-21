@@ -68,8 +68,107 @@ export function resolveCombatSlot(
   const events: CombatEvent[] = []
   let player = { ...state.player }
   let enemy = { ...state.enemy }
-  const affectedActors = getAffectedActors(slotResult.target)
+  const affectedActors = slotResult.action === 'heart' && slotResult.target === 'enemy'
+    ? ['player' as const]
+    : getAffectedActors(slotResult.target)
   const effects = context.effects ?? []
+  if (typeof slotResult.attackRoll === 'number' && typeof slotResult.defenseRoll === 'number') {
+    const attackSlot = {
+      ...slotResult,
+      action: 'bullet' as const,
+      target: 'enemy' as const,
+      modifier: slotResult.attackModifier ?? slotResult.modifier,
+    }
+    const defenseSlot = {
+      ...slotResult,
+      action: 'shield' as const,
+      target: 'self' as const,
+      modifier: slotResult.defenseModifier ?? slotResult.modifier,
+    }
+    const attackAmount = getSlotAmount(attackSlot, state, effects, slotResult.attackRoll)
+    const defenseAmount = getSlotAmount(defenseSlot, state, effects, slotResult.defenseRoll)
+    const resolved = applyDamage(enemy, attackAmount)
+    enemy = resolved.actor
+    events.push({
+      type: 'DAMAGE_APPLIED',
+      target: 'enemy',
+      amount: attackAmount,
+      blocked: resolved.blocked,
+      healthLost: resolved.healthLost,
+    })
+    player = {
+      ...player,
+      block: player.block + defenseAmount,
+    }
+    events.push({
+      type: 'BLOCK_GAINED',
+      target: 'player',
+      amount: defenseAmount,
+    })
+
+    for (const extraHitAmount of getExtraHitAmounts(attackAmount, attackSlot, state, effects)) {
+      const extraResolved = applyDamage(enemy, extraHitAmount)
+      enemy = extraResolved.actor
+      events.push({
+        type: 'DAMAGE_APPLIED',
+        target: 'enemy',
+        amount: extraHitAmount,
+        blocked: extraResolved.blocked,
+        healthLost: extraResolved.healthLost,
+      })
+    }
+
+    if (context.originTrait === 'swordsman' && attackAmount >= 16 && enemy.health > 0) {
+      const bonusStrikeAmount = Math.max(1, Math.round(attackAmount * 0.5))
+      const bonusResolved = applyDamage(enemy, bonusStrikeAmount)
+      enemy = bonusResolved.actor
+      events.push({
+        type: 'DAMAGE_APPLIED',
+        target: 'enemy',
+        amount: bonusStrikeAmount,
+        blocked: bonusResolved.blocked,
+        healthLost: bonusResolved.healthLost,
+      })
+    }
+
+    if (enemy.health > 0 && player.health > 0) {
+      const enemyAttackAmount = getCursedEnemyAttackAmount(state)
+      const enemyAttack = applyDamage(player, enemyAttackAmount)
+      player = enemyAttack.actor
+      events.push({
+        type: 'ENEMY_ATTACKED',
+        amount: enemyAttackAmount,
+        blocked: enemyAttack.blocked,
+        healthLost: enemyAttack.healthLost,
+      })
+    }
+
+    const curse = getNextCurse(state, attackSlot, effects, context.originTrait)
+    events.push({
+      type: 'CURSE_INCREASED',
+      amount: getCurseGain(state, attackSlot, effects),
+      value: curse.value,
+    })
+
+    const outcome = getOutcome(player, enemy)
+    if (outcome !== 'ongoing') {
+      events.push({
+        type: 'COMBAT_ENDED',
+        outcome,
+      })
+    }
+
+    return {
+      player,
+      enemy,
+      curse,
+      enemyIntent: state.enemyIntent,
+      lastSlotResult: slotResult,
+      events,
+      outcome,
+    }
+  }
+
   const amount = getSlotAmount(slotResult, state, effects)
 
   for (const actorId of affectedActors) {
@@ -152,27 +251,21 @@ export function resolveCombatSlot(
   }
 
   if (enemy.health > 0 && player.health > 0) {
-    const resolved = applyDamage(player, state.enemyIntent.amount)
+    const enemyAttackAmount = getCursedEnemyAttackAmount(state)
+    const resolved = applyDamage(player, enemyAttackAmount)
     player = resolved.actor
     events.push({
       type: 'ENEMY_ATTACKED',
-      amount: state.enemyIntent.amount,
+      amount: enemyAttackAmount,
       blocked: resolved.blocked,
       healthLost: resolved.healthLost,
     })
   }
 
-  const baseCurseGain = getCurseGain(state, slotResult, effects)
-  const curseGain = context.originTrait === 'priest' && (slotResult.action === 'shield' || slotResult.action === 'heart')
-    ? Math.max(0, baseCurseGain - 1)
-    : baseCurseGain
-  const jackpotCurseReduction = context.originTrait === 'gambler' && slotResult.modifier === 'x3' ? 1 : 0
-  const curse = {
-    value: Math.max(0, state.curse.value + curseGain - jackpotCurseReduction),
-  }
+  const curse = getNextCurse(state, slotResult, effects, context.originTrait)
   events.push({
     type: 'CURSE_INCREASED',
-    amount: curseGain,
+    amount: getCurseGain(state, slotResult, effects),
     value: curse.value,
   })
 
@@ -215,9 +308,10 @@ function getSlotAmount(
   slotResult: CombatSlotResult,
   state: CombatState,
   effects: EffectDefinition[],
+  baseOverride?: number,
 ): number {
-  const multiplier = MODIFIER_MULTIPLIER[slotResult.modifier]
-  const base = getBaseSlotAmount(slotResult) * multiplier
+  const multiplier = getEffectiveMultiplier(slotResult, state, effects)
+  const base = (baseOverride ?? getBaseSlotAmount(slotResult)) * multiplier
   const flatBonus = effects
     .filter((effect) => effect.type === 'combat.action_amount.add')
     .filter((effect) => effect.params.action === slotResult.action)
@@ -232,6 +326,40 @@ function getSlotAmount(
   return Math.floor((base + flatBonus) * (1 + Math.min(200, percentBonus) / 100))
 }
 
+function getEffectiveMultiplier(
+  slotResult: CombatSlotResult,
+  state: CombatState,
+  effects: EffectDefinition[],
+): number {
+  const bonus = effects
+    .filter((effect) => effect.type === 'combat.multiplier.add')
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
+    .reduce((sum, effect) => sum + effect.params.amount, 0)
+
+  const minimumMultiplier = typeof slotResult.attackRoll === 'number' && typeof slotResult.defenseRoll === 'number' ? 2 : 1
+  return clamp(MODIFIER_MULTIPLIER[slotResult.modifier] + bonus, minimumMultiplier, 5)
+}
+
+function getNextCurse(
+  state: CombatState,
+  slotResult: CombatSlotResult,
+  effects: EffectDefinition[],
+  originTrait?: CombatEffectContext['originTrait'],
+): { value: number } {
+  const baseCurseGain = getCurseGain(state, slotResult, effects)
+  const curseGain = originTrait === 'priest' && (slotResult.action === 'shield' || slotResult.action === 'heart')
+    ? Math.max(0, baseCurseGain - 1)
+    : baseCurseGain
+  const jackpotCurseReduction = originTrait === 'gambler'
+    && (slotResult.modifier === 'x3' || slotResult.attackModifier === 'x3' || slotResult.defenseModifier === 'x3')
+    ? 1
+    : 0
+
+  return {
+    value: Math.max(0, state.curse.value + curseGain - jackpotCurseReduction),
+  }
+}
+
 function getBaseSlotAmount(slotResult: CombatSlotResult): number {
   if (slotResult.action === 'bullet') {
     return COMBAT_BASE_VALUES.bulletDamage
@@ -242,6 +370,10 @@ function getBaseSlotAmount(slotResult: CombatSlotResult): number {
   }
 
   return COMBAT_BASE_VALUES.heartHealing
+}
+
+function getCursedEnemyAttackAmount(state: CombatState): number {
+  return Math.max(0, Math.round(state.enemyIntent.amount * (1 + state.curse.value * 0.1)))
 }
 
 function getExtraHitAmounts(
@@ -268,7 +400,7 @@ function getCurseGain(
     .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
 
-  return clamp(1 + adjustment, 0, 3)
+  return clamp(adjustment, 0, 3)
 }
 
 function conditionsMatch(

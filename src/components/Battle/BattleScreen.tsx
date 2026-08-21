@@ -10,7 +10,6 @@ interface BattleScreenProps {
 }
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch }) => {
-  const [selectedTarget, setSelectedTarget] = useState<'ENEMY' | 'SELF'>('ENEMY');
   const [hitBurstCount, setHitBurstCount] = useState(0);
   const [showBossEntrance, setShowBossEntrance] = useState(false);
   const lastHandledPopIdRef = useRef<number | null>(null);
@@ -37,17 +36,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
       ? getAsset('boss_appeared')
       : getAsset('boss_common');
   const enemySprite = isBoss ? bossSprite : state.enemy.spriteUrl || getAsset('ogre');
-  const currentActionType = state.currentResult?.action.type;
-  const effectSprite = currentActionType === 'SHIELD'
-    ? getAsset('fx_defense')
-    : currentActionType === 'HEART'
-      ? getAsset('fx_heal')
-      : currentActionType === 'BOMB'
-        ? getAsset('fx_attack_bomb')
-        : currentActionType === 'BULLET' || currentActionType === 'DAGGER'
-          ? getAsset('fx_attack_slash')
-          : getAsset('fx_attack_fire');
-
   useEffect(() => {
     if (!isBoss) {
       setShowBossEntrance(false);
@@ -59,22 +47,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
     return () => window.clearTimeout(timer);
   }, [isBoss, state.enemy.id]);
 
-  // Trigger Multi-hit sound & burst animation ONLY when a NEW turn damage pop is produced
+  // Trigger impact sound immediately when a new resolved combat pop is produced.
   useEffect(() => {
-    if (state.lastDamagePop && state.currentResult && state.lastDamagePop.id !== lastHandledPopIdRef.current) {
+    if (state.lastDamagePop && state.lastDamagePop.id !== lastHandledPopIdRef.current) {
       lastHandledPopIdRef.current = state.lastDamagePop.id;
 
-      const hits = Math.max(1, Math.min(5, Math.round(state.currentResult.modifier.baseValue)));
+      const hits = Math.max(1, Math.min(5, Math.round(state.currentResult?.multiplierValue ?? 1)));
       setHitBurstCount(hits);
 
-      if (state.currentResult.action.type === 'SHIELD') {
-        soundManager.playDefense();
-      } else if (state.currentResult.action.type === 'BULLET' || state.currentResult.action.type === 'DAGGER') {
+      if (state.lastDamagePop.type === 'ENEMY_DMG') {
         soundManager.playSlashAttack();
-      } else if (state.currentResult.action.type === 'BOMB') {
-        soundManager.playBombExplosion();
-      } else {
+      } else if (state.lastDamagePop.type === 'PLAYER_DMG') {
         soundManager.playHeavyPunch();
+      } else if (state.lastDamagePop.type === 'SHIELD') {
+        soundManager.playDefense();
+      } else {
+        soundManager.playHitImpact();
       }
 
       // Play N sequential hit SFX ticks ONLY during real turn execution
@@ -85,16 +73,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
       }
     }
   }, [state.lastDamagePop, state.currentResult]);
-
-  const handleSelectEnemyTarget = () => {
-    soundManager.playClick();
-    setSelectedTarget('ENEMY');
-  };
-
-  const handleSelectSelfTarget = () => {
-    soundManager.playClick();
-    setSelectedTarget('SELF');
-  };
 
   return (
     <div
@@ -113,8 +91,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
       <div className="battle-screen-content">
         {/* Top HUD Bar */}
         <div className="hud-bar">
-          <div className="hud-group" onClick={handleSelectSelfTarget} style={{ cursor: 'pointer' }}>
-            <span className="hud-label">HP {selectedTarget === 'SELF' ? '🎯' : ''}</span>
+          <div className="hud-group">
+            <span className="hud-label">HP</span>
             <div className="hp-bar-outer" style={{ position: 'relative' }}>
               <div className="hp-bar-ghost" style={{ width: `${hpPercent}%` }} />
               <div className="hp-bar-inner" style={{ width: `${hpPercent}%` }} />
@@ -199,6 +177,28 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
                 </>
               )}
             </div>
+
+            <div className="synergy-progress-list">
+              <div className="side-panel-title">
+                <span>활성화 가능 시너지</span>
+                <span>{state.build.synergyProgress.filter((synergy) => synergy.completed).length}/{state.build.synergyProgress.length}</span>
+              </div>
+              {state.build.synergyProgress.map((synergy) => {
+                const percent = Math.max(0, Math.min(100, Math.round((synergy.current / synergy.required) * 100)));
+                return (
+                  <div key={synergy.synergyId} className={`synergy-progress-row ${synergy.completed ? 'active' : ''}`}>
+                    <div className="synergy-progress-head">
+                      <span>{synergy.name}</span>
+                      <strong>{synergy.current}/{synergy.required}</strong>
+                    </div>
+                    <div className="synergy-progress-track">
+                      <div className="synergy-progress-fill" style={{ width: `${percent}%` }} />
+                    </div>
+                    <div className="synergy-progress-desc">{synergy.effectDescription}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Center Column: Monster Stage + Formula Banner + Slot Cabinet */}
@@ -216,20 +216,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               </div>
             </div>
 
-            {/* Interactive Monster Target Zone */}
+            {/* Monster Zone */}
             <div
-              className={`mob-zone ${selectedTarget === 'ENEMY' ? 'target-selected' : ''} ${state.isEnemyAttacking ? 'mob-lunge-attack' : ''} ${state.enemy.hp <= 0 || state.isEnemyDefeated ? 'mob-defeat-collapse' : ''}`}
-              onClick={handleSelectEnemyTarget}
-              title="클릭하여 공격 타겟 지정"
+              className={`mob-zone ${state.isEnemyAttacking ? 'mob-lunge-attack' : ''} ${state.enemy.hp <= 0 || state.isEnemyDefeated ? 'mob-defeat-collapse' : ''}`}
             >
-              <div className="target-indicator">
-                {selectedTarget === 'ENEMY' ? '🎯 타겟 지정됨 (CLICK)' : '👆 클릭하여 대상 선택'}
-              </div>
-
               <div className={`impact-burst ${state.lastDamagePop ? 'play' : ''}`} />
-              <img className={`elem-icon-onmob battle-effect-sprite ${state.lastDamagePop ? 'play' : ''}`} src={effectSprite} alt="battle effect" />
 
-              <img className={`mob-sprite ${isBoss ? 'boss-sprite' : ''}`} src={enemySprite} alt={state.enemy.name} />
+              <img
+                className={`mob-sprite ${isBoss ? 'boss-sprite' : ''} ${isBoss && showBossEntrance ? 'boss-entrance-sprite' : ''} ${isBoss && state.isEnemyAttacking ? 'boss-attack-sprite' : ''}`}
+                src={enemySprite}
+                alt={state.enemy.name}
+              />
 
               <div className="mob-hpbar-outer">
                 <div className="mob-hpbar-inner" style={{ width: `${mobHpPercent}%` }} />
@@ -239,18 +236,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               </div>
             </div>
 
-            {/* Dedicated Formula Display Banner */}
-            {state.currentResult && (
-              <div className="sentence-display-banner">
-                <span className="sentence-formula">
-                  [ {state.currentResult.action.name} ] + [ {state.currentResult.target.name} ] × [ {state.currentResult.modifier.name} ]
-                </span>
-                <strong className={state.currentResult.isMiss ? 'miss' : 'effect'}>
-                  ➡️ {state.currentResult.finalEffectText}
-                </strong>
-              </div>
-            )}
-
             {/* Center Slot Machine Cabinet */}
             <CombatSlotMachineView
               reels={state.reels}
@@ -258,13 +243,48 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               lockedReels={state.lockedReels}
               isSpinning={state.isSpinning}
               hasSpunThisTurn={state.hasSpunThisTurn}
+              currentResult={state.currentResult}
               onSpin={() => onDispatch({ type: 'SPIN_COMBAT_SLOT' })}
               onToggleLock={(reelId: ReelId) => onDispatch({ type: 'TOGGLE_LOCK_REEL', reelId })}
               onReroll={() => onDispatch({ type: 'REROLL_UNLOCKED' })}
               onConfirm={() => onDispatch({ type: 'CONFIRM_SLOT_RESULT' })}
               isFreeRerollAvailable={state.originTraitState.freeRerollAvailable}
             />
+
+            <div className="roulette-player-hp">
+              <div className="roulette-player-hp-head">
+                <span>HP</span>
+                <strong>
+                  {state.player.hp} / {state.player.maxHp}
+                  {state.player.shield > 0 ? `  보호막 ${state.player.shield}` : ''}
+                </strong>
+              </div>
+              <div className="roulette-player-hp-track">
+                <div className="roulette-player-hp-fill" style={{ width: `${hpPercent}%` }} />
+                {state.player.shield > 0 && (
+                  <div
+                    className="roulette-player-shield-fill"
+                    style={{ width: `${Math.min(100, Math.round((state.player.shield / state.player.maxHp) * 100))}%` }}
+                  />
+                )}
+              </div>
+            </div>
           </div>
+
+          <aside className="battle-log-panel" aria-label="전투 로그">
+            <div className="battle-log-title">전투 로그</div>
+            <div className="battle-log-list">
+              {state.combatLogs.slice(-8).map((log, index) => (
+                <div className="battle-log-row" key={`${log}-${index}`}>
+                  <img
+                    src={log.includes('방어막') ? getAsset('shield_blue') : log.includes('적에게') ? getAsset('sword_gold') : getAsset('skull_red')}
+                    alt=""
+                  />
+                  <span>{log}</span>
+                </div>
+              ))}
+            </div>
+          </aside>
         </div>
       </div>
 

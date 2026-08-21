@@ -6,6 +6,7 @@ import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
 import { createInitialGameState, type GameState } from './GameState'
 import { createSeededRngFromSnapshot, type RngSeed, type SeededRng } from './rng'
+import type { EnemyState as UiEnemyState, PlayerState as UiPlayerState } from '../../types/game'
 
 export class GameEngine {
   private state: GameState
@@ -32,6 +33,36 @@ export class GameEngine {
 
   getState(): GameState {
     return structuredClone(this.state)
+  }
+
+  syncCombatFromPresentation(player: UiPlayerState, enemy: UiEnemyState, curseValue: number): void {
+    this.state = {
+      ...this.state,
+      combat: {
+        ...this.state.combat,
+        player: {
+          id: 'player',
+          name: 'Player',
+          maxHealth: player.maxHp,
+          health: player.hp,
+          block: player.shield,
+        },
+        enemy: {
+          id: 'enemy',
+          name: enemy.name,
+          maxHealth: enemy.maxHp,
+          health: enemy.hp,
+          block: enemy.shield,
+        },
+        curse: {
+          value: curseValue,
+        },
+        enemyIntent: {
+          type: 'attack',
+          amount: enemy.intent.value,
+        },
+      },
+    }
   }
 
   private startRun(): GameEvent[] {

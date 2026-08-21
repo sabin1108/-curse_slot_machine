@@ -30,7 +30,7 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(engine.getState().curse.current).toBe(initialCurse + 2);
   });
 
-  it('should mark MISS when action and target are incompatible (e.g., HEART -> ENEMY)', () => {
+  it('should redirect HEART -> ENEMY into self healing instead of missing', () => {
     const engine = new GameEngine('miss_test_seed');
     const heartSymbol = {
       id: 'heart',
@@ -65,8 +65,9 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
 
     // Access private method calculateSlotResult for assertion
     const result = (engine as any).calculateSlotResult(heartSymbol, enemySymbol, x1Symbol);
-    expect(result.isMiss).toBe(true);
-    expect(result.calculatedValue).toBe(0);
+    expect(result.isMiss).toBe(false);
+    expect(result.target.type).toBe('SELF');
+    expect(result.calculatedValue).toBe(5);
   });
 
   it('should advance steps properly in Showcase Mode', () => {
@@ -234,16 +235,16 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     const finalBoss = (engine as any).generateEnemyForStage(1, 15);
 
     expect(firstEnemy).toMatchObject({
-      hp: 75,
-      maxHp: 75,
+      hp: 59,
+      maxHp: 59,
       shield: 0,
-      intent: expect.objectContaining({ value: 11 })
+      intent: expect.objectContaining({ value: 7 })
     });
     expect(finalBoss).toMatchObject({
-      hp: 1231,
-      maxHp: 1231,
-      shield: 120,
-      intent: expect.objectContaining({ value: 101 })
+      hp: 520,
+      maxHp: 520,
+      shield: 55,
+      intent: expect.objectContaining({ value: 34 })
     });
   });
 

@@ -241,24 +241,6 @@ export const ALL_AUGMENTS: AugmentItem[] = [
 ];
 
 export const INITIAL_SYNERGIES: SynergyProgress[] = [
-  {
-    synergyId: 'syn_burn',
-    name: '화속성 2종 시너지',
-    tag: 'BURN',
-    current: 2,
-    required: 2,
-    completed: true,
-    effectDescription: '화상 확률 +15% 증가 및 타격 시 주황 임팩트 버스트 연출'
-  },
-  {
-    synergyId: 'syn_combo',
-    name: '연속 타격 (COMBO)',
-    tag: 'COMBO',
-    current: 1,
-    required: 3,
-    completed: false,
-    effectDescription: 'COMBO 태그 3개 완성 시 모든 타격 피해 2배 증폭'
-  },
   ...DEFAULT_BUILD_CATALOG.synergies.map((synergy): SynergyProgress => ({
     synergyId: synergy.id,
     name: synergy.name,
@@ -287,7 +269,7 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
       icon: '⚓',
       description: '다음 턴 11 갈고리 피해 예고'
     },
-    spriteUrl: getAsset('skull_red')
+    spriteUrl: getAsset('enemy_skelet')
   },
   // Stage 2 Base Monster
   {
@@ -305,7 +287,7 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
       icon: '☠️',
       description: '다음 턴 12 피해 및 저주 +1'
     },
-    spriteUrl: getAsset('goblin')
+    spriteUrl: getAsset('enemy_goblin')
   },
   // Stage 3 Base Monster
   {
@@ -323,7 +305,7 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
       icon: '🔮',
       description: '다음 턴 13 독주술 피해'
     },
-    spriteUrl: getAsset('potion_red')
+    spriteUrl: getAsset('enemy_necromancer')
   },
   // Stage 4 Elite
   {
@@ -341,7 +323,7 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
       icon: '🔨',
       description: '다음 턴 16 강타 대형 피해'
     },
-    spriteUrl: getAsset('ogre')
+    spriteUrl: getAsset('enemy_ogre')
   },
   // Stage 5 Elite
   {
@@ -359,7 +341,7 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
       icon: '🛡️',
       description: '다음 턴 20 강철 강타 예고'
     },
-    spriteUrl: getAsset('shield_blue')
+    spriteUrl: getAsset('enemy_knight')
   },
   // Stage 6 Checkpoint
   {
@@ -377,7 +359,7 @@ export const DEFAULT_ENEMIES: EnemyState[] = [
       icon: '🪨',
       description: '다음 턴 24 바위 둔기 강타'
     },
-    spriteUrl: getAsset('orb_purple')
+    spriteUrl: getAsset('enemy_golem')
   },
   // Stage 7 Boss
   {

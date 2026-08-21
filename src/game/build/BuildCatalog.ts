@@ -36,6 +36,12 @@ const heartPct = (id: string, percent: number) => ({
   params: { action: 'heart' as const, percent },
 })
 
+const multiplierAdd = (id: string, amount: number) => ({
+  id,
+  type: 'combat.multiplier.add' as const,
+  params: { amount },
+})
+
 export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
   rewards: [
     {
@@ -394,6 +400,18 @@ export const DEFAULT_BUILD_CATALOG: BuildCatalog = {
           conditions: [{ type: 'slot.modifier_is', params: { modifier: 'x3' } }],
         },
       ],
+    },
+    {
+      id: 'loaded_multiplier',
+      kind: 'item',
+      name: 'Loaded Multiplier',
+      rarity: 'rare',
+      tags: ['CRITICAL', 'COMBO'],
+      effectId: 'loaded_multiplier',
+      effectLabel: 'multiplier +1',
+      assetKey: 'item_crit_die',
+      description: 'Raises the resolved attack and defense multiplier by 1.',
+      effects: [multiplierAdd('loaded_multiplier_plus_one', 1)],
     },
     {
       id: 'glass_cannon',

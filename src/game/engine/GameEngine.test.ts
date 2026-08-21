@@ -57,7 +57,7 @@ describe('GameEngine', () => {
         combatEvents: expect.arrayContaining([
           expect.objectContaining({ type: 'DAMAGE_APPLIED', target: 'enemy' }),
           expect.objectContaining({ type: 'ENEMY_ATTACKED' }),
-          expect.objectContaining({ type: 'CURSE_INCREASED', value: 1 }),
+          expect.objectContaining({ type: 'CURSE_INCREASED', value: 0 }),
         ]),
       },
     ])
@@ -72,7 +72,7 @@ describe('GameEngine', () => {
           health: 6,
         },
         curse: {
-          value: 1,
+          value: 0,
         },
         lastSlotResult: slotResult,
       },

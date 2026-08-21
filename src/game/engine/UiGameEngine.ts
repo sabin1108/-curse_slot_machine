@@ -11,6 +11,7 @@ import {
   toUiAugment,
   toUiReward,
   toUiSlotResult,
+  toUiSynergyName,
   toUiSynergyProgress,
 } from './UiProjection'
 import type { GameEvent } from './events'
@@ -115,6 +116,8 @@ export class GameEngine {
         })
         if (shouldAdvanceMapShell) {
           this.presentation = this.legacy.dispatch(command)
+          this.presentation.player.shield = 0
+          this.syncStructuredCombatFromPresentation()
         }
         this.projectStructuredBuild()
         this.projectStructuredRewards()
@@ -132,7 +135,10 @@ export class GameEngine {
       this.presentation.hasSpunThisTurn = false
       this.presentation.isSpinning = false
       this.presentation.lockedReels.clear()
+      this.presentation.player.shield = 0
       this.resetOriginTraitState()
+      this.projectStructuredBuild()
+      this.syncStructuredCombatFromPresentation()
       return this.presentation
     }
 
@@ -141,7 +147,7 @@ export class GameEngine {
       return this.presentation
     }
 
-    if (command.type === 'CONFIRM_SLOT_RESULT' && this.hasStructuredBuild()) {
+    if (command.type === 'CONFIRM_SLOT_RESULT' && (this.currentStructuredSlot || this.hasStructuredBuild())) {
       const slotResult = this.currentStructuredSlot ?? mapUiSlotResult(this.presentation)
       if (slotResult) {
         const events = this.structured.dispatch({
@@ -168,7 +174,6 @@ export class GameEngine {
     }
     this.presentation.hasSpunThisTurn = true
     this.presentation.isSpinning = false
-    this.presentation.combatLogs.push(`[Slot] ${this.presentation.currentResult.finalEffectText}`)
   }
 
   private hasStructuredBuild(): boolean {
@@ -211,7 +216,7 @@ export class GameEngine {
       ...this.presentation.build,
       augments: build.augments.map((id) => toUiAugment(getRequiredStructuredReward(id, 'augment'))),
       items: build.items,
-      activeSynergies: build.synergies.active.map((synergy) => synergy.name),
+      activeSynergies: build.synergies.active.map((synergy) => toUiSynergyName(synergy)),
       synergyProgress: DEFAULT_BUILD_CATALOG.synergies.map((synergy) =>
         toUiSynergyProgress(
           synergy,
@@ -225,6 +230,14 @@ export class GameEngine {
     this.presentation.originTraitState = {
       freeRerollAvailable: this.presentation.selectedOrigin === 'GAMBLER',
     }
+  }
+
+  private syncStructuredCombatFromPresentation(): void {
+    this.structured.syncCombatFromPresentation(
+      this.presentation.player,
+      this.presentation.enemy,
+      this.presentation.curse.current,
+    )
   }
 
   private consumeFreeRerollIfAvailable(): boolean {
@@ -288,18 +301,35 @@ export class GameEngine {
 
   private appendCombatEventLog(event: CombatEvent): void {
     if (event.type === 'DAMAGE_APPLIED') {
-      this.presentation.combatLogs.push(`[Damage] ${event.target} -${event.healthLost}`)
       if (event.target === 'enemy') {
+        this.presentation.combatLogs.push(`적에게 ${event.healthLost} 피해를 주었습니다.`)
         this.presentation.lastDamagePop = {
           value: event.healthLost,
           type: 'ENEMY_DMG',
           id: Date.now(),
         }
+      } else {
+        this.presentation.combatLogs.push(`플레이어가 ${event.healthLost} 피해를 받았습니다.`)
+      }
+    }
+
+    if (event.type === 'BLOCK_GAINED') {
+      this.presentation.combatLogs.push(`방어막 ${event.amount}을 얻었습니다.`)
+      this.presentation.lastDamagePop = {
+        value: event.amount,
+        type: 'SHIELD',
+        id: Date.now(),
       }
     }
 
     if (event.type === 'ENEMY_ATTACKED') {
-      this.presentation.combatLogs.push(`[Enemy] player -${event.healthLost}`)
+      if (event.blocked > 0 && event.healthLost > 0) {
+        this.presentation.combatLogs.push(`적의 공격을 방어막으로 ${event.blocked} 경감하고 HP가 ${event.healthLost} 감소했습니다.`)
+      } else if (event.blocked > 0) {
+        this.presentation.combatLogs.push(`적의 공격을 방어막으로 ${event.blocked} 막았습니다.`)
+      } else {
+        this.presentation.combatLogs.push(`적의 공격으로 HP가 ${event.healthLost} 감소했습니다.`)
+      }
       if (event.healthLost > 0) {
         this.presentation.lastDamagePop = {
           value: event.healthLost,
@@ -310,7 +340,9 @@ export class GameEngine {
     }
 
     if (event.type === 'CURSE_INCREASED') {
-      this.presentation.combatLogs.push(`[Curse] +${event.amount}`)
+      if (event.amount > 0) {
+        this.presentation.combatLogs.push(`저주가 ${event.amount} 증가했습니다. 적 공격력은 저주 1당 10% 강해집니다.`)
+      }
     }
   }
 }

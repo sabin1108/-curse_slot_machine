@@ -21,16 +21,21 @@ export const COMBAT_TARGET_REEL: readonly WeightedReelEntry<CombatTargetSymbol>[
 ]
 
 export const COMBAT_MODIFIER_REEL: readonly WeightedReelEntry<CombatModifierSymbol>[] = [
-  { symbol: 'x1', weight: 3 },
   { symbol: 'x2', weight: 2 },
   { symbol: 'x3', weight: 1 },
 ]
 
 export function spinCombatSlot(rng: SeededRng): CombatSlotResult {
+  const attackModifier = pickWeightedSymbol(COMBAT_MODIFIER_REEL, rng)
+  const defenseModifier = pickWeightedSymbol(COMBAT_MODIFIER_REEL, rng)
   return {
-    action: pickWeightedSymbol(COMBAT_ACTION_REEL, rng),
-    target: pickWeightedSymbol(COMBAT_TARGET_REEL, rng),
-    modifier: pickWeightedSymbol(COMBAT_MODIFIER_REEL, rng),
+    action: 'bullet',
+    target: 'enemy',
+    modifier: attackModifier,
+    attackRoll: rng.nextInt(10) + 1,
+    defenseRoll: rng.nextInt(10) + 1,
+    attackModifier,
+    defenseModifier,
   }
 }
 
@@ -39,16 +44,21 @@ export function rerollCombatSlot(
   locks: CombatSlotLocks,
   rng: SeededRng,
 ): CombatSlotResult {
+  const attackModifier = locks.modifier
+    ? previous.attackModifier ?? previous.modifier
+    : pickWeightedSymbol(COMBAT_MODIFIER_REEL, rng)
+  const defenseModifier = locks.modifier
+    ? previous.defenseModifier ?? previous.modifier
+    : pickWeightedSymbol(COMBAT_MODIFIER_REEL, rng)
+
   return {
-    action: locks.action
-      ? previous.action
-      : pickWeightedSymbol(COMBAT_ACTION_REEL, rng),
-    target: locks.target
-      ? previous.target
-      : pickWeightedSymbol(COMBAT_TARGET_REEL, rng),
-    modifier: locks.modifier
-      ? previous.modifier
-      : pickWeightedSymbol(COMBAT_MODIFIER_REEL, rng),
+    action: 'bullet',
+    target: 'enemy',
+    modifier: attackModifier,
+    attackRoll: locks.action ? previous.attackRoll : rng.nextInt(10) + 1,
+    defenseRoll: locks.target ? previous.defenseRoll : rng.nextInt(10) + 1,
+    attackModifier,
+    defenseModifier,
   }
 }
 
