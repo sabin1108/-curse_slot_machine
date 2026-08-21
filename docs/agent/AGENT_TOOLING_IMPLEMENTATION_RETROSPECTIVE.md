@@ -82,7 +82,9 @@ The work used one implementation owner. No implementation subagents edited produ
 4. After the commit is fixed, run seeded gameplay QA, level-design review, and UX review independently.
 5. Store findings with evidence and a decision state. Only human-marked `Accepted` findings enter the next implementation cycle.
 
-## Proposed additional skills
+## Implemented additional skills
+
+The following proposals were implemented as project-local Codex skills under `.codex/skills/`. All four pass the Codex skill format validator. The command trace and catalog linter helpers were also executed against the MVP repository.
 
 ### `mvp-contract-auditor`
 

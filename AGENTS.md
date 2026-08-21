@@ -45,6 +45,13 @@ Repository-native skills live under `.agents/skills/`.
 - `$slot-ux-review`: evidence-backed combat UX and accessibility review after a playable milestone.
 - `$seeded-gameplay-qa`: deterministic gameplay regression review after seed controls and commands exist.
 
+Codex implementation-support skills live under `.codex/skills/`.
+
+- `$mvp-contract-auditor`: read-only architecture invariant audit before a checkpoint or merge.
+- `$command-trace-recorder`: deterministic seed and command trace recording with commit provenance.
+- `$content-catalog-linter`: content schema, synergy, and reward reachability validation.
+- `$playable-checkpoint-preflight`: readiness gate and handoff packet for milestone domain reviews.
+
 Read the selected skill's complete `SKILL.md` before following its workflow. Review skills return findings; they do not implement fixes.
 
 ## Tools

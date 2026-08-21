@@ -1,0 +1,5 @@
+[
+  { "type": "START_RUN" },
+  { "type": "ENTER_NEXT_STAGE" },
+  { "type": "SPIN_COMBAT_SLOT" }
+]
