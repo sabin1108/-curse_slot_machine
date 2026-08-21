@@ -1,5 +1,6 @@
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
-import type { EffectDefinition } from '../effects/EffectTypes'
+import type { CombatStatusId, EffectDefinition } from '../effects/EffectTypes'
+import type { CombatSlotLocks } from '../slot/CombatSlotTypes'
 
 export type CombatActorId = 'player' | 'enemy'
 
@@ -20,12 +21,22 @@ export type CurseState = {
   value: number
 }
 
+export type CombatStatusStack = {
+  id: CombatStatusId
+  stacks: number
+}
+
 export type CombatState = {
   player: CombatActorState
   enemy: CombatActorState
   curse: CurseState
   enemyIntent: EnemyIntent
   lastSlotResult?: CombatSlotResult
+  statuses: {
+    player: CombatStatusStack[]
+    enemy: CombatStatusStack[]
+  }
+  effectUses: string[]
 }
 
 export type CombatOutcome = 'ongoing' | 'victory' | 'defeat'
@@ -64,6 +75,22 @@ export type CombatEvent =
       type: 'COMBAT_ENDED'
       outcome: Exclude<CombatOutcome, 'ongoing'>
     }
+  | {
+      type: 'STATUS_APPLIED'
+      target: CombatActorId
+      status: CombatStatusId
+      stacks: number
+    }
+  | {
+      type: 'STATUS_CONSUMED'
+      target: CombatActorId
+      status: CombatStatusId
+      stacks: number
+    }
+  | {
+      type: 'CURSE_PREVENTED'
+      effectId: string
+    }
 
 export type CombatResolution = CombatState & {
   events: CombatEvent[]
@@ -73,6 +100,7 @@ export type CombatResolution = CombatState & {
 export type CombatEffectContext = {
   effects?: EffectDefinition[]
   originTrait?: 'swordsman' | 'gambler' | 'priest'
+  lockedReels?: CombatSlotLocks
 }
 
 export type CombatStateOverrides = {
@@ -81,4 +109,6 @@ export type CombatStateOverrides = {
   curse?: Partial<CurseState>
   enemyIntent?: Partial<EnemyIntent>
   lastSlotResult?: CombatSlotResult
+  statuses?: Partial<CombatState['statuses']>
+  effectUses?: string[]
 }

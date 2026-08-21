@@ -2088,5 +2088,68 @@ html, body {
   z-index: 5;
 }
 
+/* Structured-engine MVP shell */
+.mvp-shell {
+  min-height: 100vh;
+  padding: 28px;
+  color: #f5ead4;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(127, 35, 55, 0.32), transparent 42%),
+    linear-gradient(145deg, #15111a, #08070b 65%);
+  font-family: var(--font-body);
+}
+
+.mvp-title { display: grid; place-content: center; gap: 18px; text-align: center; }
+.mvp-title h1, .mvp-room h1 { margin: 0; font: 800 clamp(36px, 7vw, 76px)/.95 var(--font-display); letter-spacing: .06em; }
+.mvp-kicker { margin: 0; color: #e7a94d; font: 700 12px/1 var(--font-display); letter-spacing: .2em; }
+.seed-field { display: grid; gap: 8px; width: min(420px, 90vw); margin: 0 auto; text-align: left; }
+.seed-field input { padding: 12px 14px; color: #fff; background: #111018; border: 1px solid #695a48; border-radius: 6px; }
+.mvp-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
+.mvp-shell button { padding: 11px 16px; color: #f8ead2; background: #25202b; border: 1px solid #71624f; border-radius: 6px; cursor: pointer; font-weight: 700; }
+.mvp-shell button:hover:not(:disabled) { border-color: #e7a94d; transform: translateY(-1px); }
+.mvp-shell button:disabled { opacity: .4; cursor: not-allowed; }
+.mvp-shell .mvp-primary { color: #17100c; background: #e7a94d; border-color: #ffd37c; }
+.mvp-header { display: flex; justify-content: space-between; gap: 20px; padding: 18px; background: rgba(13, 11, 17, .88); border: 1px solid #4c3c34; }
+.mvp-header > div { display: flex; align-items: center; gap: 14px; }
+.mvp-stat { flex-wrap: wrap; justify-content: flex-end; }
+.mvp-stat span { color: #f1c77b; font-weight: 700; }
+.mvp-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; margin-top: 18px; }
+.mvp-stage, .mvp-panel { background: rgba(17, 14, 22, .92); border: 1px solid #453a39; border-radius: 8px; box-shadow: 0 22px 60px rgba(0, 0, 0, .3); }
+.mvp-stage { min-height: 660px; display: grid; place-items: center; padding: 28px; }
+.mvp-room { width: min(900px, 100%); text-align: center; }
+.mvp-room > p { color: #bdb3a6; }
+.mvp-sidebar { display: grid; align-content: start; gap: 14px; }
+.mvp-panel { padding: 16px; }
+.mvp-panel h2 { margin-top: 0; color: #e7a94d; font: 700 13px/1 var(--font-display); letter-spacing: .12em; }
+.mvp-panel p { margin: 6px 0; color: #bdb3a6; font-size: 13px; }
+.mvp-panel strong { display: block; margin-top: 8px; color: #7fd8ff; }
+.route-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0; list-style: none; }
+.route-list li { padding: 6px; color: #6f6873; background: #0c0b10; border-left: 2px solid #332d38; font-size: 12px; }
+.route-list li span { margin-right: 5px; }
+.route-list .done { color: #8ecf9d; border-color: #568b61; }
+.route-list .current { color: #ffd37c; border-color: #e7a94d; }
+.combatants { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 30px 0; }
+.combatants > div { display: grid; gap: 6px; padding: 20px; background: #0d0c12; border: 1px solid #40333a; }
+.combatants h2 { margin: 0; color: #a89e94; font-size: 13px; letter-spacing: .14em; }
+.combatants strong { font-size: 30px; }
+.combatants span { color: #e7a94d; }
+.slot-sentence { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 24px 0; }
+.slot-sentence > * { display: grid; gap: 8px; place-content: center; min-height: 116px; padding: 12px; background: #0b0a0e; border: 2px solid #56473f; }
+.slot-sentence .locked { color: #19120b; background: #d79a42; border-color: #ffd37c; }
+.slot-sentence strong, .slot-sentence b { font: 800 24px/1 var(--font-display); text-transform: uppercase; }
+.slot-sentence small, .slot-sentence span { font-size: 11px; text-transform: uppercase; }
+.reward-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
+.reward-grid button { display: grid; gap: 10px; min-height: 180px; text-align: left; }
+.reward-grid strong { color: #ffd37c; font-size: 18px; }
+.reward-grid span { color: #bdb3a6; font-weight: 400; }
+.reward-grid em { color: #7fd8ff; font-style: normal; font-size: 11px; }
+
+@media (max-width: 860px) {
+  .mvp-shell { padding: 12px; }
+  .mvp-layout { grid-template-columns: 1fr; }
+  .mvp-header { align-items: flex-start; flex-direction: column; }
+  .mvp-stage { min-height: 520px; padding: 16px; }
+}
+
 
 

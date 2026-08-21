@@ -11,6 +11,18 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /showcase mode/i })).toBeInTheDocument();
   });
 
+  it('starts a seeded normal run and enters the fixed first stage', () => {
+    render(<App />)
+
+    fireEvent.change(screen.getByLabelText('런 시드'), { target: { value: 'ui-fixed-seed' } })
+    fireEvent.click(screen.getByRole('button', { name: 'START NORMAL RUN' }))
+    expect(screen.getByText('다음 방: 1. 전투')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '1번 방 진입' }))
+    expect(screen.getByText('STAGE 1 · 전투')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '릴 돌리기' })).toBeInTheDocument()
+  })
+
   it('starts showcase mode from the title screen and shows the overlay', () => {
     render(<App />);
 
