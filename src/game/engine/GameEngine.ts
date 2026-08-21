@@ -172,7 +172,10 @@ export class GameEngine {
     if (this.state.phase !== 'battle' || !this.state.slot.current) {
       return this.reject('CONFIRM_COMBAT_SLOT', 'a combat result is required before confirmation')
     }
-    return this.resolveCombatSlot({ type: 'RESOLVE_COMBAT_SLOT', result: this.state.slot.current })
+    return this.resolveCombatSlot(
+      { type: 'RESOLVE_COMBAT_SLOT', result: this.state.slot.current },
+      this.state.slot.locks,
+    )
   }
 
   private resolveRest(action: 'heal' | 'purify'): GameEvent[] {
@@ -322,13 +325,17 @@ export class GameEngine {
     ]
   }
 
-  private resolveCombatSlot(command: Extract<GameCommand, { type: 'RESOLVE_COMBAT_SLOT' }>): GameEvent[] {
+  private resolveCombatSlot(
+    command: Extract<GameCommand, { type: 'RESOLVE_COMBAT_SLOT' }>,
+    lockedReels?: CombatSlotLocks,
+  ): GameEvent[] {
     if (this.state.phase !== 'battle' || !this.state.run.currentStage || !isCombatStage(this.state.run.currentStage)) {
       return this.reject('RESOLVE_COMBAT_SLOT', 'combat can only resolve during an active battle')
     }
     const resolution = resolveCombatSlot(this.state.combat, command.result, {
       effects: getActiveEffects(this.state.build, MVP_BUILD_CATALOG),
       originTrait: command.originTrait,
+      lockedReels,
     })
     const turn = this.state.turn + 1
     const completedStage = resolution.outcome === 'victory' ? this.state.run.currentStage : null

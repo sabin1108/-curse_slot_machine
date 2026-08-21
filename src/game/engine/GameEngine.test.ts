@@ -310,6 +310,29 @@ describe('GameEngine', () => {
     expect(first.getState().slot).toMatchObject({ current: null, hasSpun: false })
   })
 
+  it('passes canonical reel locks to lock-dependent reward effects on confirmation', () => {
+    let engine: GameEngine | undefined
+
+    for (let index = 0; index < 100; index += 1) {
+      const candidate = new GameEngine(`locked-effect-${index}`, {
+        startingRewards: [{ kind: 'augment', id: 'combo_starter' }],
+      })
+      candidate.dispatch({ type: 'START_RUN' })
+      candidate.dispatch({ type: 'ENTER_NEXT_STAGE' })
+      candidate.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+      if (candidate.getState().slot.current?.action === 'bullet') {
+        engine = candidate
+        break
+      }
+    }
+
+    expect(engine).toBeDefined()
+    engine!.dispatch({ type: 'TOGGLE_REEL_LOCK', reel: 'action' })
+    engine!.dispatch({ type: 'CONFIRM_COMBAT_SLOT' })
+
+    expect(engine!.getState().combat.statuses.enemy).toContainEqual({ id: 'primer', stacks: 1 })
+  })
+
   it('creates debt from a locked reroll when Hexed Clutch is owned', () => {
     const engine = new GameEngine('debt-reroll', {
       startingRewards: [{ kind: 'augment', id: 'hexed_clutch' }],
