@@ -1,3 +1,8 @@
+---
+name: slot-ux-review
+description: Review a playable Curse Slot Machine combat flow for clarity, accessibility, and interaction quality with browser evidence. Use for UX findings, not visual implementation or game-rule changes.
+---
+
 # slot-ux-review
 
 Use this skill for review-only feedback on curse-slot-machine combat UX after a playable milestone exists.
