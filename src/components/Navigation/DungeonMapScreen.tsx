@@ -48,6 +48,7 @@ function getNodeType(stage: number, lane: number): MapNodeType {
   if (stage === 13) return 'SHOP';
   if (stage === 14) return 'REST';
   if (stage === 15) return 'BOSS';
+  if ((stage === 5 || stage === 8 || stage === 11) && lane === 2) return 'REST';
   if ((stage === 6 || stage === 10 || stage === 12) && lane !== 2) return 'ELITE';
   if (stage === 5 || stage === 8 || stage === 11) return 'EVENT';
   return 'BATTLE';
@@ -55,21 +56,21 @@ function getNodeType(stage: number, lane: number): MapNodeType {
 
 function getNodeMeta(type: MapNodeType) {
   if (type === 'SHOP') {
-    return { icon: getAsset('dg_coin_anim_f0'), label: 'Shop', description: 'Final route shop. Buy before the boss climb.' };
+    return { icon: getAsset('dg_coin_anim_f0'), label: '상점', description: '보스 등반 전 마지막 상점입니다.' };
   }
   if (type === 'REST') {
-    return { icon: getAsset('rest_campfire'), label: 'Rest', description: 'Last shelter. Heal or purify before the final boss.' };
+    return { icon: getAsset('rest_campfire'), label: '휴식', description: '체력을 회복하거나 현재 저주의 80%를 정화합니다.' };
   }
   if (type === 'BOSS') {
-    return { icon: getAsset('skull_red'), label: 'Boss', description: 'Stage 15 final boss room.' };
+    return { icon: getAsset('skull_red'), label: '보스', description: '15층 최종 보스 방입니다.' };
   }
   if (type === 'ELITE') {
-    return { icon: getAsset('ogre'), label: 'Elite', description: 'Hard fight with stronger rewards and route pressure.' };
+    return { icon: getAsset('ogre'), label: '정예', description: '더 강하지만 보상이 좋은 전투입니다.' };
   }
   if (type === 'EVENT') {
-    return { icon: getAsset('dg_crate'), label: 'Event', description: 'A risky detour with a chance for gold, recovery, or nothing.' };
+    return { icon: getAsset('dg_crate'), label: '이벤트', description: '골드, 회복, 빈손 중 하나가 걸린 우회로입니다.' };
   }
-  return { icon: getAsset('skull_white'), label: 'Battle', description: 'A standard combat room.' };
+  return { icon: getAsset('skull_white'), label: '전투', description: '일반 전투 방입니다.' };
 }
 
 function buildNodes(): MapNodeData[] {
@@ -183,14 +184,14 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
       <div className="map-floor-texture" />
 
       <div className="map-boss-goal-banner">
-        Route rule: Stage 1 starts narrow, 3-12 branch heavily, 13 Shop, 14 Rest, 15 Boss.
+        경로 규칙: 1층은 외길, 3-12층은 다중 갈림길, 13층 상점, 14층 휴식, 15층 보스.
       </div>
       <div className="map-header-banner">
-        <div className="map-chapter-title">Cursed Castle Route - Stage {activeStage} / {totalWaves}</div>
+        <div className="map-chapter-title">저주받은 성채 경로 - {activeStage} / {totalWaves}층</div>
         <div className="map-chapter-sub">
           {visitedNodePath.length === 0
-            ? 'Enter the only first room. Later branches lock off unreachable routes.'
-            : `Cleared rooms: ${visitedNodePath.length}. Pick one connected node for Stage ${activeStage}.`}
+            ? '첫 방은 외길입니다. 이후 선택한 길에 따라 닿을 수 없는 경로가 잠깁니다.'
+            : `클리어한 방: ${visitedNodePath.length}. ${activeStage}층에서 연결된 방 하나를 고르세요.`}
         </div>
       </div>
 
@@ -260,13 +261,13 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
 
             <div className="event-choices-grid" style={{ display: 'flex', gap: '16px', justifyContent: 'center', margin: '20px 0' }}>
               <button className="k-btn primary big" onClick={() => handleEventChoice('OPEN')} type="button">
-                Open cache
+                은닉품 열기
               </button>
               <button className="k-btn warning big" onClick={() => handleEventChoice('REST')} type="button">
-                Take shelter
+                잠시 피신
               </button>
               <button className="k-btn big" onClick={() => handleEventChoice('SKIP')} type="button">
-                Push onward
+                계속 전진
               </button>
             </div>
           </div>
@@ -282,7 +283,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
             <div className="hover-desc">{hoveredNode.description}</div>
           </>
         ) : (
-          <div className="hover-hint">Hover a room to inspect it. Unconnected rooms are locked out by your route.</div>
+          <div className="hover-hint">방 위에 마우스를 올리면 정보를 볼 수 있습니다. 연결되지 않은 방은 현재 경로에서 잠깁니다.</div>
         )}
       </div>
 

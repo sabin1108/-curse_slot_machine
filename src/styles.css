@@ -468,6 +468,18 @@ html, body {
   color: #dcdcdc;
   font-size: 12px;
   line-height: 1.2;
+  min-width: 0;
+}
+
+.aug-name small {
+  display: block;
+  margin-top: 2px;
+  color: #7fd8ff;
+  font-size: 9px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .aug-val {
@@ -497,6 +509,7 @@ html, body {
   border: 1px solid rgba(127, 216, 255, 0.18);
   border-radius: 6px;
   padding: 7px 8px;
+  position: relative;
 }
 
 .synergy-progress-row.active {
@@ -519,6 +532,13 @@ html, body {
   flex-shrink: 0;
 }
 
+.synergy-progress-head em {
+  color: #ffd25a;
+  font-style: normal;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
 .synergy-progress-track {
   height: 5px;
   margin: 5px 0;
@@ -535,6 +555,57 @@ html, body {
 .synergy-progress-desc {
   color: #a99f8d;
   font-size: 10px;
+  line-height: 1.25;
+}
+
+.synergy-hover-card {
+  max-height: 0;
+  margin-top: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.66);
+  border: 1px solid rgba(255, 183, 3, 0.55);
+  border-radius: 8px;
+  box-shadow: inset 0 0 12px rgba(255, 183, 3, 0.08);
+  color: #f4e5c5;
+  opacity: 0;
+  transition: max-height 0.18s ease, margin-top 0.18s ease, padding 0.18s ease, opacity 0.18s ease;
+}
+
+.synergy-progress-row:hover .synergy-hover-card {
+  max-height: 170px;
+  margin-top: 8px;
+  padding: 8px;
+  opacity: 1;
+}
+
+.synergy-hover-card strong {
+  display: block;
+  color: #ffb703;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.synergy-hover-card div {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  opacity: 0.62;
+}
+
+.synergy-hover-card div.unlocked {
+  opacity: 1;
+}
+
+.synergy-hover-card span {
+  color: #7fd8ff;
+  font-weight: 800;
+}
+
+.synergy-hover-card p {
+  margin: 0;
   line-height: 1.25;
 }
 

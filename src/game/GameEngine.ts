@@ -789,8 +789,10 @@ export class GameEngine {
       this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + healAmt);
       this.state.combatLogs.push(`[휴식] 체력 +${healAmt} 회복되었습니다.`);
     } else {
-      this.state.curse.current = Math.max(0, this.state.curse.current - 3);
-      this.state.combatLogs.push('[휴식] 정화 의식: 저주 게이지 -3 정화되었습니다.');
+      const before = this.state.curse.current;
+      const reduced = Math.ceil(before * 0.8);
+      this.state.curse.current = Math.max(0, before - reduced);
+      this.state.combatLogs.push(`[휴식] 정화 의식: 저주 ${reduced} 감소했습니다. (${before} → ${this.state.curse.current})`);
     }
     this.state.screen = 'MAP';
   }

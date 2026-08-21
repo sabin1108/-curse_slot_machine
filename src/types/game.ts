@@ -61,6 +61,7 @@ export interface SynergyProgress {
   required: number;
   completed: boolean;
   effectDescription: string;
+  tierEffects?: { count: number; label: string; description: string }[];
 }
 
 export interface BuildState {

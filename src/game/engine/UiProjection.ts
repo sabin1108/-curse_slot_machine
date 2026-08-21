@@ -23,7 +23,7 @@ export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
     rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
     tags: reward.tags,
     description: localized.description,
-    icon: 'AUG',
+    icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
     imgUrl: reward.assetKey ? getAsset(reward.assetKey) : undefined,
     effectValue: localized.effectLabel,
   }
@@ -95,6 +95,11 @@ export function toUiSynergyProgress(
     required,
     completed: progress?.completed ?? current >= required,
     effectDescription: localizeSynergy(synergy, activeTier).description,
+    tierEffects: (synergy.tiers ?? []).map((tier) => ({
+      count: tier.count,
+      label: localizeEffectLabel(tier.effectLabel),
+      description: localizeEffectLabel(tier.description),
+    })),
   }
 }
 
@@ -203,8 +208,24 @@ function localizeSynergy(
 
   return {
     name: localizeSynergyName(synergy.id, base.name),
-    description: activeTier ? `${activeTier.effectLabel} / ${activeTier.description}` : base.description,
+    description: activeTier ? `${localizeEffectLabel(activeTier.effectLabel)} / ${localizeEffectLabel(activeTier.description)}` : base.description,
   }
+}
+
+function localizeEffectLabel(value: string): string {
+  return value
+    .replaceAll('COMBO', '연계')
+    .replaceAll('BURN', '화상')
+    .replaceAll('DEFENSE', '방어')
+    .replaceAll('CURSE', '저주')
+    .replaceAll('RESOURCE', '자원')
+    .replaceAll('CRITICAL', '치명')
+    .replaceAll('bullet', '공격')
+    .replaceAll('shield', '방어막')
+    .replaceAll('heart', '회복')
+    .replaceAll('curse', '저주')
+    .replaceAll('low HP', '저체력')
+    .replaceAll('extra hit', '추가타')
 }
 
 function localizeSynergyName(synergyId: string, fallback: string): string {

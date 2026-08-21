@@ -214,7 +214,10 @@ export class GameEngine {
     const build = this.structured.getState().build
     this.presentation.build = {
       ...this.presentation.build,
-      augments: build.augments.map((id) => toUiAugment(getRequiredStructuredReward(id, 'augment'))),
+      augments: [
+        ...build.augments.map((id) => toUiAugment(getRequiredStructuredReward(id, 'augment'))),
+        ...build.items.map((id) => toUiAugment(getRequiredStructuredReward(id, 'item'))),
+      ],
       items: build.items,
       activeSynergies: build.synergies.active.map((synergy) => toUiSynergyName(synergy)),
       synergyProgress: DEFAULT_BUILD_CATALOG.synergies.map((synergy) =>

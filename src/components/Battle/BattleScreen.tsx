@@ -9,6 +9,21 @@ interface BattleScreenProps {
   onDispatch: (cmd: GameCommand) => void;
 }
 
+const TAG_LABELS: Record<string, string> = {
+  COMBO: '연계',
+  MULTI_HIT: '다단타',
+  CRITICAL: '치명',
+  BURN: '화상',
+  DEFENSE: '방어',
+  CURSE: '저주',
+  RISK: '위험',
+  RESOURCE: '자원',
+};
+
+function getTagLabel(tag: string): string {
+  return TAG_LABELS[tag] ?? tag;
+}
+
 export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch }) => {
   const [hitBurstCount, setHitBurstCount] = useState(0);
   const [showBossEntrance, setShowBossEntrance] = useState(false);
@@ -136,7 +151,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
           </div>
 
           <div className="hud-group curse-badge">
-            <span>☠️ 저주 {state.curse.current}/{state.curse.max}</span>
+            <span>☠️ 저주 {state.curse.current}</span>
           </div>
 
           <div className="hud-group gold-count">
@@ -149,7 +164,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
           {/* Left Column: Side Panel */}
           <div className="side-panel">
             <div className="side-panel-title">
-              <span>보유 증강</span>
+              <span>보유 증강/아이템</span>
               <span>{state.build.augments.length}/12</span>
             </div>
 
@@ -157,7 +172,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               {state.build.augments.map((aug) => (
                 <div key={aug.id} className="aug-row">
                   <img src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
-                  <span className="aug-name" title={aug.name}>{aug.name}</span>
+                  <span className="aug-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
+                    {aug.name}
+                    <small>{aug.tags.map(getTagLabel).join(' / ')}</small>
+                  </span>
                   <span className="aug-val">{aug.effectValue}</span>
                 </div>
               ))}
@@ -173,7 +191,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               ) : (
                 <>
                   시너지 조율 중<br />
-                  동일 태그 증강 수집 필요
+                  같은 태그의 증강/아이템 필요
                 </>
               )}
             </div>
@@ -188,13 +206,27 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
                 return (
                   <div key={synergy.synergyId} className={`synergy-progress-row ${synergy.completed ? 'active' : ''}`}>
                     <div className="synergy-progress-head">
-                      <span>{synergy.name}</span>
+                      <span>{synergy.name} <em>{getTagLabel(synergy.tag)}</em></span>
                       <strong>{synergy.current}/{synergy.required}</strong>
                     </div>
                     <div className="synergy-progress-track">
                       <div className="synergy-progress-fill" style={{ width: `${percent}%` }} />
                     </div>
                     <div className="synergy-progress-desc">{synergy.effectDescription}</div>
+                    {synergy.tierEffects && synergy.tierEffects.length > 0 && (
+                      <div className="synergy-hover-card">
+                        <strong>{synergy.name} 효과 미리보기</strong>
+                        {synergy.tierEffects.map((tier) => (
+                          <div
+                            key={`${synergy.synergyId}-${tier.count}`}
+                            className={synergy.current >= tier.count ? 'unlocked' : ''}
+                          >
+                            <span>{tier.count}개</span>
+                            <p>{tier.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}

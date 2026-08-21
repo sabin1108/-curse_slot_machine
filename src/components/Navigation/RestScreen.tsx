@@ -44,7 +44,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
       <div className="rest-header-bar">
         <div className="rest-title-badge">🔥 모닥불 쉼터 — 던전 보금자리</div>
         <div className="rest-status-hud">
-          ❤️ HP {player.hp}/{player.maxHp} &nbsp;|&nbsp; ☠️ 저주 {curseCurrent}/10
+          ❤️ HP {player.hp}/{player.maxHp} &nbsp;|&nbsp; ☠️ 저주 {curseCurrent}
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
           <div className="rest-card-title">🔮 저주 정화 의식</div>
           <div className="rest-card-desc">
             신성한 정화 기도를 올려<br />
-            <strong>저주 게이지 -3</strong> 정화합니다.
+            <strong>현재 저주 80%</strong>를 정화합니다.
           </div>
           <button className="k-btn warning" type="button">
             {selectedAction === 'UPGRADE' ? '✅ 완료' : '정화하기'}

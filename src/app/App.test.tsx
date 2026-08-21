@@ -40,7 +40,7 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
     fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }));
 
-    expect(screen.getByText(/VICTORY REWARD/i)).toBeInTheDocument();
+    expect(screen.getByText(/전투 보상/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /NEXT STEP/i })).not.toBeInTheDocument();
   });
 
