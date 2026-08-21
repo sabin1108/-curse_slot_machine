@@ -577,8 +577,8 @@ function getPressuredIntent(intent: CombatState['enemyIntent'], curseValue: numb
 
 function getPreviewWarnings(state: CombatState, resolution: CombatResolution): string[] {
   const warnings: string[] = []
-  if (state.curse.value < 5 && resolution.curse.value >= 5) warnings.push('저주 5: 적 공격 +1')
-  if (state.curse.value < 8 && resolution.curse.value >= 8) warnings.push('저주 8: 적 공격 +2')
+  if (state.curse.value < 5 && resolution.curse.value >= 5) warnings.push('저주 5: 다음 적 공격 +1')
+  if (state.curse.value < 8 && resolution.curse.value >= 8) warnings.push('저주 8: 다음 적 공격 +2')
   if (resolution.endReason === 'curse_overload') warnings.push('저주 10: 즉시 패배')
   if (resolution.events.some((event) => event.type === 'BOSS_PHASE_CHANGED')) warnings.push('보스 2페이즈: 공격 10')
   return warnings

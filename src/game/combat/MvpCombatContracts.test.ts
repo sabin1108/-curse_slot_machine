@@ -52,11 +52,27 @@ describe('MVP combat contracts', () => {
       playerHealthDelta: resolved.player.health - state.player.health,
       playerBlockDelta: resolved.player.block - state.player.block,
       enemyHealthDelta: resolved.enemy.health - state.enemy.health,
+      enemyBlockDelta: resolved.enemy.block - state.enemy.block,
       curseDelta: resolved.curse.value - state.curse.value,
       enemyAttack: 5,
       outcome: resolved.outcome,
+      warnings: [],
     })
     expect(preview.endReason).toBe(resolved.endReason)
+  })
+
+  it('warns that newly crossed curse pressure applies to the next enemy attack', () => {
+    const state = createCombatState({
+      enemy: { maxHealth: 99, health: 99 },
+      enemyIntent: { baseAmount: 7, amount: 7 },
+      curse: { value: 4 },
+    })
+    const preview = previewCombatSlot(state, safeShot)
+    const resolved = resolveCombatSlot(state, safeShot)
+
+    expect(preview.enemyAttack).toBe(7)
+    expect(preview.warnings).toEqual(['저주 5: 다음 적 공격 +1'])
+    expect(resolved.enemyIntent).toMatchObject({ baseAmount: 7, amount: 8 })
   })
 
   it('moves the boss to phase two at half health and attacks for 10 on that turn', () => {

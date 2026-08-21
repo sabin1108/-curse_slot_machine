@@ -20,7 +20,7 @@ Open `http://127.0.0.1:5173`, keep the default seed, and select **START NORMAL R
 ## Narration checkpoints
 
 1. Stage 1: spin, lock a useful reel, reroll, and point out the exact result preview before confirming.
-2. Stages 1–2: choose `Combo Starter`, then `Multi-Hit Charm`. Let curse reach 5 so the +1 enemy-attack warning is visible.
+2. Stages 1–2: choose `Combo Starter`, then `Multi-Hit Charm`. Let curse reach 5 so the next-enemy-attack +1 warning is visible.
 3. Stage 3: purify 5 curse. Explain that 8 raises the pressure to +2 and 10 immediately loses the run.
 4. Stage 5: choose `Combo Finisher`.
 5. Stage 6 event: take the reward and choose `Ember Magazine`; the sidebar should show `Clockwork Barrage` completed.

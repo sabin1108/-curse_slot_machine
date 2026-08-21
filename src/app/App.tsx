@@ -149,7 +149,7 @@ function formatEvent(event: GameEvent): string {
     case 'REST_RESOLVED': return `휴식: ${event.action} ${event.amount}`
     case 'EVENT_RESOLVED': return `이벤트: ${event.choice}`
     case 'COMMAND_REJECTED': return `거부됨: ${event.reason}`
-    case 'CURSE_THRESHOLD_REACHED': return `저주 ${event.threshold} 도달: 적 공격 +${event.attackBonus}`
+    case 'CURSE_THRESHOLD_REACHED': return `저주 ${event.threshold} 도달: 다음 적 공격 +${event.attackBonus}`
     case 'CURSE_DEFEAT': return '저주 10 도달: 런 패배'
     case 'BOSS_PHASE_CHANGED': return `보스 2페이즈: 공격 ${event.attack}`
     default: return event.type.replaceAll('_', ' ').toLowerCase()

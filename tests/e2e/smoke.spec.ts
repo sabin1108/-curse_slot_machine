@@ -3,6 +3,10 @@ import { expect, test } from '@playwright/test'
 import { MVP_BUILD_CATALOG } from '../../src/game/build/MvpBuildCatalog'
 import { MVP_DEMO_COMMANDS, MVP_DEMO_SEED } from '../../src/game/demo/MvpDemoTrace'
 
+async function expectNoHorizontalOverflow(page: import('@playwright/test').Page) {
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+}
+
 test('plays the first deterministic combat through the canonical engine', async ({ page }) => {
   await page.goto('/')
 
@@ -24,6 +28,7 @@ test('plays the first deterministic combat through the canonical engine', async 
 
 test('replays the representative seed to the two-phase boss victory without browser errors', async ({ page }) => {
   test.setTimeout(120_000)
+  await page.setViewportSize({ width: 1280, height: 720 })
   const pageErrors: string[] = []
   const consoleErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
@@ -51,6 +56,7 @@ test('replays the representative seed to the two-phase boss victory without brow
       case 'SPIN_COMBAT_SLOT':
         await page.getByRole('button', { name: '릴 돌리기' }).click()
         await expect(page.getByRole('region', { name: '결과 미리보기' })).toBeVisible()
+        await expectNoHorizontalOverflow(page)
         break
       case 'TOGGLE_REEL_LOCK': {
         const reelIndex = { action: 0, target: 1, modifier: 2 }[command.reel]
@@ -63,6 +69,7 @@ test('replays the representative seed to the two-phase boss victory without brow
       case 'CONFIRM_COMBAT_SLOT':
         await page.getByRole('button', { name: '문장 실행' }).click()
         bossPhaseSeen ||= await page.getByText(/PHASE 2/).count() > 0
+        if (bossPhaseSeen) await expectNoHorizontalOverflow(page)
         break
       case 'CHOOSE_REWARD': {
         const reward = MVP_BUILD_CATALOG.rewards.find((candidate) => candidate.id === command.reward.id)
@@ -76,6 +83,7 @@ test('replays the representative seed to the two-phase boss victory without brow
       case 'BUY_SHOP_ITEM': {
         const reward = MVP_BUILD_CATALOG.rewards.find((candidate) => candidate.id === command.rewardId)
         if (!reward) throw new Error(`missing shop reward definition ${command.rewardId}`)
+        await expectNoHorizontalOverflow(page)
         await page.getByRole('button').filter({ hasText: reward.name }).click()
         break
       }
@@ -97,5 +105,5 @@ test('replays the representative seed to the two-phase boss victory without brow
   expect(bossPhaseSeen).toBe(true)
   expect(pageErrors).toEqual([])
   expect(consoleErrors).toEqual([])
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await expectNoHorizontalOverflow(page)
 })
