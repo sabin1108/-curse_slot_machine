@@ -1,3 +1,8 @@
+---
+name: slot-level-designer
+description: Review a playable Curse Slot Machine milestone for pacing, difficulty, and risk-reward balance using seed-based evidence. Use for level-design feedback, not implementation or general code review.
+---
+
 # slot-level-designer
 
 Use this skill for review-only feedback on curse-slot-machine level pacing and risk-reward balance after a playable milestone exists.

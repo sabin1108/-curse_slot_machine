@@ -1,3 +1,8 @@
+---
+name: seeded-gameplay-qa
+description: Verify deterministic Curse Slot Machine gameplay and representative seed regressions after seed controls and game commands exist. Use for reproducible gameplay QA, not feature implementation.
+---
+
 # seeded-gameplay-qa
 
 Use this skill for review-only seeded gameplay QA after deterministic game commands and debug seeds exist.
