@@ -31,6 +31,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
 
   const hpPercent = Math.max(0, Math.min(100, Math.round((state.player.hp / state.player.maxHp) * 100)));
   const mobHpPercent = Math.max(0, Math.min(100, Math.round((state.enemy.hp / state.enemy.maxHp) * 100)));
+  const mobShieldPercent = Math.max(0, Math.min(100, Math.round((state.enemy.shield / state.enemy.maxHp) * 100)));
 
   // Dynamic Theme Customization per Stage Wave
   const stageThemes: Record<number, { name: string; floorTile: string; wallTile: string; glowColor: string }> = {
@@ -262,8 +263,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
 
               <div className="mob-hpbar-outer">
                 <div className="mob-hpbar-inner" style={{ width: `${mobHpPercent}%` }} />
+                {state.enemy.shield > 0 && (
+                  <div className="mob-shieldbar-inner" style={{ width: `${mobShieldPercent}%` }} />
+                )}
                 <div className="mob-hp-text">
                   {state.enemy.hp} / {state.enemy.maxHp}
+                  {state.enemy.shield > 0 ? `  보호막 ${state.enemy.shield}` : ''}
                 </div>
               </div>
             </div>

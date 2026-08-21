@@ -305,9 +305,15 @@ export class GameEngine {
   private appendCombatEventLog(event: CombatEvent): void {
     if (event.type === 'DAMAGE_APPLIED') {
       if (event.target === 'enemy') {
-        this.presentation.combatLogs.push(`적에게 ${event.healthLost} 피해를 주었습니다.`)
+        if (event.blocked > 0 && event.healthLost > 0) {
+          this.presentation.combatLogs.push(`적의 방어막을 ${event.blocked} 깎고 HP에 ${event.healthLost} 피해를 주었습니다.`)
+        } else if (event.blocked > 0) {
+          this.presentation.combatLogs.push(`적의 방어막을 ${event.blocked} 깎았습니다.`)
+        } else {
+          this.presentation.combatLogs.push(`적에게 ${event.healthLost} 피해를 주었습니다.`)
+        }
         this.presentation.lastDamagePop = {
-          value: event.healthLost,
+          value: event.healthLost > 0 ? event.healthLost : event.blocked,
           type: 'ENEMY_DMG',
           id: Date.now(),
         }
