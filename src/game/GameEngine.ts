@@ -93,6 +93,7 @@ export class GameEngine {
       augSlotPresentation: null,
       combatLogs: ['[시스템] 저주받은 던전에 진입했습니다.'],
       lastDamagePop: null,
+      lastEnemyDamagePop: null,
       showcase: {
         active: false,
         currentStep: 0,
@@ -224,6 +225,7 @@ export class GameEngine {
     // Clear previous damage pop & result when entering a new room
     this.state.player.shield = 0;
     this.state.lastDamagePop = null;
+    this.state.lastEnemyDamagePop = null;
     this.state.currentResult = null;
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
@@ -399,6 +401,10 @@ export class GameEngine {
           type: 'ENEMY_DMG',
           id: Date.now()
         };
+        this.state.lastEnemyDamagePop = {
+          value: dmg,
+          id: Date.now()
+        };
         this.state.combatLogs.push(`[타격] ${this.state.enemy.name}에게 ${dmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
         const extraDmg = this.getLegacyExtraHitDamage(dmg, res.modifier.id);
         if (extraDmg > 0 && this.state.enemy.hp > 0) {
@@ -406,6 +412,10 @@ export class GameEngine {
           this.state.lastDamagePop = {
             value: extraDmg,
             type: 'ENEMY_DMG',
+            id: Date.now()
+          };
+          this.state.lastEnemyDamagePop = {
+            value: extraDmg,
             id: Date.now()
           };
           this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
@@ -488,6 +498,10 @@ export class GameEngine {
     this.state.lastDamagePop = {
       value: bonusDamage,
       type: 'ENEMY_DMG',
+      id: Date.now()
+    };
+    this.state.lastEnemyDamagePop = {
+      value: bonusDamage,
       id: Date.now()
     };
     this.state.combatLogs.push(`[Origin:Swordsman] half-power follow-up ${bonusDamage} damage! (enemy HP: ${this.state.enemy.hp})`);

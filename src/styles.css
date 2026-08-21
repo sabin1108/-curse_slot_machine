@@ -2391,6 +2391,69 @@ html, body {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.45); }
 }
 
+.mob-damage-pop {
+  position: absolute;
+  left: 50%;
+  top: 35%;
+  z-index: 7;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.4vw, 48px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  transform: translate(-50%, -50%) scale(0.7);
+  -webkit-text-stroke: 2px #1a0500;
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    0 0 10px rgba(255, 255, 255, 0.35),
+    0 7px 14px rgba(0, 0, 0, 0.75);
+  animation: mob-damage-number 0.92s cubic-bezier(0.18, 0.88, 0.24, 1) forwards;
+}
+
+.mob-damage-pop.low {
+  color: #ffffff;
+}
+
+.mob-damage-pop.mid {
+  color: #ff9f1c;
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    0 0 12px rgba(255, 159, 28, 0.68),
+    0 7px 14px rgba(0, 0, 0, 0.78);
+}
+
+.mob-damage-pop.high {
+  color: #ff2c22;
+  -webkit-text-stroke: 2px #260000;
+  text-shadow:
+    4px 4px 0 #000,
+    -1px -1px 0 #000,
+    0 0 14px rgba(255, 44, 34, 0.8),
+    0 9px 16px rgba(0, 0, 0, 0.82);
+}
+
+@keyframes mob-damage-number {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20%) scale(0.55) rotate(-3deg);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -70%) scale(1.18) rotate(2deg);
+  }
+  36% {
+    opacity: 1;
+    transform: translate(-50%, -98%) scale(1) rotate(-1deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -160%) scale(0.92) rotate(0deg);
+  }
+}
+
 .elem-icon-onmob {
   position: absolute;
   left: 50%;

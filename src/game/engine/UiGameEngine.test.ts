@@ -380,4 +380,23 @@ describe('UiGameEngine', () => {
 
     expect(resolvedState.enemy.hp).toBe(0)
   })
+
+  it('projects boss counterattack motion and enemy damage pop from structured combat', () => {
+    const engine = new GameEngine('boss-attack-motion')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'boss-attack-motion' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1501, nodeType: 'BOSS' })
+    const spunState = engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const expectedDamage = spunState.currentResult?.calculatedValue
+
+    const resolvedState = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+
+    expect(resolvedState.enemy.hp).toBeLessThan(resolvedState.enemy.maxHp)
+    expect(resolvedState.isEnemyAttacking).toBe(true)
+    expect(resolvedState.lastEnemyDamagePop).toEqual(
+      expect.objectContaining({
+        value: expectedDamage,
+      }),
+    )
+  })
 })

@@ -134,6 +134,8 @@ export class GameEngine {
       this.presentation.currentResult = null
       this.presentation.hasSpunThisTurn = false
       this.presentation.isSpinning = false
+      this.presentation.isEnemyAttacking = false
+      this.presentation.lastEnemyDamagePop = null
       this.presentation.lockedReels.clear()
       this.presentation.player.shield = 0
       this.resetOriginTraitState()
@@ -174,6 +176,8 @@ export class GameEngine {
     }
     this.presentation.hasSpunThisTurn = true
     this.presentation.isSpinning = false
+    this.presentation.isEnemyAttacking = false
+    this.presentation.lastEnemyDamagePop = null
   }
 
   private hasStructuredBuild(): boolean {
@@ -184,6 +188,7 @@ export class GameEngine {
   private projectStructuredState(events: GameEvent[]): void {
     const state = this.structured.getState()
     const combat = state.combat
+    const combatEvents = events.flatMap((event) => event.type === 'COMBAT_SLOT_RESOLVED' ? event.combatEvents : [])
 
     this.presentation.player = {
       hp: combat.player.health,
@@ -204,6 +209,8 @@ export class GameEngine {
     this.presentation.screen = state.phase === 'reward' ? 'REWARD' : state.phase === 'defeat' ? 'GAMEOVER' : 'BATTLE'
     this.presentation.hasSpunThisTurn = false
     this.presentation.currentResult = null
+    this.presentation.isEnemyAttacking = combatEvents.some((event) => event.type === 'ENEMY_ATTACKED')
+    this.presentation.isEnemyDefeated = combat.enemy.health <= 0
     this.presentation.lockedReels.clear()
     this.projectStructuredBuild()
     this.projectStructuredRewards()
@@ -315,6 +322,10 @@ export class GameEngine {
         this.presentation.lastDamagePop = {
           value: event.healthLost > 0 ? event.healthLost : event.blocked,
           type: 'ENEMY_DMG',
+          id: Date.now(),
+        }
+        this.presentation.lastEnemyDamagePop = {
+          value: event.amount,
           id: Date.now(),
         }
       } else {

@@ -199,6 +199,7 @@ export interface GameState {
   // Combat Log & Floating Feedback
   combatLogs: string[];
   lastDamagePop: { value: number; type: 'PLAYER_DMG' | 'ENEMY_DMG' | 'HEAL' | 'SHIELD'; id: number } | null;
+  lastEnemyDamagePop: { value: number; id: number } | null;
   
   // Showcase State
   showcase: {

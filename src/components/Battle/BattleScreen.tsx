@@ -24,10 +24,17 @@ function getTagLabel(tag: string): string {
   return TAG_LABELS[tag] ?? tag;
 }
 
+function getEnemyDamageTone(value: number): 'low' | 'mid' | 'high' {
+  if (value <= 10) return 'low';
+  if (value <= 30) return 'mid';
+  return 'high';
+}
+
 export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch }) => {
   const [hitBurstCount, setHitBurstCount] = useState(0);
   const [showBossEntrance, setShowBossEntrance] = useState(false);
   const lastHandledPopIdRef = useRef<number | null>(null);
+  const lastHandledEnemyPopIdRef = useRef<number | null>(null);
 
   const hpPercent = Math.max(0, Math.min(100, Math.round((state.player.hp / state.player.maxHp) * 100)));
   const mobHpPercent = Math.max(0, Math.min(100, Math.round((state.enemy.hp / state.enemy.maxHp) * 100)));
@@ -68,27 +75,32 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
     if (state.lastDamagePop && state.lastDamagePop.id !== lastHandledPopIdRef.current) {
       lastHandledPopIdRef.current = state.lastDamagePop.id;
 
-      const hits = Math.max(1, Math.min(5, Math.round(state.currentResult?.multiplierValue ?? 1)));
-      setHitBurstCount(hits);
-
-      if (state.lastDamagePop.type === 'ENEMY_DMG') {
-        soundManager.playSlashAttack();
-      } else if (state.lastDamagePop.type === 'PLAYER_DMG') {
+      if (state.lastDamagePop.type === 'PLAYER_DMG') {
         soundManager.playHeavyPunch();
       } else if (state.lastDamagePop.type === 'SHIELD') {
         soundManager.playDefense();
-      } else {
+      } else if (state.lastDamagePop.type === 'HEAL') {
         soundManager.playHitImpact();
-      }
-
-      // Play N sequential hit SFX ticks ONLY during real turn execution
-      for (let i = 0; i < hits; i++) {
-        setTimeout(() => {
-          soundManager.playHitImpact();
-        }, i * 120);
       }
     }
   }, [state.lastDamagePop, state.currentResult]);
+
+  useEffect(() => {
+    if (!state.lastEnemyDamagePop || state.lastEnemyDamagePop.id === lastHandledEnemyPopIdRef.current) {
+      return;
+    }
+
+    lastHandledEnemyPopIdRef.current = state.lastEnemyDamagePop.id;
+    const hits = Math.max(1, Math.min(5, Math.round(state.currentResult?.multiplierValue ?? 1)));
+    setHitBurstCount(hits);
+    soundManager.playSlashAttack();
+
+    for (let i = 0; i < hits; i++) {
+      setTimeout(() => {
+        soundManager.playHitImpact();
+      }, i * 120);
+    }
+  }, [state.lastEnemyDamagePop, state.currentResult]);
 
   return (
     <div
@@ -253,7 +265,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
             <div
               className={`mob-zone ${state.isEnemyAttacking ? 'mob-lunge-attack' : ''} ${state.enemy.hp <= 0 || state.isEnemyDefeated ? 'mob-defeat-collapse' : ''}`}
             >
-              <div className={`impact-burst ${state.lastDamagePop ? 'play' : ''}`} />
+              <div className={`impact-burst ${state.lastEnemyDamagePop ? 'play' : ''}`} />
+              {state.lastEnemyDamagePop && (
+                <div
+                  key={state.lastEnemyDamagePop.id}
+                  className={`mob-damage-pop ${getEnemyDamageTone(state.lastEnemyDamagePop.value)}`}
+                >
+                  -{state.lastEnemyDamagePop.value}
+                </div>
+              )}
 
               <img
                 className={`mob-sprite ${isBoss ? 'boss-sprite' : ''} ${isBoss && showBossEntrance ? 'boss-entrance-sprite' : ''} ${isBoss && state.isEnemyAttacking ? 'boss-attack-sprite' : ''}`}
@@ -326,9 +346,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
       </div>
 
       {/* Floating Damage Popup Text */}
-      {state.lastDamagePop && (
+      {state.lastDamagePop && state.lastDamagePop.type !== 'ENEMY_DMG' && (
         <div className="dmg-pop show">
-          {state.lastDamagePop.type === 'ENEMY_DMG' ? `-${state.lastDamagePop.value}` : `+${state.lastDamagePop.value}`}
+          {state.lastDamagePop.type === 'PLAYER_DMG' ? `-${state.lastDamagePop.value}` : `+${state.lastDamagePop.value}`}
         </div>
       )}
 
