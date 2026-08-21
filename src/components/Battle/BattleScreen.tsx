@@ -12,6 +12,7 @@ interface BattleScreenProps {
 export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch }) => {
   const [selectedTarget, setSelectedTarget] = useState<'ENEMY' | 'SELF'>('ENEMY');
   const [hitBurstCount, setHitBurstCount] = useState(0);
+  const [showBossEntrance, setShowBossEntrance] = useState(false);
   const lastHandledPopIdRef = useRef<number | null>(null);
 
   const hpPercent = Math.max(0, Math.min(100, Math.round((state.player.hp / state.player.maxHp) * 100)));
@@ -29,6 +30,34 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
   };
 
   const theme = stageThemes[state.wave] || stageThemes[1];
+  const isBoss = state.wave >= 15 || state.enemy.id === 'house_dealer_boss';
+  const bossSprite = state.isEnemyAttacking
+    ? getAsset('boss_act')
+    : showBossEntrance
+      ? getAsset('boss_appeared')
+      : getAsset('boss_common');
+  const enemySprite = isBoss ? bossSprite : state.enemy.spriteUrl || getAsset('ogre');
+  const currentActionType = state.currentResult?.action.type;
+  const effectSprite = currentActionType === 'SHIELD'
+    ? getAsset('fx_defense')
+    : currentActionType === 'HEART'
+      ? getAsset('fx_heal')
+      : currentActionType === 'BOMB'
+        ? getAsset('fx_attack_bomb')
+        : currentActionType === 'BULLET' || currentActionType === 'DAGGER'
+          ? getAsset('fx_attack_slash')
+          : getAsset('fx_attack_fire');
+
+  useEffect(() => {
+    if (!isBoss) {
+      setShowBossEntrance(false);
+      return;
+    }
+
+    setShowBossEntrance(true);
+    const timer = window.setTimeout(() => setShowBossEntrance(false), 1400);
+    return () => window.clearTimeout(timer);
+  }, [isBoss, state.enemy.id]);
 
   // Trigger Multi-hit sound & burst animation ONLY when a NEW turn damage pop is produced
   useEffect(() => {
@@ -198,9 +227,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               </div>
 
               <div className={`impact-burst ${state.lastDamagePop ? 'play' : ''}`} />
-              <img className={`elem-icon-onmob ${state.lastDamagePop ? 'play' : ''}`} src={getAsset('fx_fire_strip_f0')} alt="element fx" />
+              <img className={`elem-icon-onmob battle-effect-sprite ${state.lastDamagePop ? 'play' : ''}`} src={effectSprite} alt="battle effect" />
 
-              <img className="mob-sprite" src={state.enemy.spriteUrl || getAsset('ogre')} alt={state.enemy.name} />
+              <img className={`mob-sprite ${isBoss ? 'boss-sprite' : ''}`} src={enemySprite} alt={state.enemy.name} />
 
               <div className="mob-hpbar-outer">
                 <div className="mob-hpbar-inner" style={{ width: `${mobHpPercent}%` }} />

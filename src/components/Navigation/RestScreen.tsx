@@ -56,6 +56,11 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
           src={getAsset('fx_campfire_strip_f0')}
           alt="campfire flame"
         />
+        <img
+          className="rest-smoke-effect"
+          src={getAsset('fx_rest_smoke')}
+          alt="rest smoke effect"
+        />
         <div className="campfire-quote">
           💬 "따스한 장작불 소리와 온기가 지친 수호자의 영혼을 감쌉니다..."
         </div>

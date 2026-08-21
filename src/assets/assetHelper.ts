@@ -35,6 +35,15 @@ const PUBLIC_ASSETS: Record<string, string> = {
   rest_campfire: '/assets/icons_rpg/candle_01a.png',
   rest_shrine: '/assets/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7/frames/flask_big_yellow.png',
   rest_shelter: '/assets/icons_rpg/book_06g.png',
+  boss_common: '/boss/common.png',
+  boss_appeared: '/boss/appeared.png',
+  boss_act: '/boss/act.png',
+  fx_attack_slash: '/assets/Free Pixel Effects Pack/10_weaponhit_spritesheet.png',
+  fx_attack_fire: '/assets/Free Pixel Effects Pack/11_fire_spritesheet.png',
+  fx_attack_bomb: '/assets/Free Pixel Effects Pack/13_vortex_spritesheet.png',
+  fx_defense: '/assets/Free Pixel Effects Pack/8_protectioncircle_spritesheet.png',
+  fx_heal: '/assets/Free Pixel Effects Pack/20_magicbubbles_spritesheet.png',
+  fx_rest_smoke: '/assets/Free Pixel Effects Pack/14_phantom_spritesheet.png',
 };
 
 export function getAsset(key: string): string {

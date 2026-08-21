@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { GameEngine } from '../game/engine/UiGameEngine';
 import { GameCommand } from '../types/game';
 
@@ -14,6 +15,7 @@ import { ShopScreen } from '../components/Navigation/ShopScreen';
 import { RestScreen } from '../components/Navigation/RestScreen';
 import { GameOverVictoryModal } from '../components/Navigation/GameOverVictoryModal';
 import { ShowcaseOverlay } from '../components/Showcase/ShowcaseOverlay';
+import { soundManager } from '../utils/soundManager';
 
 import '../styles.css';
 
@@ -21,11 +23,38 @@ export function App() {
   const engine = useMemo(() => new GameEngine(), []);
   const [gameState, setGameState] = useState(() => engine.getState());
   const [isCurseLogOpen, setIsCurseLogOpen] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(() => soundManager.getMusicVolume());
+  const [audioEnabled, setAudioEnabled] = useState(() => soundManager.isEnabled());
+
+  const syncMusicForState = (state: ReturnType<GameEngine['getState']>) => {
+    const shouldPlayMusic = !['TITLE', 'PROLOGUE', 'ORIGIN', 'GAMEOVER', 'VICTORY'].includes(state.screen);
+    if (!shouldPlayMusic) {
+      soundManager.stopMusic();
+      return;
+    }
+
+    if (state.screen === 'BATTLE' && (state.wave >= 15 || state.enemy.id === 'house_dealer_boss')) {
+      soundManager.startBossMusic();
+      return;
+    }
+
+    soundManager.startBackgroundMusic();
+  };
 
   const handleDispatch = (command: GameCommand) => {
     const updatedState = engine.dispatch(command);
+    syncMusicForState(updatedState);
     // Clone state object to force React state trigger
     setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
+  };
+
+  useEffect(() => {
+    syncMusicForState(gameState);
+  }, [gameState.screen, gameState.wave, gameState.enemy.id]);
+
+  const handleMusicVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextVolume = soundManager.setMusicVolume(Number(event.target.value));
+    setMusicVolume(nextVolume);
   };
 
   return (
@@ -79,6 +108,30 @@ export function App() {
           >
             휴식처
           </button>
+        </div>
+        <div className="music-control" aria-label="music volume control">
+          <button
+            className="music-toggle-btn"
+            onClick={() => {
+              const nextEnabled = soundManager.toggleSound();
+              setAudioEnabled(nextEnabled);
+              syncMusicForState(gameState);
+            }}
+            title={audioEnabled ? 'Mute audio' : 'Unmute audio'}
+            type="button"
+          >
+            {audioEnabled ? 'Audio' : 'Muted'}
+          </button>
+          <input
+            aria-label="Music volume"
+            className="music-volume-slider"
+            max="1"
+            min="0"
+            onChange={handleMusicVolumeChange}
+            step="0.05"
+            type="range"
+            value={musicVolume}
+          />
         </div>
       </nav>
 

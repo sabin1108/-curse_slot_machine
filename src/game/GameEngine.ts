@@ -1,6 +1,7 @@
 import {
   GameState,
   GameCommand,
+  MapNodeType,
   ReelId,
   SlotResult,
   ReelSymbol,
@@ -43,9 +44,9 @@ export class GameEngine {
       seed,
       turn: 1,
       wave: 1,
-      totalWaves: 7,
+      totalWaves: 15,
       floor: 1,
-      totalFloors: 3,
+      totalFloors: 1,
       player: {
         hp: 100,
         maxHp: 100,
@@ -112,7 +113,7 @@ export class GameEngine {
         this.handleSelectOrigin(command.originId);
         break;
       case 'SELECT_MAP_NODE':
-        this.handleSelectMapNode(command.nodeId);
+        this.handleSelectMapNode(command.nodeId, command.nodeType);
         break;
       case 'SPIN_COMBAT_SLOT':
         this.handleSpinCombatSlot();
@@ -209,10 +210,16 @@ export class GameEngine {
     }
   }
 
-  private handleSelectMapNode(nodeId: number) {
+  private handleSelectMapNode(nodeId: number, nodeType?: MapNodeType) {
     if (!this.state.visitedNodePath.includes(nodeId)) {
       this.state.visitedNodePath.push(nodeId);
       this.state.combatLogs.push(`[지도 이동] 노드 #${nodeId} 탐사 진입`);
+    }
+    const selectedStage = nodeId >= 100 ? Math.floor(nodeId / 100) : nodeId;
+    this.state.floor = 1;
+    this.state.wave = Math.max(1, Math.min(this.state.totalWaves, selectedStage));
+    if (nodeType === 'BATTLE' || nodeType === 'ELITE' || nodeType === 'BOSS' || nodeType === undefined) {
+      this.state.enemy = this.generateEnemyForStage(this.state.floor, this.state.wave);
     }
     // Clear previous damage pop & result when entering a new room
     this.state.lastDamagePop = null;
@@ -523,14 +530,14 @@ export class GameEngine {
   }
 
   private generateEnemyForStage(floor: number, wave: number): EnemyState {
-    const isBoss = wave === 7 && floor === 3;
-    const isElite = wave === 4;
+    const isBoss = wave >= 15;
+    const isElite = wave === 6 || wave === 10 || wave === 12;
 
     let baseEnemy: EnemyState;
     if (isBoss) {
       baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[6])); // Final Boss
     } else if (isElite) {
-      const eliteIdx = floor === 1 ? 3 : floor === 2 ? 4 : 5;
+      const eliteIdx = wave === 6 ? 3 : wave === 10 ? 4 : 5;
       baseEnemy = JSON.parse(JSON.stringify(DEFAULT_ENEMIES[eliteIdx]));
     } else {
       const idx = (wave - 1) % 3;
@@ -538,9 +545,9 @@ export class GameEngine {
     }
 
     // Dynamic Roguelike Level Design Scaling Formula
-    const hpScale = 1 + (floor - 1) * 0.78 + (wave - 1) * 0.11;
-    const dmgScale = 1 + (floor - 1) * 0.58 + (wave - 1) * 0.08;
-    const shieldBonus = (floor - 1) * 16 + (wave > 3 ? 8 : 0) + (isBoss ? 12 : 0);
+    const hpScale = 1 + (wave - 1) * 0.16;
+    const dmgScale = 1 + (wave - 1) * 0.1;
+    const shieldBonus = (wave > 3 ? 8 : 0) + Math.floor(wave / 3) * 6 + (isBoss ? 32 : 0);
 
     const scaledHp = Math.round(baseEnemy.maxHp * hpScale);
     const scaledDmg = Math.round(baseEnemy.intent.value * dmgScale);
@@ -548,7 +555,7 @@ export class GameEngine {
 
     return {
       ...baseEnemy,
-      name: `${floor}층 ${wave}단계: ${baseEnemy.name.split(': ')[1] || baseEnemy.name}`,
+      name: `Stage ${wave}: ${baseEnemy.name.split(': ')[1] || baseEnemy.name}`,
       hp: scaledHp,
       maxHp: scaledHp,
       shield: scaledShield,
@@ -568,18 +575,10 @@ export class GameEngine {
       this.state.combatLogs.push(`[보상 획득] 증강 '${chosen.name}' 획득 (+40 골드)`);
     }
 
-    // Check 3-Floor Progression (Wave 1~7 per Floor)
     if (this.state.wave >= this.state.totalWaves) {
-      if (this.state.floor >= this.state.totalFloors) {
-        this.state.screen = 'VICTORY';
-        this.state.narrativeMicrocopy = '3층 최종 보스를 정복하고 저주의 구속에서 해방되었습니다!';
-        return;
-      } else {
-        this.state.floor += 1;
-        this.state.wave = 1;
-        this.state.visitedNodePath = []; // reset map for next floor
-        this.state.narrativeMicrocopy = `${this.state.floor}층에 진입했습니다. 더욱 강력한 마물들이 등장합니다!`;
-      }
+      this.state.screen = 'VICTORY';
+      this.state.narrativeMicrocopy = 'Stage 15 final boss cleared. The cursed slot machine is broken.';
+      return;
     } else {
       this.state.wave += 1;
     }

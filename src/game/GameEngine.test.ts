@@ -211,27 +211,27 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(engine.getState().narrativeMicrocopy).toBe('잠시, 릴이 멈춘다.');
   });
 
-  it('should progress through 3 floors and trigger VICTORY ending upon clearing 3-7', () => {
+  it('should trigger VICTORY ending upon clearing Stage 15', () => {
     const engine = new GameEngine();
     engine.dispatch({ type: 'START_RUN' });
     engine.dispatch({ type: 'SELECT_ORIGIN', originId: 'SWORDSMAN' });
 
-    // Set stage to 3-7
-    (engine as any).state.floor = 3;
-    (engine as any).state.wave = 7;
+    // Set stage to the final boss.
+    (engine as any).state.floor = 1;
+    (engine as any).state.wave = 15;
 
-    // Choose reward for 3-7 boss
+    // Choose reward for the final boss.
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'aug_combo_1' });
 
     expect(engine.getState().screen).toBe('VICTORY');
-    expect(engine.getState().narrativeMicrocopy).toContain('3층 최종 보스를 정복');
+    expect(engine.getState().narrativeMicrocopy).toContain('Stage 15 final boss cleared');
   });
 
   it('should keep the first encounter tense and scale the final boss as a hard check', () => {
     const engine = new GameEngine();
 
     const firstEnemy = (engine as any).generateEnemyForStage(1, 1);
-    const finalBoss = (engine as any).generateEnemyForStage(3, 7);
+    const finalBoss = (engine as any).generateEnemyForStage(1, 15);
 
     expect(firstEnemy).toMatchObject({
       hp: 75,
@@ -240,11 +240,20 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
       intent: expect.objectContaining({ value: 11 })
     });
     expect(finalBoss).toMatchObject({
-      hp: 1224,
-      maxHp: 1224,
-      shield: 102,
-      intent: expect.objectContaining({ value: 111 })
+      hp: 1231,
+      maxHp: 1231,
+      shield: 120,
+      intent: expect.objectContaining({ value: 101 })
     });
+  });
+
+  it('maps 15-stage route node ids to the correct boss encounter', () => {
+    const engine = new GameEngine('route-node-stage');
+
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1502, nodeType: 'BOSS' });
+
+    expect(engine.getState().wave).toBe(15);
+    expect(engine.getState().enemy.id).toBe('house_dealer_boss');
   });
 
   it('should absorb enemy damage with player shield first', () => {
