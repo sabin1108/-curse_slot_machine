@@ -50,9 +50,9 @@
 - Suspected cause: `RewardModal` renders a full-screen `.reward-modal-backdrop` above the main view, while the Showcase overlay remains visible behind it. The visible overlay `NEXT STEP` button is not actionable because the reward modal intercepts pointer events.
 - Recommended experiment: When Showcase step 3 opens rewards, either hide/disable the overlay next-step action with copy that says reward selection is required, or render a Showcase-specific continuation control inside the reward modal after reward selection.
 - Confidence: High. The same click sequence was repeated and Playwright reported the reward modal backdrop intercepting pointer events.
-- Status: Proposed
-- Related GitHub PR or issue: PR #18
-- Human decision reason:
+- Status: Resolved in follow-up
+- Related GitHub PR or issue: PR #18; verified on `feature/reward-modal-accessibility-coverage`
+- Human decision reason: Showcase step 3 now prepares the reward modal through the deterministic engine demo path and hides overlay `NEXT STEP` while reward selection owns input.
 
 ## Finding
 
@@ -66,9 +66,9 @@
 - Suspected cause: Reward choices are clickable `div.reward-card-pixel` elements rather than semantic buttons. Mouse users can proceed by clicking a card, but keyboard and assistive-technology users do not get a role-based reward action.
 - Recommended experiment: Convert each reward card to a semantic `button` or add correct `role="button"`, `tabIndex`, keyboard handlers, and accessible labels. Prefer a real `button` unless styling constraints block it.
 - Confidence: High. Role-based Playwright lookup could not find a reward-selection button, while `.reward-card-pixel` click did trigger selection.
-- Status: Proposed
-- Related GitHub PR or issue: PR #18
-- Human decision reason:
+- Status: Resolved in follow-up
+- Related GitHub PR or issue: PR #18; verified on `feature/reward-modal-accessibility-coverage`
+- Human decision reason: Reward cards are semantic `button type="button"` controls with accessible reward-name labels and `aria-pressed`, covered by React Testing Library role/name/focus checks and Playwright keyboard activation.
 
 ## Finding
 
