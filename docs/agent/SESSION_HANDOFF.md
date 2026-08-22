@@ -2,14 +2,14 @@
 
 ## Current Goal
 
-Continue from `feature/effect-resolver-boundary` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain has been merged into `main`; the earlier local-source sync attempt was discarded before any push.
+Continue from `feature/reward-effect-condition-resolver` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain and PR #32 have been merged into `main`; the earlier local-source sync attempt was discarded before any push.
 
 ## Current Branch
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
-- Branch: `feature/effect-resolver-boundary`
+- Branch: `feature/reward-effect-condition-resolver`
 - Base branch: `main`
-- Baseline before this resolver boundary: `16e58cb`
+- Baseline before this resolver boundary: `ad33fcd`
 - Branch status before this cleanup: branched locally from merged `main`
 - Merge policy: do not merge or change PR state without explicit user approval
 
@@ -28,6 +28,8 @@ Continue from `feature/effect-resolver-boundary` in `C:\Users\00\Documents\Codex
 - `docs/superpowers/plans/2026-08-22-reward-modal-accessibility-coverage.md`
 - `docs/superpowers/specs/2026-08-22-effect-resolver-boundary-design.md`
 - `docs/superpowers/plans/2026-08-22-effect-resolver-boundary.md`
+- `docs/superpowers/specs/2026-08-22-reward-effect-condition-resolver-design.md`
+- `docs/superpowers/plans/2026-08-22-reward-effect-condition-resolver.md`
 
 ## Latest Merged Baseline
 
@@ -36,6 +38,29 @@ Continue from `feature/effect-resolver-boundary` in `C:\Users\00\Documents\Codex
 - PR #29 merged into `feature/reward-card-inventory-projection` at `652e407`.
 - PR #28 merged into `feature/enemy-defense-intent` at `7d57de0`.
 - PR #27 merged into `main` at `16e58cb`.
+- PR #32 merged into `main` at `ad33fcd`.
+
+## Current Branch: Reward Effect Condition Resolver
+
+- Goal: reuse `EffectResolver` for `reward.score.add` reward/build conditions.
+- `EffectResolver` now accepts reward facts and active synergy IDs while staying fact-based.
+- `RewardSystem` still owns scoring, sorting, content-value selection, and pre-pick active synergy semantics.
+- `RewardSystem` projects only `kind`, `rarity`, and `tags` into the resolver, not the full reward definition.
+- TDD evidence on 2026-08-22:
+  - `npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts`: failed first because reward/build conditions returned false.
+  - `npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts`: passed with 12 tests.
+  - `npm.cmd run test:run -- src/game/build/RewardSystem.test.ts`: passed with 4 tests.
+  - Review follow-up added direct pre-pick synergy regression coverage and no-context active-synergy fail-closed coverage.
+  - `npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts src/game/build/RewardSystem.test.ts`: passed with 2 files and 17 tests.
+- Review:
+  - Code-review lane returned `REQUEST CHANGES`; explicit reward fact projection, direct pre-pick synergy regression coverage, and no-context active-synergy coverage were fixed.
+  - Architecture lane returned `CLEAR`; low-risk pre-pick coverage recommendation was fixed.
+- Full verification after review fixes:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed with 22 files and 130 tests.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed with 4 Chromium tests.
+  - `git diff --check`: passed.
 
 ## Current Branch: Effect Resolver Boundary
 

@@ -1,5 +1,6 @@
 import { DEFAULT_BUILD_CATALOG } from './BuildCatalog'
 import { applyReward, hasReward } from './BuildSystem'
+import { effectConditionsMatch } from '../effects/EffectResolver'
 import type {
   BuildCatalog,
   BuildRewardDefinition,
@@ -108,16 +109,17 @@ function scoreReward(
 }
 
 function getContentValue(build: BuildState, reward: BuildRewardDefinition): number {
+  const activeSynergyIds = build.synergies.active.map((synergy) => synergy.synergyId)
+
   return (reward.effects ?? [])
     .filter((effect) => effect.type === 'reward.score.add')
-    .filter((effect) => (effect.conditions ?? []).every((condition) => {
-      if (condition.type === 'reward.kind_is') return reward.kind === condition.params.kind
-      if (condition.type === 'reward.rarity_is') return reward.rarity === condition.params.rarity
-      if (condition.type === 'reward.has_tag') return reward.tags.includes(condition.params.tag)
-      if (condition.type === 'build.synergy_active') {
-        return build.synergies.active.some((synergy) => synergy.synergyId === condition.params.synergyId)
-      }
-      return false
+    .filter((effect) => effectConditionsMatch(effect, {
+      reward: {
+        kind: reward.kind,
+        rarity: reward.rarity,
+        tags: reward.tags,
+      },
+      activeSynergyIds,
     }))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
 }
