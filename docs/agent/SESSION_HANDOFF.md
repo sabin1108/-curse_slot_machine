@@ -10,8 +10,8 @@ Continue from `feature/ui-map-projection` in `C:\Users\00\Documents\Codex\curse_
 - Branch: `feature/ui-map-projection`
 - Base branch: `main`
 - Baseline before this map projection slice: `c937bb5`
-- Branch status: local implementation in progress
-- Draft PR: pending
+- Branch status: pushed with draft PR #34 open
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/34
 - Merge policy: do not merge or change PR state without explicit user approval
 
 ## Source Documents
@@ -67,6 +67,7 @@ Continue from `feature/ui-map-projection` in `C:\Users\00\Documents\Codex\curse_
   - `npm.cmd run build`: passed.
   - `npm.cmd run test:e2e`: passed with 4 Chromium tests.
   - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/34.
 
 ## Current Branch: Reward Effect Condition Resolver
 

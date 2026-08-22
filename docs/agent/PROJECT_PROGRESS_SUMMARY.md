@@ -9,7 +9,7 @@ Last updated: 2026-08-22
 - Current branch: `feature/ui-map-projection`
 - Current branch base: `main`
 - Baseline before this map projection slice: `c937bb5`
-- Draft PR: pending
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/34
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
 ## Merged Stack
@@ -241,5 +241,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Complete review, full verification, push, and open a draft PR for `feature/ui-map-projection`.
+- Review draft PR #34 and merge only after explicit user approval.
 - Do not merge or change PR state without explicit user approval.
