@@ -2,15 +2,15 @@
 
 ## Current Goal
 
-Continue from the stacked branch `feature/reward-modal-accessibility-coverage` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain is the source of truth. The earlier local-source sync attempt was discarded before any push.
+Continue from `feature/effect-resolver-boundary` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain has been merged into `main`; the earlier local-source sync attempt was discarded before any push.
 
 ## Current Branch
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
-- Branch: `feature/reward-modal-accessibility-coverage`
-- Base branch: `feature/reward-inventory-naming-cleanup`
-- Baseline before this cleanup: `a3b4a78`
-- Branch status before this cleanup: branched locally from `feature/reward-inventory-naming-cleanup`
+- Branch: `feature/effect-resolver-boundary`
+- Base branch: `main`
+- Baseline before this resolver boundary: `16e58cb`
+- Branch status before this cleanup: branched locally from merged `main`
 - Merge policy: do not merge or change PR state without explicit user approval
 
 ## Source Documents
@@ -26,6 +26,37 @@ Continue from the stacked branch `feature/reward-modal-accessibility-coverage` i
 - `docs/superpowers/plans/2026-08-22-reward-inventory-naming-cleanup.md`
 - `docs/superpowers/specs/2026-08-22-reward-modal-accessibility-coverage-design.md`
 - `docs/superpowers/plans/2026-08-22-reward-modal-accessibility-coverage.md`
+- `docs/superpowers/specs/2026-08-22-effect-resolver-boundary-design.md`
+- `docs/superpowers/plans/2026-08-22-effect-resolver-boundary.md`
+
+## Latest Merged Baseline
+
+- PR #31 merged into `feature/reward-inventory-naming-cleanup` at `f65e213`.
+- PR #30 merged into `feature/reward-card-type-cleanup` at `36377db`.
+- PR #29 merged into `feature/reward-card-inventory-projection` at `652e407`.
+- PR #28 merged into `feature/enemy-defense-intent` at `7d57de0`.
+- PR #27 merged into `main` at `16e58cb`.
+
+## Current Branch: Effect Resolver Boundary
+
+- Goal: extract reusable combat effect condition matching into `src/game/effects/EffectResolver.ts`.
+- Ownership/synergy activation remains in `BuildSystem.getActiveEffects`.
+- `CombatSystem` still owns modifier ordering, arithmetic, state mutation, and combat event emission.
+- `EffectResolver` takes minimal combat facts instead of importing full `CombatState`.
+- TDD evidence on 2026-08-22:
+  - `npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts`: failed first because `EffectResolver.ts` did not exist.
+  - `npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts src/game/combat/CombatSystem.test.ts src/game/engine/GameEngine.test.ts src/game/combat/MvpEffects.test.ts`: passed with 4 files and 45 tests after review corrections.
+- Plan review returned `REJECT`; corrected scope to condition matching only and removed combat modifier aggregation from the resolver boundary.
+- Code review returned `REQUEST CHANGES`; resolver condition tests were split into independent positive/negative branches.
+- Code re-review returned `APPROVE` with no remaining findings.
+- Architecture review returned `WATCH`; condition-bearing combat handlers were all routed through the resolver and resolver context was narrowed to minimal facts.
+- Architecture re-review returned `CLEAR`.
+- Full verification after correction:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed with 22 files and 124 tests.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed with 4 Chromium tests.
+  - `git diff --check`: passed.
 
 ## Architecture Rules To Preserve
 

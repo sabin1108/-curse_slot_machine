@@ -690,7 +690,41 @@
 
 ### GitHub
 
-- Draft PR: pending.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/31
+- Later merged into `feature/reward-inventory-naming-cleanup` as part of the approved stacked PR merge.
+
+## 2026-08-22 - Stacked PR Merge And Effect Resolver Boundary
+
+- User approved merging the stacked PR chain and continuing work.
+- Merged PR #31 into `feature/reward-inventory-naming-cleanup`: `f65e213`.
+- Merged PR #30 into `feature/reward-card-type-cleanup`: `36377db`.
+- Merged PR #29 into `feature/reward-card-inventory-projection`: `652e407`.
+- Merged PR #28 into `feature/enemy-defense-intent`: `7d57de0`.
+- Merged PR #27 into `main`: `16e58cb`.
+- Verified merged `main`:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 109 tests across 21 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Started `feature/effect-resolver-boundary` from merged `main`.
+- Added `src/game/effects/EffectResolver.ts` as a pure combat condition resolver.
+- Rewired `CombatSystem` to consume resolver condition matching without moving modifier ordering, arithmetic, event emission, or state ownership.
+- TDD evidence:
+  - Resolver test first failed because `EffectResolver.ts` did not exist.
+  - Targeted resolver/combat/engine test pass after review corrections: 4 files, 45 tests.
+  - `npm.cmd run typecheck`: passed.
+- Plan-review lane returned `REJECT`; corrected the branch scope from condition-plus-aggregation to condition-only and added ordering/filtering regressions.
+- Code-review lane returned `REQUEST CHANGES`; split resolver condition tests into independent branch checks.
+- Code-review re-review returned `APPROVE`.
+- Architecture lane returned `WATCH`; routed all condition-bearing combat handlers through the resolver and narrowed resolver context to minimal facts.
+- Architecture re-review returned `CLEAR`.
+- Full branch verification after correction:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 124 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
 - Merge policy: no merge without explicit user approval.
 
 ## 2026-08-20 - Offline Font Fallback
