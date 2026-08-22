@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { GameEngine } from './GameEngine'
 import { createInitialGameState } from './GameState'
 import { projectUiGameState, toUiEnemyIntent, toUiReward, toUiRewardCard, type UiFeedback } from './UiProjection'
+import { completeCurrentStage, enterNextStage, getNextStage } from '../run/RunSystem'
 
 const emptyFeedback: UiFeedback = {
   combatLogs: [],
@@ -146,5 +147,89 @@ describe('UiProjection reward cards', () => {
       icon: 'ITEM',
       rarity: 'RARE',
     })
+  })
+})
+
+describe('UiProjection map state', () => {
+  it('projects the initial route with stage 1 available on a started run', () => {
+    const state = createInitialGameState('map-projection-start')
+    state.phase = 'map'
+    state.run = {
+      status: 'active',
+      currentStage: null,
+      completedStageIds: [],
+    }
+
+    const projected = projectUiGameState(state, emptyFeedback)
+
+    expect(projected.map.completedStageIds).toEqual([])
+    expect(projected.map.nodes).toHaveLength(15)
+    expect(projected.map.nodes[0]).toMatchObject({
+      id: 1,
+      type: 'combat',
+      rewardPolicy: 'starter',
+      status: 'available',
+      positionPct: 5,
+    })
+    expect(projected.map.activeNode).toMatchObject({ id: 1, type: 'combat' })
+    expect(projected.map.nextAvailableNode).toMatchObject({ id: 1, type: 'combat' })
+    expect(projected.map.currentNode).toBeNull()
+  })
+
+  it('projects completed stages and the next available route node', () => {
+    const state = createInitialGameState('map-projection-progress')
+    state.phase = 'map'
+    state.run = {
+      status: 'active',
+      currentStage: null,
+      completedStageIds: [1, 2],
+    }
+
+    const projected = projectUiGameState(state, emptyFeedback)
+
+    expect(projected.map.nodes.slice(0, 3).map((node) => [node.id, node.status])).toEqual([
+      [1, 'completed'],
+      [2, 'completed'],
+      [3, 'available'],
+    ])
+    expect(projected.map.activeNode).toMatchObject({ id: 3, type: 'rest' })
+    expect(projected.map.nextAvailableNode).toMatchObject({ id: 3, type: 'rest' })
+    expect(projected.map.currentNode).toBeNull()
+  })
+
+  it('projects the same next available route node selected by RunSystem', () => {
+    const state = createInitialGameState('map-projection-selector')
+    state.phase = 'map'
+    const stageOne = enterNextStage(state.run)
+    const afterStageOne = completeCurrentStage(stageOne)
+    state.run = afterStageOne
+    const nextStage = getNextStage(state.run)
+
+    const projected = projectUiGameState(state, emptyFeedback)
+
+    expect(projected.map.completedStageIds).toEqual([1])
+    expect(projected.map.nextAvailableNode).toMatchObject({
+      id: nextStage?.id,
+      type: nextStage?.type,
+      rewardPolicy: nextStage?.rewardPolicy,
+      status: 'available',
+    })
+  })
+
+  it('projects an entered event stage as current without exposing a next available node', () => {
+    const state = createInitialGameState('map-projection-event')
+    state.phase = 'event'
+    state.run = {
+      status: 'active',
+      currentStage: { id: 6, type: 'event', rewardPolicy: 'normal' },
+      completedStageIds: [1, 2, 3, 4, 5],
+    }
+
+    const projected = projectUiGameState(state, emptyFeedback)
+
+    expect(projected.screen).toBe('MAP')
+    expect(projected.map.currentNode).toMatchObject({ id: 6, type: 'event', status: 'current' })
+    expect(projected.map.activeNode).toMatchObject({ id: 6, type: 'event', status: 'current' })
+    expect(projected.map.nextAvailableNode).toBeNull()
   })
 })
