@@ -22,6 +22,8 @@ Curse Slot Machine is a desktop-first web roguelike prototype where the player f
 - Combat slots and augment slots are different systems.
 - Showcase Mode uses scripted scenario/reward data and must not mutate normal combat balance.
 - Content-specific augment, item, and synergy names should live in data, not engine branches.
+- Enemy intent sequencing is deterministic combat-engine data: current MVP enemies may define different attack, wait, and defend patterns without React calculating enemy behavior.
+- Structured UI projection should expose item-specific reward card data instead of forcing items to masquerade as augments.
 
 ## Branch Sequence
 

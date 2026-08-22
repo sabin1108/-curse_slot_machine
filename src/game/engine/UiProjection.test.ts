@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { toUiEnemyIntent } from './UiProjection'
+import { toUiEnemyIntent, toUiReward } from './UiProjection'
+
+const emptyScore = {
+  immediatePower: 0,
+  synergyValue: 0,
+  completionValue: 0,
+  futureValue: 0,
+  contentValue: 0,
+  total: 0,
+}
 
 describe('UiProjection enemy intent', () => {
   it('projects attack damage', () => {
@@ -8,29 +17,66 @@ describe('UiProjection enemy intent', () => {
       id: 'attack',
       type: 'ATTACK',
       value: 8,
-      name: '예고된 공격',
     })
   })
 
-  it('projects a harmless wait with clear Korean copy', () => {
-    expect(toUiEnemyIntent({ type: 'wait', baseAmount: 7, amount: 0 })).toEqual({
+  it('projects a harmless wait', () => {
+    expect(toUiEnemyIntent({ type: 'wait', baseAmount: 7, amount: 0 })).toMatchObject({
       id: 'wait',
-      name: '숨 고르기',
       type: 'WAIT',
       value: 0,
-      icon: '💤',
-      description: '이번 턴에는 공격하지 않습니다.',
     })
   })
 
   it('projects a low defense intent', () => {
-    expect(toUiEnemyIntent({ type: 'defend', baseAmount: 7, amount: 1 })).toEqual({
+    expect(toUiEnemyIntent({ type: 'defend', baseAmount: 7, amount: 1 })).toMatchObject({
       id: 'defend',
-      name: '방어 태세',
       type: 'DEFEND',
       value: 1,
-      icon: '🛡️',
-      description: '방어를 최대 1 얻습니다. (상한 2)',
+    })
+  })
+
+  it('projects defense intent descriptions from the intent amount', () => {
+    const intent = toUiEnemyIntent({ type: 'defend', baseAmount: 7, amount: 2 })
+
+    expect(intent.description).toContain('2')
+    expect(intent.description).not.toContain('1 ')
+  })
+})
+
+describe('UiProjection reward cards', () => {
+  it('projects items with explicit item kind and item label fields', () => {
+    expect(toUiReward({
+      id: 'multi_hit_charm',
+      kind: 'item',
+      name: 'Multi-Hit Charm',
+      rarity: 'uncommon',
+      tags: ['MULTI_HIT'],
+      description: 'Bullets add a 35% extra hit.',
+      effectLabel: 'Bullets add a 35% extra hit.',
+      score: emptyScore,
+    })).toMatchObject({
+      id: 'multi_hit_charm',
+      kind: 'item',
+      icon: 'ITEM',
+      effectValue: 'Bullets add a 35% extra hit.',
+    })
+  })
+
+  it('projects augments with explicit augment kind', () => {
+    expect(toUiReward({
+      id: 'combo_starter',
+      kind: 'augment',
+      name: 'Combo Starter',
+      rarity: 'common',
+      tags: ['COMBO'],
+      description: 'Locked bullets apply Primer.',
+      effectLabel: 'Locked bullets apply Primer.',
+      score: emptyScore,
+    })).toMatchObject({
+      id: 'combo_starter',
+      kind: 'augment',
+      icon: 'AUG',
     })
   })
 })

@@ -4,6 +4,30 @@ import type { CombatSlotLocks } from '../slot/CombatSlotTypes'
 
 export type CombatActorId = 'player' | 'enemy'
 
+export type EnemyIntentType = 'attack' | 'wait' | 'defend'
+
+export type EnemyIntentPatternStep =
+  | {
+      type: 'attack'
+    }
+  | {
+      type: 'wait'
+    }
+  | {
+      type: 'defend'
+      amount?: number
+    }
+
+export type EnemyIntentPattern = readonly [
+  EnemyIntentPatternStep,
+  ...EnemyIntentPatternStep[],
+]
+
+export type EnemyIntentPatternStepOverrides = {
+  type: EnemyIntentType
+  amount?: number
+}
+
 export type CombatActorState = {
   id: CombatActorId
   name: string
@@ -16,9 +40,11 @@ export type CombatActorState = {
 }
 
 export type EnemyIntent = {
-  type: 'attack' | 'wait' | 'defend'
+  type: EnemyIntentType
   baseAmount: number
   amount: number
+  pattern?: EnemyIntentPattern
+  patternIndex?: number
 }
 
 export type CurseState = {

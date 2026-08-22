@@ -45,6 +45,7 @@ export type SynergyTag =
 
 export interface AugmentItem {
   id: string;
+  kind: 'augment' | 'item';
   name: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'CURSED' | 'LEGENDARY';
   tags: SynergyTag[];

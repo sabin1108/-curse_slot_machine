@@ -55,7 +55,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
   };
 
   const getKindLabel = (augment: AugmentItem) => {
-    if (augment.icon === 'ITEM') return '아이템';
+    if (augment.kind === 'item') return '아이템';
     if (augment.rarity === 'CURSED') return '저주 증강';
     return '증강';
   };

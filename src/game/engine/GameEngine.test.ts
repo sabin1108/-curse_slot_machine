@@ -283,6 +283,27 @@ describe('GameEngine', () => {
     expect(engine.getState().combat.enemyIntent.amount).toBe(5)
   })
 
+  it('enters elite combat with the elite enemy intent pattern', () => {
+    const engine = new GameEngine('elite-pattern')
+    startRun(engine)
+
+    completeCombatStage(engine)
+    completeCombatStage(engine)
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+    engine.dispatch({ type: 'RESOLVE_REST', action: 'heal' })
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+    engine.dispatch({ type: 'LEAVE_SHOP' })
+    completeCombatStage(engine)
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+    engine.dispatch({ type: 'RESOLVE_EVENT', choice: 'gold' })
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+
+    const combat = engine.getState().combat
+    expect(combat.enemy.name).toBe('Vault Enforcer')
+    expect(combat.enemyIntent.pattern?.map((step) => step.type)).toEqual(['attack', 'wait', 'attack', 'defend'])
+    expect(combat.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 5, amount: 5, patternIndex: 0 })
+  })
+
   it('owns deterministic spin, lock, reroll, curse cost, and confirmation state', () => {
     const first = new GameEngine('canonical-slot')
     const second = new GameEngine('canonical-slot')
@@ -306,6 +327,58 @@ describe('GameEngine', () => {
     const events = first.dispatch({ type: 'CONFIRM_COMBAT_SLOT' })
     expect(events).toContainEqual(expect.objectContaining({ type: 'COMBAT_SLOT_RESOLVED', result: confirmed }))
     expect(first.getState().slot).toMatchObject({ current: null, hasSpun: false })
+  })
+
+  it('keeps wait intent at zero damage after reroll curse changes', () => {
+    const engine = new GameEngine('wait-reroll-stability')
+    startRun(engine)
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+    engine.dispatch({
+      type: 'RESOLVE_COMBAT_SLOT',
+      result: { action: 'bullet', target: 'enemy', modifier: 'x1' },
+    })
+
+    expect(engine.getState().combat.enemyIntent).toMatchObject({ type: 'wait', amount: 0 })
+
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    engine.dispatch({ type: 'REROLL_UNLOCKED' })
+
+    expect(engine.getState().combat.enemyIntent).toMatchObject({ type: 'wait', amount: 0 })
+  })
+
+  it('keeps defense intent amount stable after rest purification changes curse', () => {
+    const engine = new GameEngine('rest-defense-stability')
+    startRun(engine)
+    completeCombatStageOnDefendIntent(engine)
+    completeCombatStageOnDefendIntent(engine)
+
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+    expect(engine.getState().phase).toBe('rest')
+    expect(engine.getState().combat.enemyIntent).toMatchObject({ type: 'defend', amount: 1 })
+
+    engine.dispatch({ type: 'RESOLVE_REST', action: 'purify' })
+
+    expect(engine.getState().combat.enemyIntent).toMatchObject({ type: 'defend', amount: 1 })
+  })
+
+  it('keeps defense intent amount stable after purchase cleansing changes curse', () => {
+    const engine = new GameEngine('shop-defense-stability', {
+      startingRewards: [{ kind: 'item', id: 'black_market_stamp' }],
+    })
+    startRun(engine)
+    completeCombatStageOnDefendIntent(engine)
+    completeCombatStageOnDefendIntent(engine)
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+    engine.dispatch({ type: 'RESOLVE_REST', action: 'purify' })
+    engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+
+    const offer = engine.getState().shop.offers.find((candidate) => candidate.price <= engine.getState().economy.gold)
+    expect(offer).toBeDefined()
+    expect(engine.getState().combat.enemyIntent).toMatchObject({ type: 'defend', amount: 1 })
+
+    engine.dispatch({ type: 'BUY_SHOP_ITEM', rewardId: offer!.reward.id })
+
+    expect(engine.getState().combat.enemyIntent).toMatchObject({ type: 'defend', amount: 1 })
   })
 
   it('passes canonical reel locks to lock-dependent reward effects on confirmation', () => {
@@ -443,6 +516,27 @@ describe('GameEngine', () => {
 
 function completeCombatStage(engine: GameEngine): void {
   engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+  engine.dispatch({
+    type: 'RESOLVE_COMBAT_SLOT',
+    result: { action: 'bullet', target: 'enemy', modifier: 'x3' },
+  })
+
+  const reward = engine.getState().rewards.options[0]
+  if (reward) {
+    engine.dispatch({ type: 'CHOOSE_REWARD', rewardId: reward.id })
+  }
+}
+
+function completeCombatStageOnDefendIntent(engine: GameEngine): void {
+  engine.dispatch({ type: 'ENTER_NEXT_STAGE' })
+  engine.dispatch({
+    type: 'RESOLVE_COMBAT_SLOT',
+    result: { action: 'bullet', target: 'enemy', modifier: 'x1' },
+  })
+  engine.dispatch({
+    type: 'RESOLVE_COMBAT_SLOT',
+    result: { action: 'bullet', target: 'enemy', modifier: 'x1' },
+  })
   engine.dispatch({
     type: 'RESOLVE_COMBAT_SLOT',
     result: { action: 'bullet', target: 'enemy', modifier: 'x3' },

@@ -190,6 +190,7 @@ export const MODIFIER_SYMBOLS: ReelSymbol[] = [
 export const ALL_AUGMENTS: AugmentItem[] = [
   {
     id: 'aug_fire_sword',
+    kind: 'augment',
     name: '화염검 강결',
     rarity: 'RARE',
     tags: ['RISK', 'CRITICAL'],
@@ -200,6 +201,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   {
     id: 'aug_barrier',
+    kind: 'augment',
     name: '방벽 코어',
     rarity: 'COMMON',
     tags: ['DEFENSE'],
@@ -210,6 +212,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   {
     id: 'aug_regen',
+    kind: 'augment',
     name: '재생 물약',
     rarity: 'COMMON',
     tags: ['RESOURCE'],
@@ -220,6 +223,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   {
     id: 'aug_frenzy_core',
+    kind: 'augment',
     name: '폭주 코어',
     rarity: 'LEGENDARY',
     tags: ['BURN', 'MULTI_HIT'],
@@ -230,6 +234,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   ...DEFAULT_BUILD_CATALOG.rewards.map((reward): AugmentItem => ({
     id: reward.id,
+    kind: reward.kind,
     name: reward.name,
     rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
     tags: reward.tags,

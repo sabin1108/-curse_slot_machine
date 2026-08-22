@@ -118,7 +118,7 @@ export function toUiEnemyIntent(intent: CoreEnemyIntent): UiGameState['enemy']['
       type: 'DEFEND',
       value: intent.amount,
       icon: '🛡️',
-      description: '방어를 최대 1 얻습니다. (상한 2)',
+      description: `방어를 최대 ${intent.amount} 얻습니다. (상한 2)`,
     }
   }
   return {
@@ -134,6 +134,7 @@ export function toUiEnemyIntent(intent: CoreEnemyIntent): UiGameState['enemy']['
 export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   return {
     id: reward.id,
+    kind: reward.kind,
     name: reward.name,
     rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
     tags: reward.tags,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createCombatState, previewCombatSlot, resolveCombatSlot } from './CombatSystem'
+import { createCombatState, previewCombatSlot, recalculateEnemyIntent, resolveCombatSlot } from './CombatSystem'
 
 const safeShot = { action: 'bullet', target: 'enemy', modifier: 'x1' } as const
 
@@ -124,6 +124,60 @@ describe('MVP combat contracts', () => {
     expect(result.events).toContainEqual({ type: 'ENEMY_WAITED' })
     expect(result.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
     expect(result).toMatchObject({ outcome: 'defeat', endReason: 'curse_overload', curse: { value: 10 } })
+  })
+
+  it('advances custom enemy intent patterns deterministically', () => {
+    const state = createCombatState({
+      enemy: { maxHealth: 99, health: 99 },
+      enemyIntent: {
+        baseAmount: 6,
+        amount: 6,
+        pattern: [
+          { type: 'attack' },
+          { type: 'defend', amount: 2 },
+          { type: 'wait' },
+        ],
+        patternIndex: 0,
+      },
+    })
+
+    const attack = resolveCombatSlot(state, safeShot)
+    expect(attack.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED', amount: 6 }))
+    expect(attack.enemyIntent).toMatchObject({ type: 'defend', baseAmount: 6, amount: 2, patternIndex: 1 })
+
+    const defend = resolveCombatSlot(attack, safeShot)
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 2 })
+    expect(defend.enemyIntent).toMatchObject({ type: 'wait', baseAmount: 6, amount: 0, patternIndex: 2 })
+
+    const wait = resolveCombatSlot(defend, safeShot)
+    expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(wait.enemyIntent).toMatchObject({ type: 'attack', baseAmount: 6, amount: 6, patternIndex: 0 })
+  })
+
+  it('keeps wait and defend amounts stable when combat state is created under curse pressure', () => {
+    const waiting = createCombatState({
+      enemyIntent: { type: 'wait', baseAmount: 7, amount: 0 },
+      curse: { value: 8 },
+    })
+    const defending = createCombatState({
+      enemyIntent: { type: 'defend', baseAmount: 7, amount: 1 },
+      curse: { value: 8 },
+    })
+
+    expect(waiting.enemyIntent).toMatchObject({ type: 'wait', amount: 0 })
+    expect(defending.enemyIntent).toMatchObject({ type: 'defend', amount: 1 })
+  })
+
+  it('derives recalculated intent type and amount from the pattern index', () => {
+    const intent = recalculateEnemyIntent({
+      type: 'attack',
+      baseAmount: 7,
+      amount: 7,
+      pattern: [{ type: 'attack' }, { type: 'defend', amount: 2 }, { type: 'wait' }],
+      patternIndex: 1,
+    }, 8)
+
+    expect(intent).toMatchObject({ type: 'defend', amount: 2, patternIndex: 1 })
   })
 
   it('warns that newly crossed curse pressure applies to the next enemy attack', () => {

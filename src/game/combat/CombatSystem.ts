@@ -5,6 +5,8 @@ import type {
   CombatEvent,
   CombatEffectContext,
   CombatEndReason,
+  EnemyIntentPattern,
+  EnemyIntentPatternStepOverrides,
   CombatOutcome,
   CombatPreview,
   CombatResolution,
@@ -51,21 +53,35 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     overrides.enemy,
   )
 
+  const curseValue = overrides.curse?.value ?? 0
   const enemyIntentType = overrides.enemyIntent?.type ?? 'attack'
   const enemyIntentBaseAmount = overrides.enemyIntent?.baseAmount ?? overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack
+  const enemyIntentPattern = overrides.enemyIntent?.pattern ? cloneEnemyIntentPattern(overrides.enemyIntent.pattern) : undefined
+  const enemyIntentPatternIndex = enemyIntentPattern && enemyIntentPattern.length > 0
+    ? normalizePatternIndex(overrides.enemyIntent?.patternIndex ?? 0, enemyIntentPattern.length)
+    : undefined
+  const enemyIntentPatternStep = enemyIntentPatternIndex !== undefined ? enemyIntentPattern?.[enemyIntentPatternIndex] : undefined
+  const resolvedEnemyIntentType = enemyIntentPatternStep?.type ?? enemyIntentType
 
   return {
     player,
     enemy,
     curse: {
-      value: overrides.curse?.value ?? 0,
+      value: curseValue,
       max: 10,
-      attackBonus: getCurseAttackBonus(overrides.curse?.value ?? 0),
+      attackBonus: getCurseAttackBonus(curseValue),
     },
     enemyIntent: {
-      type: enemyIntentType,
+      type: resolvedEnemyIntentType,
       baseAmount: enemyIntentBaseAmount,
-      amount: overrides.enemyIntent?.amount ?? getIntentAmount(enemyIntentType, enemyIntentBaseAmount, 0),
+      amount: getIntentAmount(
+        resolvedEnemyIntentType,
+        enemyIntentBaseAmount,
+        curseValue,
+        getPatternStepAmount(enemyIntentPatternStep) ?? overrides.enemyIntent?.amount,
+      ),
+      ...(enemyIntentPattern ? { pattern: enemyIntentPattern } : {}),
+      ...(enemyIntentPatternIndex !== undefined ? { patternIndex: enemyIntentPatternIndex } : {}),
     },
     statuses: {
       player: (overrides.statuses?.player ?? []).map((status) => ({ ...status })),
@@ -264,7 +280,7 @@ export function resolveCombatSlot(
     } else if (enemyIntent.type === 'wait') {
       events.push({ type: 'ENEMY_WAITED' })
     } else {
-      const defenseGained = Math.min(COMBAT_BASE_VALUES.enemyDefense, Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block))
+      const defenseGained = Math.min(enemyIntent.amount, Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block))
       enemy = { ...enemy, block: enemy.block + defenseGained }
       events.push({ type: 'ENEMY_DEFENDED', amount: defenseGained })
     }
@@ -588,24 +604,63 @@ export function getCurseAttackBonus(value: number): number {
   return 0
 }
 
+export function recalculateEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  return getPressuredIntent(intent, curseValue)
+}
+
 function getPressuredIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  const patternStep = getCurrentPatternStep(intent)
+  const type = patternStep?.type ?? intent.type
   return {
     ...intent,
-    amount: getIntentAmount(intent.type, intent.baseAmount, curseValue),
+    type,
+    amount: getIntentAmount(type, intent.baseAmount, curseValue, getPatternStepAmount(patternStep)),
   }
 }
 
 function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  if (intent.pattern && intent.pattern.length > 0) {
+    const nextIndex = normalizePatternIndex((intent.patternIndex ?? 0) + 1, intent.pattern.length)
+    const step = intent.pattern[nextIndex]
+    return getPressuredIntent({
+      ...intent,
+      type: step.type,
+      patternIndex: nextIndex,
+    }, curseValue)
+  }
+
   return getPressuredIntent({
     ...intent,
     type: intent.type === 'attack' ? 'wait' : intent.type === 'wait' ? 'defend' : 'attack',
   }, curseValue)
 }
 
-function getIntentAmount(type: CombatState['enemyIntent']['type'], baseAmount: number, curseValue: number): number {
+function getIntentAmount(
+  type: CombatState['enemyIntent']['type'],
+  baseAmount: number,
+  curseValue: number,
+  amount?: number,
+): number {
   if (type === 'wait') return 0
-  if (type === 'defend') return COMBAT_BASE_VALUES.enemyDefense
+  if (type === 'defend') return amount ?? COMBAT_BASE_VALUES.enemyDefense
   return baseAmount + getCurseAttackBonus(curseValue)
+}
+
+function getCurrentPatternStep(intent: CombatState['enemyIntent']): EnemyIntentPatternStepOverrides | undefined {
+  if (!intent.pattern || intent.pattern.length === 0) return undefined
+  return intent.pattern[normalizePatternIndex(intent.patternIndex ?? 0, intent.pattern.length)]
+}
+
+function getPatternStepAmount(step: EnemyIntentPatternStepOverrides | undefined): number | undefined {
+  return step?.type === 'defend' ? step.amount : undefined
+}
+
+function cloneEnemyIntentPattern(pattern: EnemyIntentPattern): EnemyIntentPattern {
+  return pattern.map((step) => ({ ...step })) as unknown as EnemyIntentPattern
+}
+
+function normalizePatternIndex(index: number, length: number): number {
+  return ((index % length) + length) % length
 }
 
 function getPreviewWarnings(state: CombatState, resolution: CombatResolution): string[] {

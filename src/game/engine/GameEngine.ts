@@ -3,7 +3,7 @@ import type { RewardRef } from '../build/BuildTypes'
 import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 import { generateMvpRewardOptions } from '../build/MvpRewardSystem'
 import { generateRewardOptions } from '../build/RewardSystem'
-import { getCurseAttackBonus, createCombatState, previewCombatSlot, resolveCombatSlot } from '../combat/CombatSystem'
+import { getCurseAttackBonus, createCombatState, previewCombatSlot, recalculateEnemyIntent, resolveCombatSlot } from '../combat/CombatSystem'
 import { getMvpEnemyProfile } from '../combat/MvpEnemyCatalog'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
@@ -226,10 +226,7 @@ export class GameEngine {
       combat: {
         ...this.state.combat,
         curse: { value: curseValue, max: 10, attackBonus },
-        enemyIntent: {
-          ...this.state.combat.enemyIntent,
-          amount: this.state.combat.enemyIntent.baseAmount + attackBonus,
-        },
+        enemyIntent: recalculateEnemyIntent(this.state.combat.enemyIntent, curseValue),
         statuses: {
           ...this.state.combat.statuses,
           player: playerStatuses,
@@ -578,6 +575,7 @@ function createStageCombatState(
 ): GameState['combat'] {
   const profile = getMvpEnemyProfile(stage.type)
   const attackBonus = getCurseAttackBonus(previous.curse.value)
+  const openingIntent = profile.intentPattern[0]
 
   return createCombatState({
     player: {
@@ -597,8 +595,24 @@ function createStageCombatState(
       } : {}),
     },
     curse: { value: previous.curse.value },
-    enemyIntent: { baseAmount: profile.attack, amount: profile.attack + attackBonus },
+    enemyIntent: {
+      type: openingIntent.type,
+      baseAmount: profile.attack,
+      amount: getOpeningIntentAmount(openingIntent, profile.attack, attackBonus),
+      pattern: profile.intentPattern,
+      patternIndex: 0,
+    },
   })
+}
+
+function getOpeningIntentAmount(
+  intent: ReturnType<typeof getMvpEnemyProfile>['intentPattern'][number],
+  attack: number,
+  attackBonus: number,
+): number {
+  if (intent.type === 'wait') return 0
+  if (intent.type === 'defend') return intent.amount ?? 1
+  return attack + attackBonus
 }
 
 function createShopOffers(state: GameState): GameState['shop']['offers'] {
@@ -619,9 +633,6 @@ function updateCombatCurse(combat: GameState['combat'], value: number): GameStat
   return {
     ...combat,
     curse: { value, max: 10, attackBonus },
-    enemyIntent: {
-      ...combat.enemyIntent,
-      amount: combat.enemyIntent.baseAmount + attackBonus,
-    },
+    enemyIntent: recalculateEnemyIntent(combat.enemyIntent, value),
   }
 }
