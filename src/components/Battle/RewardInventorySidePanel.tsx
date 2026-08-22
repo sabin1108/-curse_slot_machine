@@ -1,27 +1,29 @@
 import React from 'react';
 import { BuildState } from '../../types/game';
 
-interface AugmentSidePanelProps {
+interface RewardInventorySidePanelProps {
   build: BuildState;
 }
 
-export const AugmentSidePanel: React.FC<AugmentSidePanelProps> = ({ build }) => {
+export const RewardInventorySidePanel: React.FC<RewardInventorySidePanelProps> = ({ build }) => {
+  const ownedRewardCards = [...build.augments, ...build.items];
+
   return (
     <aside className="side-panel-container">
       <div className="side-panel-header">
-        <h3>보유 증강</h3>
-        <span className="count-badge">{build.augments.length}/12</span>
+        <h3>보유 증강/아이템</h3>
+        <span className="count-badge">{ownedRewardCards.length}/12</span>
       </div>
 
-      <div className="augment-list">
-        {build.augments.map((aug) => (
-          <div key={aug.id} className={`aug-row rarity-${aug.rarity.toLowerCase()}`} title={aug.description}>
-            <span className="aug-icon">{aug.icon}</span>
-            <div className="aug-details">
-              <span className="aug-name">{aug.name}</span>
-              <span className="aug-tags">{aug.tags.join(' · ')}</span>
+      <div className="reward-card-list">
+        {ownedRewardCards.map((rewardCard) => (
+          <div key={`${rewardCard.kind}-${rewardCard.id}`} className={`reward-card-row reward-card-row-${rewardCard.kind} rarity-${rewardCard.rarity.toLowerCase()}`} title={rewardCard.description}>
+            <span className="reward-card-icon">{rewardCard.icon}</span>
+            <div className="reward-card-details">
+              <span className="reward-card-name">{rewardCard.name}</span>
+              <span className="reward-card-tags">{rewardCard.tags.join(' · ')}</span>
             </div>
-            <span className="aug-val">{aug.effectValue}</span>
+            <span className="reward-card-value">{rewardCard.effectValue}</span>
           </div>
         ))}
       </div>

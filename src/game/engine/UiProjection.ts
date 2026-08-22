@@ -1,7 +1,7 @@
 import { getAsset } from '../../assets/assetHelper'
-import type { AugmentItem, GameScreen, GameState as UiGameState, ReelSymbol, SlotResult, SynergyProgress as UiSynergyProgress } from '../../types/game'
+import type { AugmentCard, GameScreen, GameState as UiGameState, ItemCard, ReelSymbol, RewardCard, SlotResult, SynergyProgress as UiSynergyProgress } from '../../types/game'
 import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
-import type { BuildRewardDefinition, SynergyDefinition, SynergyProgress as CoreSynergyProgress } from '../build/BuildTypes'
+import type { BuildRewardDefinition, RewardKind, SynergyDefinition, SynergyProgress as CoreSynergyProgress } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import type { CombatPreview, EnemyIntent as CoreEnemyIntent } from '../combat/CombatTypes'
@@ -19,7 +19,8 @@ export type UiFeedback = {
 export function projectUiGameState(state: CoreGameState, feedback: UiFeedback): UiGameState {
   const currentStageId = state.run.currentStage?.id ?? Math.min(15, state.run.completedStageIds.length + 1)
   const currentResult = state.slot.current ? toUiSlotResult(state.slot.current, state.slot.preview) : null
-  const ownedDefinitions = [...state.build.augments, ...state.build.items].map(getRequiredReward)
+  const ownedAugments = state.build.augments.map((id) => getRequiredReward(id, 'augment'))
+  const ownedItems = state.build.items.map((id) => getRequiredReward(id, 'item'))
   const enemyId = state.run.currentStage?.type === 'boss' ? 'house_dealer_boss' : `mvp_${state.run.currentStage?.type ?? 'combat'}`
 
   return {
@@ -54,8 +55,8 @@ export function projectUiGameState(state: CoreGameState, feedback: UiFeedback): 
       threshold2Triggered: state.combat.curse.value >= 8,
     },
     build: {
-      augments: ownedDefinitions.map(toUiAugment),
-      items: [...state.build.items],
+      augments: ownedAugments.map(toUiOwnedAugment),
+      items: ownedItems.map(toUiOwnedItem),
       activeSynergies: state.build.synergies.active.map((synergy) => synergy.name),
       synergyProgress: MVP_BUILD_CATALOG.synergies.map((synergy) => toUiSynergyProgress(synergy, state.build.synergies.progress.find((progress) => progress.synergyId === synergy.id))),
     },
@@ -131,12 +132,12 @@ export function toUiEnemyIntent(intent: CoreEnemyIntent): UiGameState['enemy']['
   }
 }
 
-export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
+export function toUiRewardCard(reward: BuildRewardDefinition): RewardCard {
   return {
     id: reward.id,
     kind: reward.kind,
     name: reward.name,
-    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    rarity: reward.rarity.toUpperCase() as RewardCard['rarity'],
     tags: reward.tags,
     description: reward.description,
     icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
@@ -145,8 +146,24 @@ export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   }
 }
 
-export function toUiReward(reward: RewardOption): AugmentItem {
-  return toUiAugment(reward)
+export function toUiReward(reward: RewardOption): RewardCard {
+  return toUiRewardCard(reward)
+}
+
+function toUiOwnedAugment(reward: BuildRewardDefinition & { kind: 'augment' }): AugmentCard {
+  const card = toUiRewardCard(reward)
+  if (card.kind !== 'augment') {
+    throw new Error(`Reward kind mismatch for ${reward.id}: expected augment, found ${card.kind}`)
+  }
+  return card
+}
+
+function toUiOwnedItem(reward: BuildRewardDefinition & { kind: 'item' }): ItemCard {
+  const card = toUiRewardCard(reward)
+  if (card.kind !== 'item') {
+    throw new Error(`Reward kind mismatch for ${reward.id}: expected item, found ${card.kind}`)
+  }
+  return card
 }
 
 export function toUiSlotResult(result: CombatSlotResult, preview: CombatPreview | null = null): SlotResult {
@@ -182,9 +199,17 @@ export function toUiSynergyProgress(synergy: SynergyDefinition, progress?: CoreS
   }
 }
 
-function getRequiredReward(id: string): BuildRewardDefinition {
+function getRequiredReward<K extends RewardKind>(
+  id: string,
+  expectedKind: K,
+): BuildRewardDefinition & { kind: K }
+function getRequiredReward(id: string): BuildRewardDefinition
+function getRequiredReward(id: string, expectedKind?: RewardKind): BuildRewardDefinition {
   const reward = MVP_BUILD_CATALOG.rewards.find((candidate) => candidate.id === id)
   if (!reward) throw new Error(`Missing MVP reward definition: ${id}`)
+  if (expectedKind && reward.kind !== expectedKind) {
+    throw new Error(`Reward kind mismatch for ${id}: expected ${expectedKind}, found ${reward.kind}`)
+  }
   return reward
 }
 

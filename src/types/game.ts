@@ -43,9 +43,8 @@ export type SynergyTag =
   | 'RESOURCE'
   | 'LIMIT';
 
-export interface AugmentItem {
+interface RewardCardBase {
   id: string;
-  kind: 'augment' | 'item';
   name: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'CURSED' | 'LEGENDARY';
   tags: SynergyTag[];
@@ -54,6 +53,16 @@ export interface AugmentItem {
   imgUrl?: string;
   effectValue: string;
 }
+
+export interface AugmentCard extends RewardCardBase {
+  kind: 'augment';
+}
+
+export interface ItemCard extends RewardCardBase {
+  kind: 'item';
+}
+
+export type RewardCard = AugmentCard | ItemCard;
 
 export interface SynergyProgress {
   synergyId: string;
@@ -67,8 +76,8 @@ export interface SynergyProgress {
 }
 
 export interface BuildState {
-  augments: AugmentItem[];
-  items: string[];
+  augments: AugmentCard[];
+  items: ItemCard[];
   activeSynergies: string[];
   synergyProgress: SynergyProgress[];
 }
@@ -191,10 +200,10 @@ export interface GameState {
   isSpinning: boolean;
   
   // Augment Slot Machine Presentation State (Reward reveal)
-  rewardCandidates: AugmentItem[];
+  rewardCandidates: RewardCard[];
   augSlotPresentation: {
     reels: [string, string, string];
-    targetAugment: AugmentItem | null;
+    targetAugment: RewardCard | null;
     isRevealed: boolean;
   } | null;
 

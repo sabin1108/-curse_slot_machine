@@ -1,4 +1,4 @@
-import { ReelSymbol, AugmentItem, SynergyProgress, EnemyState, ShowcaseStep } from '../types/game';
+import { ReelSymbol, RewardCard, SynergyProgress, EnemyState, ShowcaseStep } from '../types/game';
 import { getAsset } from '../assets/assetHelper';
 import { DEFAULT_BUILD_CATALOG } from './build/BuildCatalog';
 
@@ -187,7 +187,7 @@ export const MODIFIER_SYMBOLS: ReelSymbol[] = [
   }
 ];
 
-export const ALL_AUGMENTS: AugmentItem[] = [
+export const ALL_REWARD_CARDS: RewardCard[] = [
   {
     id: 'aug_fire_sword',
     kind: 'augment',
@@ -232,11 +232,11 @@ export const ALL_AUGMENTS: AugmentItem[] = [
     imgUrl: getAsset('orb_purple'),
     effectValue: 'NEW'
   },
-  ...DEFAULT_BUILD_CATALOG.rewards.map((reward): AugmentItem => ({
+  ...DEFAULT_BUILD_CATALOG.rewards.map((reward): RewardCard => ({
     id: reward.id,
     kind: reward.kind,
     name: reward.name,
-    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    rarity: reward.rarity.toUpperCase() as RewardCard['rarity'],
     tags: reward.tags,
     description: reward.description,
     icon: reward.kind === 'item' ? 'ITEM' : 'AUG',

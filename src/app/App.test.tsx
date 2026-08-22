@@ -30,6 +30,30 @@ describe('App', () => {
     expect(screen.getByText(/START GAME/i)).toBeInTheDocument()
   })
 
+  it('offers showcase reward choices as named buttons with selected state while hiding overlay controls', () => {
+    const { container } = render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: /showcase mode/i }))
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }))
+    fireEvent.click(screen.getByRole('button', { name: /NEXT STEP/i }))
+
+    const rewardChoice = container.querySelector<HTMLButtonElement>('button[data-reward-id]')
+    const rewardChoiceName = rewardChoice?.getAttribute('aria-label') ?? ''
+
+    expect(container.querySelector('.reward-modal-backdrop')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /NEXT STEP/i })).not.toBeInTheDocument()
+    expect(rewardChoice).not.toBeNull()
+    if (!rewardChoice) throw new Error('Expected a reward choice button')
+    expect(rewardChoiceName).toMatch(/선택/)
+    expect(screen.getByRole('button', { name: rewardChoiceName })).toBe(rewardChoice)
+    expect(rewardChoice).toHaveAttribute('type', 'button')
+    expect(rewardChoice).toHaveAttribute('aria-pressed', 'true')
+
+    rewardChoice?.focus()
+
+    expect(rewardChoice).toHaveFocus()
+  })
+
   it('accepts the next spin immediately after confirming the previous result', () => {
     const { container } = render(<App />)
     fireEvent.change(screen.getByLabelText('Run seed'), { target: { value: 'origin-demo-334' } })
