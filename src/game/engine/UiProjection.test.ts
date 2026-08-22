@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { toUiEnemyIntent, toUiReward } from './UiProjection'
+import { GameEngine } from './GameEngine'
+import { createInitialGameState } from './GameState'
+import { projectUiGameState, toUiEnemyIntent, toUiReward, type UiFeedback } from './UiProjection'
 
 const emptyScore = {
   immediatePower: 0,
@@ -9,6 +11,18 @@ const emptyScore = {
   futureValue: 0,
   contentValue: 0,
   total: 0,
+}
+
+const emptyFeedback: UiFeedback = {
+  combatLogs: [],
+  lastDamagePop: null,
+  enemyDamagePops: [],
+  isEnemyAttacking: false,
+  showcase: {
+    active: false,
+    currentStep: 0,
+    steps: [],
+  },
 }
 
 describe('UiProjection enemy intent', () => {
@@ -45,6 +59,44 @@ describe('UiProjection enemy intent', () => {
 })
 
 describe('UiProjection reward cards', () => {
+  it('projects owned augments and items as separate UI card arrays', () => {
+    const engine = new GameEngine('owned-card-projection', {
+      startingRewards: [
+        { kind: 'augment', id: 'combo_starter' },
+        { kind: 'item', id: 'multi_hit_charm' },
+      ],
+    })
+
+    const projected = projectUiGameState(engine.getState(), emptyFeedback)
+
+    expect(projected.build.augments).toEqual([
+      expect.objectContaining({
+        id: 'combo_starter',
+        kind: 'augment',
+        icon: 'AUG',
+      }),
+    ])
+    expect(projected.build.items).toEqual([
+      expect.objectContaining({
+        id: 'multi_hit_charm',
+        kind: 'item',
+        icon: 'ITEM',
+      }),
+    ])
+  })
+
+  it('rejects owned reward IDs stored under the wrong core kind', () => {
+    const state = createInitialGameState('wrong-owned-kind')
+    state.build = {
+      ...state.build,
+      augments: ['multi_hit_charm'],
+    }
+
+    expect(() => projectUiGameState(state, emptyFeedback)).toThrow(
+      'Reward kind mismatch for multi_hit_charm: expected augment, found item',
+    )
+  })
+
   it('projects items with explicit item kind and item label fields', () => {
     expect(toUiReward({
       id: 'multi_hit_charm',

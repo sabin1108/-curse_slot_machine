@@ -458,6 +458,15 @@ html, body {
   border: 1px solid transparent;
 }
 
+.aug-row-augment {
+  border-color: rgba(127, 216, 255, 0.2);
+}
+
+.aug-row-item {
+  border-color: rgba(255, 183, 3, 0.25);
+  background: rgba(255, 183, 3, 0.07);
+}
+
 .aug-row img {
   width: 24px;
   height: 24px;
@@ -483,10 +492,21 @@ html, body {
   white-space: nowrap;
 }
 
+.aug-kind {
+  flex: 0 0 auto;
+  color: #ffb703;
+  font-size: 9px;
+  font-weight: 800;
+}
+
 .aug-val {
   color: #7fd8ff;
   font-size: 12px;
   font-weight: bold;
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .synergy-box {

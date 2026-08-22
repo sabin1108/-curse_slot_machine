@@ -6,16 +6,18 @@ interface AugmentSidePanelProps {
 }
 
 export const AugmentSidePanel: React.FC<AugmentSidePanelProps> = ({ build }) => {
+  const ownedRewardCards = [...build.augments, ...build.items];
+
   return (
     <aside className="side-panel-container">
       <div className="side-panel-header">
-        <h3>보유 증강</h3>
-        <span className="count-badge">{build.augments.length}/12</span>
+        <h3>보유 증강/아이템</h3>
+        <span className="count-badge">{ownedRewardCards.length}/12</span>
       </div>
 
       <div className="augment-list">
-        {build.augments.map((aug) => (
-          <div key={aug.id} className={`aug-row rarity-${aug.rarity.toLowerCase()}`} title={aug.description}>
+        {ownedRewardCards.map((aug) => (
+          <div key={`${aug.kind}-${aug.id}`} className={`aug-row aug-row-${aug.kind} rarity-${aug.rarity.toLowerCase()}`} title={aug.description}>
             <span className="aug-icon">{aug.icon}</span>
             <div className="aug-details">
               <span className="aug-name">{aug.name}</span>

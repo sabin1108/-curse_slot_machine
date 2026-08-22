@@ -40,10 +40,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
   const hpPercent = Math.max(0, Math.min(100, Math.round((state.player.hp / state.player.maxHp) * 100)));
   const mobHpPercent = Math.max(0, Math.min(100, Math.round((state.enemy.hp / state.enemy.maxHp) * 100)));
   const mobShieldPercent = Math.max(0, Math.min(100, Math.round((state.enemy.shield / state.enemy.maxHp) * 100)));
-  const buildRewardIds = new Set([
-    ...state.build.augments.map((augment) => augment.id),
-    ...state.build.items,
-  ]);
+  const ownedRewardCards = [...state.build.augments, ...state.build.items];
+  const buildRewardIds = new Set(ownedRewardCards.map((reward) => reward.id));
   const currentMultiplierMax = Math.max(
     state.build.activeSynergies.includes('한계 돌파') || (buildRewardIds.has('limit_core') && buildRewardIds.has('limit_breaker')) ? 10 : 3,
     buildRewardIds.has('limit_breaker') ? 5 : 3,
@@ -194,17 +192,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
           <div className="side-panel">
             <div className="side-panel-title">
               <span>보유 증강/아이템</span>
-              <span>{state.build.augments.length}/12</span>
+              <span>{ownedRewardCards.length}/12</span>
             </div>
 
             <div className="aug-list">
-              {state.build.augments.map((aug) => (
-                <div key={aug.id} className="aug-row">
+              {ownedRewardCards.map((aug) => (
+                <div key={`${aug.kind}-${aug.id}`} className={`aug-row aug-row-${aug.kind}`}>
                   <img src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
                   <span className="aug-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
                     {aug.name}
                     <small>{aug.tags.map(getTagLabel).join(' / ')}</small>
                   </span>
+                  <span className="aug-kind">{aug.kind === 'item' ? 'ITEM' : 'AUG'}</span>
                   <span className="aug-val">{aug.effectValue}</span>
                 </div>
               ))}
