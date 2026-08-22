@@ -10,7 +10,8 @@ Continue from `feature/reward-effect-condition-resolver` in `C:\Users\00\Documen
 - Branch: `feature/reward-effect-condition-resolver`
 - Base branch: `main`
 - Baseline before this resolver boundary: `ad33fcd`
-- Branch status before this cleanup: branched locally from merged `main`
+- Branch status: pushed with draft PR #33 open
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/33
 - Merge policy: do not merge or change PR state without explicit user approval
 
 ## Source Documents
@@ -61,6 +62,7 @@ Continue from `feature/reward-effect-condition-resolver` in `C:\Users\00\Documen
   - `npm.cmd run build`: passed.
   - `npm.cmd run test:e2e`: passed with 4 Chromium tests.
   - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/33.
 
 ## Current Branch: Effect Resolver Boundary
 

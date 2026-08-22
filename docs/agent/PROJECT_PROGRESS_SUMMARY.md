@@ -9,6 +9,7 @@ Last updated: 2026-08-22
 - Current branch: `feature/reward-effect-condition-resolver`
 - Current branch base: `main`
 - Baseline before this resolver boundary: `ad33fcd`
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/33
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
 ## Merged Stack
@@ -200,5 +201,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Push `feature/reward-effect-condition-resolver` and open its draft PR.
+- Review draft PR #33 and merge only after explicit user approval.
 - Do not merge or change PR state without explicit user approval.

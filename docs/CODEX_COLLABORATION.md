@@ -765,6 +765,7 @@
   - `npm.cmd run build`: passed.
   - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
   - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/33
 - Merge policy: no merge without explicit user approval.
 
 ## 2026-08-20 - Offline Font Fallback
