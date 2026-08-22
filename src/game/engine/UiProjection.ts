@@ -1,5 +1,5 @@
 import { getAsset } from '../../assets/assetHelper'
-import type { AugmentCard, AugmentItem, GameScreen, GameState as UiGameState, ItemCard, ReelSymbol, SlotResult, SynergyProgress as UiSynergyProgress } from '../../types/game'
+import type { AugmentCard, GameScreen, GameState as UiGameState, ItemCard, ReelSymbol, RewardCard, SlotResult, SynergyProgress as UiSynergyProgress } from '../../types/game'
 import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 import type { BuildRewardDefinition, RewardKind, SynergyDefinition, SynergyProgress as CoreSynergyProgress } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
@@ -132,12 +132,12 @@ export function toUiEnemyIntent(intent: CoreEnemyIntent): UiGameState['enemy']['
   }
 }
 
-export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
+export function toUiRewardCard(reward: BuildRewardDefinition): RewardCard {
   return {
     id: reward.id,
     kind: reward.kind,
     name: reward.name,
-    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    rarity: reward.rarity.toUpperCase() as RewardCard['rarity'],
     tags: reward.tags,
     description: reward.description,
     icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
@@ -146,12 +146,12 @@ export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   }
 }
 
-export function toUiReward(reward: RewardOption): AugmentItem {
-  return toUiAugment(reward)
+export function toUiReward(reward: RewardOption): RewardCard {
+  return toUiRewardCard(reward)
 }
 
 function toUiOwnedAugment(reward: BuildRewardDefinition & { kind: 'augment' }): AugmentCard {
-  const card = toUiAugment(reward)
+  const card = toUiRewardCard(reward)
   if (card.kind !== 'augment') {
     throw new Error(`Reward kind mismatch for ${reward.id}: expected augment, found ${card.kind}`)
   }
@@ -159,7 +159,7 @@ function toUiOwnedAugment(reward: BuildRewardDefinition & { kind: 'augment' }): 
 }
 
 function toUiOwnedItem(reward: BuildRewardDefinition & { kind: 'item' }): ItemCard {
-  const card = toUiAugment(reward)
+  const card = toUiRewardCard(reward)
   if (card.kind !== 'item') {
     throw new Error(`Reward kind mismatch for ${reward.id}: expected item, found ${card.kind}`)
   }

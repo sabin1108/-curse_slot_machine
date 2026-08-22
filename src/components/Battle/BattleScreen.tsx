@@ -195,16 +195,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               <span>{ownedRewardCards.length}/12</span>
             </div>
 
-            <div className="aug-list">
+            <div className="reward-card-list">
               {ownedRewardCards.map((aug) => (
-                <div key={`${aug.kind}-${aug.id}`} className={`aug-row aug-row-${aug.kind}`}>
+                <div key={`${aug.kind}-${aug.id}`} className={`reward-card-row reward-card-row-${aug.kind}`}>
                   <img src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
-                  <span className="aug-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
+                  <span className="reward-card-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
                     {aug.name}
                     <small>{aug.tags.map(getTagLabel).join(' / ')}</small>
                   </span>
-                  <span className="aug-kind">{aug.kind === 'item' ? 'ITEM' : 'AUG'}</span>
-                  <span className="aug-val">{aug.effectValue}</span>
+                  <span className="reward-card-kind">{aug.kind === 'item' ? 'ITEM' : 'AUG'}</span>
+                  <span className="reward-card-value">{aug.effectValue}</span>
                 </div>
               ))}
             </div>

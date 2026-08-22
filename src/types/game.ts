@@ -62,7 +62,7 @@ export interface ItemCard extends RewardCardBase {
   kind: 'item';
 }
 
-export type AugmentItem = AugmentCard | ItemCard;
+export type RewardCard = AugmentCard | ItemCard;
 
 export interface SynergyProgress {
   synergyId: string;
@@ -200,10 +200,10 @@ export interface GameState {
   isSpinning: boolean;
   
   // Augment Slot Machine Presentation State (Reward reveal)
-  rewardCandidates: AugmentItem[];
+  rewardCandidates: RewardCard[];
   augSlotPresentation: {
     reels: [string, string, string];
-    targetAugment: AugmentItem | null;
+    targetAugment: RewardCard | null;
     isRevealed: boolean;
   } | null;
 

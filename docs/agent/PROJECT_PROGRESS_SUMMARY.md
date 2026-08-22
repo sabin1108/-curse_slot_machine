@@ -6,11 +6,12 @@ Last updated: 2026-08-22
 
 - GitHub: `https://github.com/sabin1108/-curse_slot_machine`
 - Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
-- Current branch: `feature/reward-card-inventory-projection`
-- Baseline before this continuation: `c9ee9c4`
+- Current branch: `feature/reward-card-type-cleanup`
+- Current branch base: `feature/reward-card-inventory-projection`
+- Baseline before this stacked cleanup: `9957510`
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
-## Current Branch
+## Parent Branch
 
 `feature/enemy-defense-intent` continues from the playable canonical UI integration line.
 
@@ -51,6 +52,32 @@ npm run test:e2e   # passed, 3 Chromium tests
 
 Review feedback and remaining risks are recorded in `docs/agent/SESSION_HANDOFF.md`.
 
+## Current Branch
+
+`feature/reward-card-type-cleanup` is stacked on `feature/reward-card-inventory-projection`.
+
+Completed in this slice:
+
+1. Renamed the shared UI card type from `AugmentItem` to `RewardCard`.
+2. Kept `AugmentCard` and `ItemCard` as discriminated UI subtypes for owned inventory arrays.
+3. Renamed `toUiAugment` to `toUiRewardCard` while keeping `toUiReward` as the reward-option adapter.
+4. Renamed battle inventory row/list/value CSS classes from augment-specific names to `reward-card-*`.
+5. Added direct coverage for `toUiReward`, `toUiRewardCard`, and neutral battle inventory selectors.
+
+Verification for this cleanup branch:
+
+```powershell
+npm run typecheck  # passed
+npm run test:run   # passed, 20 files / 106 tests
+npm run build      # passed
+npm run test:e2e   # passed, 3 Chromium tests
+```
+
+Review status for this cleanup branch:
+
+- Code-review lane: initial `REQUEST CHANGES`, re-review `APPROVE`.
+- Architecture lane: `CLEAR`.
+
 ## Current Stacked Branch
 
 `feature/reward-card-inventory-projection` is stacked on `feature/enemy-defense-intent`.
@@ -79,6 +106,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Decide whether to rename the temporary `AugmentItem` UI type to a neutral reward-card type.
-- Consider renaming `.aug-*` CSS and component naming to neutral reward-card terminology in a later cleanup.
+- Complete review and verification for the stacked `feature/reward-card-type-cleanup` branch.
 - Do not merge or change PR state without explicit user approval.

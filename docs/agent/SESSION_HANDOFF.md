@@ -2,14 +2,15 @@
 
 ## Current Goal
 
-Continue from `feature/enemy-defense-intent` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch is the source of truth. The earlier local-source sync attempt was discarded before any push.
+Continue from the stacked branch `feature/reward-card-type-cleanup` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain is the source of truth. The earlier local-source sync attempt was discarded before any push.
 
 ## Current Branch
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
-- Branch: `feature/enemy-defense-intent`
-- Baseline before this continuation: `c9ee9c4`
-- Branch status before this continuation: clean and synchronized with `origin/feature/enemy-defense-intent`
+- Branch: `feature/reward-card-type-cleanup`
+- Base branch: `feature/reward-card-inventory-projection`
+- Baseline before this cleanup: `9957510`
+- Branch status before this cleanup: branched locally from `feature/reward-card-inventory-projection`
 - Merge policy: do not merge or change PR state without explicit user approval
 
 ## Source Documents
@@ -19,6 +20,8 @@ Continue from `feature/enemy-defense-intent` in `C:\Users\00\Documents\Codex\cur
 - `docs/design/PLANNING_SUMMARY.md`
 - `docs/superpowers/specs/2026-08-22-enemy-intent-patterns-item-projection-design.md`
 - `docs/superpowers/plans/2026-08-22-enemy-intent-patterns-item-projection.md`
+- `docs/superpowers/specs/2026-08-22-reward-card-type-cleanup-design.md`
+- `docs/superpowers/plans/2026-08-22-reward-card-type-cleanup.md`
 
 ## Architecture Rules To Preserve
 
@@ -115,5 +118,14 @@ Do not claim completion unless the command output was checked in the current wor
 
 ## Remaining Risks
 
-- The UI card type is still named `AugmentItem` and several CSS classes are still `.aug-*`; this is naming debt only after the projection split.
+- `feature/reward-card-type-cleanup` replaces `AugmentItem` and battle inventory `.aug-*` classes with neutral reward-card terminology.
+- Full verification on 2026-08-22 for the cleanup branch:
+  - `npm run typecheck`: passed.
+  - `npm run test:run`: passed with 20 files and 106 tests.
+  - `npm run build`: passed.
+  - `npm run test:e2e`: passed with 3 Chromium smoke tests.
+- Review:
+  - Initial code-review lane returned `REQUEST CHANGES` for current-branch docs, RewardModal local variable naming, and missing direct `toUiReward` coverage.
+  - Follow-up fixed all three; code-review re-review returned `APPROVE`.
+  - Architecture review returned `CLEAR`.
 - The current MVP enemy patterns preserve low-defense demo balance; later balance changes should rerun origin demo traces and e2e smoke tests.

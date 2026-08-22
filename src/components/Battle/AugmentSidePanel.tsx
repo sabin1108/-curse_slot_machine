@@ -15,15 +15,15 @@ export const AugmentSidePanel: React.FC<AugmentSidePanelProps> = ({ build }) => 
         <span className="count-badge">{ownedRewardCards.length}/12</span>
       </div>
 
-      <div className="augment-list">
+      <div className="reward-card-list">
         {ownedRewardCards.map((aug) => (
-          <div key={`${aug.kind}-${aug.id}`} className={`aug-row aug-row-${aug.kind} rarity-${aug.rarity.toLowerCase()}`} title={aug.description}>
-            <span className="aug-icon">{aug.icon}</span>
-            <div className="aug-details">
-              <span className="aug-name">{aug.name}</span>
-              <span className="aug-tags">{aug.tags.join(' · ')}</span>
+          <div key={`${aug.kind}-${aug.id}`} className={`reward-card-row reward-card-row-${aug.kind} rarity-${aug.rarity.toLowerCase()}`} title={aug.description}>
+            <span className="reward-card-icon">{aug.icon}</span>
+            <div className="reward-card-details">
+              <span className="reward-card-name">{aug.name}</span>
+              <span className="reward-card-tags">{aug.tags.join(' · ')}</span>
             </div>
-            <span className="aug-val">{aug.effectValue}</span>
+            <span className="reward-card-value">{aug.effectValue}</span>
           </div>
         ))}
       </div>

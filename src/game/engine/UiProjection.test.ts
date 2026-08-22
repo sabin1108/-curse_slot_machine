@@ -2,16 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { GameEngine } from './GameEngine'
 import { createInitialGameState } from './GameState'
-import { projectUiGameState, toUiEnemyIntent, toUiReward, type UiFeedback } from './UiProjection'
-
-const emptyScore = {
-  immediatePower: 0,
-  synergyValue: 0,
-  completionValue: 0,
-  futureValue: 0,
-  contentValue: 0,
-  total: 0,
-}
+import { projectUiGameState, toUiEnemyIntent, toUiReward, toUiRewardCard, type UiFeedback } from './UiProjection'
 
 const emptyFeedback: UiFeedback = {
   combatLogs: [],
@@ -23,6 +14,15 @@ const emptyFeedback: UiFeedback = {
     currentStep: 0,
     steps: [],
   },
+}
+
+const emptyScore = {
+  immediatePower: 0,
+  synergyValue: 0,
+  completionValue: 0,
+  futureValue: 0,
+  contentValue: 0,
+  total: 0,
 }
 
 describe('UiProjection enemy intent', () => {
@@ -98,7 +98,7 @@ describe('UiProjection reward cards', () => {
   })
 
   it('projects items with explicit item kind and item label fields', () => {
-    expect(toUiReward({
+    expect(toUiRewardCard({
       id: 'multi_hit_charm',
       kind: 'item',
       name: 'Multi-Hit Charm',
@@ -106,7 +106,6 @@ describe('UiProjection reward cards', () => {
       tags: ['MULTI_HIT'],
       description: 'Bullets add a 35% extra hit.',
       effectLabel: 'Bullets add a 35% extra hit.',
-      score: emptyScore,
     })).toMatchObject({
       id: 'multi_hit_charm',
       kind: 'item',
@@ -116,7 +115,7 @@ describe('UiProjection reward cards', () => {
   })
 
   it('projects augments with explicit augment kind', () => {
-    expect(toUiReward({
+    expect(toUiRewardCard({
       id: 'combo_starter',
       kind: 'augment',
       name: 'Combo Starter',
@@ -124,11 +123,28 @@ describe('UiProjection reward cards', () => {
       tags: ['COMBO'],
       description: 'Locked bullets apply Primer.',
       effectLabel: 'Locked bullets apply Primer.',
-      score: emptyScore,
     })).toMatchObject({
       id: 'combo_starter',
       kind: 'augment',
       icon: 'AUG',
+    })
+  })
+
+  it('keeps the reward-option adapter on the neutral reward card shape', () => {
+    expect(toUiReward({
+      id: 'black_market_stamp',
+      kind: 'item',
+      name: 'Black-Market Stamp',
+      rarity: 'rare',
+      tags: ['CURSE', 'RESOURCE'],
+      description: 'Purify arms a 25% discount and purchase cleanse.',
+      effectLabel: 'Purify arms a 25% discount and purchase cleanse.',
+      score: emptyScore,
+    })).toMatchObject({
+      id: 'black_market_stamp',
+      kind: 'item',
+      icon: 'ITEM',
+      rarity: 'RARE',
     })
   })
 })

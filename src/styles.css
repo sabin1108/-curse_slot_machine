@@ -442,13 +442,13 @@ html, body {
   padding-bottom: 6px;
 }
 
-.aug-list {
+.reward-card-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.aug-row {
+.reward-card-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -458,22 +458,22 @@ html, body {
   border: 1px solid transparent;
 }
 
-.aug-row-augment {
+.reward-card-row-augment {
   border-color: rgba(127, 216, 255, 0.2);
 }
 
-.aug-row-item {
+.reward-card-row-item {
   border-color: rgba(255, 183, 3, 0.25);
   background: rgba(255, 183, 3, 0.07);
 }
 
-.aug-row img {
+.reward-card-row img {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
 }
 
-.aug-name {
+.reward-card-name {
   flex: 1;
   color: #dcdcdc;
   font-size: 12px;
@@ -481,7 +481,7 @@ html, body {
   min-width: 0;
 }
 
-.aug-name small {
+.reward-card-name small {
   display: block;
   margin-top: 2px;
   color: #7fd8ff;
@@ -492,14 +492,14 @@ html, body {
   white-space: nowrap;
 }
 
-.aug-kind {
+.reward-card-kind {
   flex: 0 0 auto;
   color: #ffb703;
   font-size: 9px;
   font-weight: 800;
 }
 
-.aug-val {
+.reward-card-value {
   color: #7fd8ff;
   font-size: 12px;
   font-weight: bold;
