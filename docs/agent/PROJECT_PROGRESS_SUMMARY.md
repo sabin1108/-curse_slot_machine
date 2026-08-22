@@ -6,10 +6,20 @@ Last updated: 2026-08-22
 
 - GitHub: `https://github.com/sabin1108/-curse_slot_machine`
 - Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
-- Current branch: `feature/reward-modal-accessibility-coverage`
-- Current branch base: `feature/reward-inventory-naming-cleanup`
-- Baseline before this stacked cleanup: `a3b4a78`
+- Current branch: `feature/effect-resolver-boundary`
+- Current branch base: `main`
+- Baseline before this resolver boundary: `16e58cb`
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
+
+## Merged Stack
+
+The stacked PR chain was merged on 2026-08-22 after explicit user approval:
+
+- PR #31 -> PR #30 branch: `f65e213`
+- PR #30 -> PR #29 branch: `36377db`
+- PR #29 -> PR #28 branch: `652e407`
+- PR #28 -> PR #27 branch: `7d57de0`
+- PR #27 -> `main`: `16e58cb`
 
 ## Parent Branch
 
@@ -161,5 +171,6 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Open a draft PR for the stacked `feature/reward-modal-accessibility-coverage` branch.
+- Open a draft PR for `feature/effect-resolver-boundary`, which extracts combat condition matching into `src/game/effects/EffectResolver.ts`.
+- Independent code review returned `APPROVE`; architecture re-review returned `CLEAR`.
 - Do not merge or change PR state without explicit user approval.

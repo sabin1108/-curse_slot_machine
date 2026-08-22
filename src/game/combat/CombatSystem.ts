@@ -14,7 +14,8 @@ import type {
   CombatStateOverrides,
   CombatStatusStack,
 } from './CombatTypes'
-import type { CombatStatusId, EffectCondition, EffectDefinition } from '../effects/EffectTypes'
+import type { CombatStatusId, EffectDefinition } from '../effects/EffectTypes'
+import { effectConditionsMatch } from '../effects/EffectResolver'
 
 const COMBAT_BASE_VALUES = {
   bulletDamage: 6,
@@ -201,7 +202,7 @@ export function resolveCombatSlot(
   if (effectiveSlotResult.action === 'bullet') {
     const extraHitAmounts = getExtraHitAmounts(amount, effectiveSlotResult, state, effects, context)
     for (const effect of effects.filter((candidate) => candidate.type === 'combat.status.consume_extra_hit')) {
-      if (!conditionsMatch(effect.conditions ?? [], effectiveSlotResult, state, context)) continue
+      if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
       const targetStatuses = statuses[effect.params.target]
       if (getStatusStacks(targetStatuses, effect.params.status) <= 0) continue
       consumeStatus(targetStatuses, effect.params.status, 1)
@@ -287,7 +288,11 @@ export function resolveCombatSlot(
   }
 
   if (fullBlock && enemy.health > 0) {
-    const retaliation = effects.find((effect) => effect.type === 'combat.full_block.retaliate')
+    const retaliation = effects
+      .filter((effect): effect is Extract<EffectDefinition, { type: 'combat.full_block.retaliate' }> =>
+        effect.type === 'combat.full_block.retaliate',
+      )
+      .find((effect) => effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context)))
     if (retaliation) {
       const resolved = applyDamage(enemy, retaliation.params.amount)
       enemy = resolved.actor
@@ -296,6 +301,7 @@ export function resolveCombatSlot(
         blocked: resolved.blocked, healthLost: resolved.healthLost,
       })
       for (const effect of effects.filter((candidate) => candidate.type === 'combat.retaliation.status_apply')) {
+        if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
         addStatus(statuses.enemy, effect.params.status, effect.params.stacks)
         events.push({ type: 'STATUS_APPLIED', target: 'enemy', status: effect.params.status, stacks: effect.params.stacks })
       }
@@ -303,12 +309,13 @@ export function resolveCombatSlot(
   }
 
   for (const effect of effects.filter((candidate) => candidate.type === 'combat.status.apply')) {
-    if (!conditionsMatch(effect.conditions ?? [], effectiveSlotResult, state, context)) continue
+    if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
     addStatus(statuses[effect.params.target], effect.params.status, effect.params.stacks)
     events.push({ type: 'STATUS_APPLIED', target: effect.params.target, status: effect.params.status, stacks: effect.params.stacks })
   }
   if (extraHitOccurred) {
     for (const effect of effects.filter((candidate) => candidate.type === 'combat.extra_hit.status_apply')) {
+      if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
       addStatus(statuses[effect.params.target], effect.params.status, effect.params.stacks)
       events.push({ type: 'STATUS_APPLIED', target: effect.params.target, status: effect.params.status, stacks: effect.params.stacks })
     }
@@ -319,10 +326,18 @@ export function resolveCombatSlot(
     ? Math.max(0, baseCurseGain - 1)
     : baseCurseGain
   const guard = fullBlock
-    ? effects.find((effect) => effect.type === 'combat.full_block.curse_prevent' && !effectUses.includes(effect.id))
+    ? effects.find((effect) =>
+      effect.type === 'combat.full_block.curse_prevent'
+      && !effectUses.includes(effect.id)
+      && effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context)),
+    )
     : undefined
   const safety = (statusConsumed || blockDepleted)
-    ? effects.find((effect) => effect.type === 'combat.curse_gain.prevent_once' && !effectUses.includes(effect.id))
+    ? effects.find((effect) =>
+      effect.type === 'combat.curse_gain.prevent_once'
+      && !effectUses.includes(effect.id)
+      && effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context)),
+    )
     : undefined
   const prevention = guard ?? safety
   if (prevention && curseGain > 0) {
@@ -402,12 +417,12 @@ function getSlotAmount(
   const flatBonus = effects
     .filter((effect) => effect.type === 'combat.action_amount.add')
     .filter((effect) => effect.params.action === slotResult.action)
-    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state, context))
+    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
   const percentBonus = effects
     .filter((effect) => effect.type === 'combat.action_amount.add_pct')
     .filter((effect) => effect.params.action === slotResult.action)
-    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state, context))
+    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
     .reduce((sum, effect) => sum + effect.params.percent, 0)
 
   return Math.floor((base + flatBonus) * (1 + Math.min(200, percentBonus) / 100))
@@ -434,7 +449,7 @@ function getExtraHitAmounts(
 ): number[] {
   return effects
     .filter((effect) => effect.type === 'combat.bullet.extra_hit')
-    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state, context))
+    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
     .slice(0, 2)
     .map((effect) => Math.floor((amount * effect.params.percent) / 100))
     .filter((extraHitAmount) => extraHitAmount > 0)
@@ -448,46 +463,27 @@ function getCurseGain(
 ): number {
   const adjustment = effects
     .filter((effect) => effect.type === 'combat.curse_gain.add')
-    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state, context))
+    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
 
   return clamp(1 + adjustment, 0, 3)
 }
 
-function conditionsMatch(
-  conditions: EffectCondition[],
+function getResolverContext(
   slotResult: CombatSlotResult,
   state: CombatState,
   context: CombatEffectContext,
-): boolean {
-  return conditions.every((condition) => {
-    if (condition.type === 'slot.action_is') {
-      return slotResult.action === condition.params.action
-    }
-
-    if (condition.type === 'slot.target_is') {
-      return slotResult.target === condition.params.target
-    }
-
-    if (condition.type === 'slot.modifier_is') {
-      return slotResult.modifier === condition.params.modifier
-    }
-
-    if (condition.type === 'combat.curse_at_least') {
-      return state.curse.value >= condition.params.value
-    }
-
-    if (condition.type === 'combat.player_health_pct_at_most') {
-      return (state.player.health / state.player.maxHealth) * 100 <= condition.params.percent
-    }
-
-    if (condition.type === 'slot.locked_reels_at_least') {
-      const locks = context.lockedReels ?? {}
-      return [locks.action, locks.target, locks.modifier].filter(Boolean).length >= condition.params.count
-    }
-
-    return false
-  })
+): Parameters<typeof effectConditionsMatch>[1] {
+  return {
+    slotResult,
+    curseValue: state.curse.value,
+    playerHealthPct: (state.player.health / state.player.maxHealth) * 100,
+    lockedReelCount: [
+      context.lockedReels?.action,
+      context.lockedReels?.target,
+      context.lockedReels?.modifier,
+    ].filter(Boolean).length,
+  }
 }
 
 function applyModifierSteps(
@@ -508,7 +504,7 @@ function applyModifierSteps(
 
   for (const effect of effects.filter((candidate) => candidate.type === 'combat.modifier.step_up')) {
     const candidate = { ...slotResult, modifier }
-    if (modifier !== effect.params.from || !conditionsMatch(effect.conditions ?? [], candidate, state, context)) continue
+    if (modifier !== effect.params.from || !effectConditionsMatch(effect, getResolverContext(candidate, state, context))) continue
     modifier = effect.params.to
   }
 
