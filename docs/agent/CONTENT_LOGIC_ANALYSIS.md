@@ -74,7 +74,7 @@ What is still missing:
 - `BuildState` stores reward IDs, not resolved effect descriptors.
 - `CombatSystem.resolveCombatSlot` receives only `CombatState` and `CombatSlotResult`; it has no build/effect context.
 - `RewardSystem` scores tags and rarity, not actual effect impact.
-- The visible UI reward flow still uses legacy `ALL_AUGMENTS` and first-three reward selection.
+- The visible UI display catalog now uses neutral `ALL_REWARD_CARDS` naming; first-three reward selection remains legacy UI behavior.
 
 ## Specific Landmines
 

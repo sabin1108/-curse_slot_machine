@@ -1,11 +1,11 @@
 import React from 'react';
 import { BuildState } from '../../types/game';
 
-interface AugmentSidePanelProps {
+interface RewardInventorySidePanelProps {
   build: BuildState;
 }
 
-export const AugmentSidePanel: React.FC<AugmentSidePanelProps> = ({ build }) => {
+export const RewardInventorySidePanel: React.FC<RewardInventorySidePanelProps> = ({ build }) => {
   const ownedRewardCards = [...build.augments, ...build.items];
 
   return (
@@ -16,14 +16,14 @@ export const AugmentSidePanel: React.FC<AugmentSidePanelProps> = ({ build }) => 
       </div>
 
       <div className="reward-card-list">
-        {ownedRewardCards.map((aug) => (
-          <div key={`${aug.kind}-${aug.id}`} className={`reward-card-row reward-card-row-${aug.kind} rarity-${aug.rarity.toLowerCase()}`} title={aug.description}>
-            <span className="reward-card-icon">{aug.icon}</span>
+        {ownedRewardCards.map((rewardCard) => (
+          <div key={`${rewardCard.kind}-${rewardCard.id}`} className={`reward-card-row reward-card-row-${rewardCard.kind} rarity-${rewardCard.rarity.toLowerCase()}`} title={rewardCard.description}>
+            <span className="reward-card-icon">{rewardCard.icon}</span>
             <div className="reward-card-details">
-              <span className="reward-card-name">{aug.name}</span>
-              <span className="reward-card-tags">{aug.tags.join(' · ')}</span>
+              <span className="reward-card-name">{rewardCard.name}</span>
+              <span className="reward-card-tags">{rewardCard.tags.join(' · ')}</span>
             </div>
-            <span className="reward-card-value">{aug.effectValue}</span>
+            <span className="reward-card-value">{rewardCard.effectValue}</span>
           </div>
         ))}
       </div>

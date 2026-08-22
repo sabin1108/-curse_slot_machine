@@ -6,9 +6,9 @@ Last updated: 2026-08-22
 
 - GitHub: `https://github.com/sabin1108/-curse_slot_machine`
 - Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
-- Current branch: `feature/reward-card-type-cleanup`
-- Current branch base: `feature/reward-card-inventory-projection`
-- Baseline before this stacked cleanup: `9957510`
+- Current branch: `feature/reward-inventory-naming-cleanup`
+- Current branch base: `feature/reward-card-type-cleanup`
+- Baseline before this stacked cleanup: `e8adb7a`
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
 ## Parent Branch
@@ -52,7 +52,34 @@ npm run test:e2e   # passed, 3 Chromium tests
 
 Review feedback and remaining risks are recorded in `docs/agent/SESSION_HANDOFF.md`.
 
-## Current Branch
+## Current Branch: Reward Inventory Naming Cleanup
+
+`feature/reward-inventory-naming-cleanup` is stacked on `feature/reward-card-type-cleanup`.
+
+Completed in this slice:
+
+1. Renamed the legacy battle inventory side panel from `AugmentSidePanel` to `RewardInventorySidePanel`.
+2. Renamed the display reward catalog export from `ALL_AUGMENTS` to `ALL_REWARD_CARDS`.
+3. Updated battle inventory local reward-card variable names without changing rendered class names or gameplay behavior.
+4. Added direct catalog coverage that confirms the display reward catalog includes explicit augment and item card kinds.
+
+Verification for this cleanup branch:
+
+```powershell
+npm.cmd run test:run -- src/components/Battle/BattleScreen.test.tsx src/game/data.test.ts src/game/engine/UiProjection.test.ts  # passed, 3 files / 13 tests
+npm.cmd run typecheck  # passed
+npm.cmd run test:run   # passed, 21 files / 107 tests
+npm.cmd run build      # passed
+npm.cmd run test:e2e   # passed, 3 Chromium tests
+git diff --check        # passed
+```
+
+Review status for this cleanup branch:
+
+- Code-review lane: `COMMENT`; one low-severity progress-summary wording issue was fixed.
+- Architecture lane: `CLEAR`.
+
+## Parent Stacked Branch: Reward Card Type Cleanup
 
 `feature/reward-card-type-cleanup` is stacked on `feature/reward-card-inventory-projection`.
 
@@ -78,7 +105,7 @@ Review status for this cleanup branch:
 - Code-review lane: initial `REQUEST CHANGES`, re-review `APPROVE`.
 - Architecture lane: `CLEAR`.
 
-## Current Stacked Branch
+## Grandparent Stacked Branch: Reward Card Inventory Projection
 
 `feature/reward-card-inventory-projection` is stacked on `feature/enemy-defense-intent`.
 
@@ -106,5 +133,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Complete review and verification for the stacked `feature/reward-card-type-cleanup` branch.
+- Push and open a draft PR for the stacked `feature/reward-inventory-naming-cleanup` branch.
 - Do not merge or change PR state without explicit user approval.

@@ -2,15 +2,15 @@
 
 ## Current Goal
 
-Continue from the stacked branch `feature/reward-card-type-cleanup` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain is the source of truth. The earlier local-source sync attempt was discarded before any push.
+Continue from the stacked branch `feature/reward-inventory-naming-cleanup` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain is the source of truth. The earlier local-source sync attempt was discarded before any push.
 
 ## Current Branch
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
-- Branch: `feature/reward-card-type-cleanup`
-- Base branch: `feature/reward-card-inventory-projection`
-- Baseline before this cleanup: `9957510`
-- Branch status before this cleanup: branched locally from `feature/reward-card-inventory-projection`
+- Branch: `feature/reward-inventory-naming-cleanup`
+- Base branch: `feature/reward-card-type-cleanup`
+- Baseline before this cleanup: `e8adb7a`
+- Branch status before this cleanup: branched locally from `feature/reward-card-type-cleanup`
 - Merge policy: do not merge or change PR state without explicit user approval
 
 ## Source Documents
@@ -22,6 +22,8 @@ Continue from the stacked branch `feature/reward-card-type-cleanup` in `C:\Users
 - `docs/superpowers/plans/2026-08-22-enemy-intent-patterns-item-projection.md`
 - `docs/superpowers/specs/2026-08-22-reward-card-type-cleanup-design.md`
 - `docs/superpowers/plans/2026-08-22-reward-card-type-cleanup.md`
+- `docs/superpowers/specs/2026-08-22-reward-inventory-naming-cleanup-design.md`
+- `docs/superpowers/plans/2026-08-22-reward-inventory-naming-cleanup.md`
 
 ## Architecture Rules To Preserve
 
@@ -117,6 +119,23 @@ Do not claim completion unless the command output was checked in the current wor
   - Architecture re-review returned `CLEAR`.
 
 ## Remaining Risks
+
+- `feature/reward-inventory-naming-cleanup` removes the remaining stale augment-only display names after the `RewardCard` type cleanup.
+- `RewardInventorySidePanel` replaces the legacy `AugmentSidePanel` export and file name.
+- `ALL_REWARD_CARDS` replaces the legacy `ALL_AUGMENTS` display catalog export.
+- Targeted verification on 2026-08-22:
+  - `npm.cmd run test:run -- src/components/Battle/BattleScreen.test.tsx src/game/data.test.ts src/game/engine/UiProjection.test.ts`: passed with 3 files and 13 tests.
+  - `npm.cmd run typecheck`: passed.
+- Full verification on 2026-08-22:
+  - `npm.cmd run test:run`: passed with 21 files and 107 tests.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed with 3 Chromium smoke tests.
+  - `git diff --check`: passed.
+- Review:
+  - Code-review lane returned `COMMENT`; one low-severity progress-summary wording issue was fixed.
+  - Architecture lane returned `CLEAR`.
+
+## Parent Branch: Reward Card Type Cleanup
 
 - `feature/reward-card-type-cleanup` replaces `AugmentItem` and battle inventory `.aug-*` classes with neutral reward-card terminology.
 - Full verification on 2026-08-22 for the cleanup branch:

@@ -196,15 +196,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
             </div>
 
             <div className="reward-card-list">
-              {ownedRewardCards.map((aug) => (
-                <div key={`${aug.kind}-${aug.id}`} className={`reward-card-row reward-card-row-${aug.kind}`}>
-                  <img src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
-                  <span className="reward-card-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
-                    {aug.name}
-                    <small>{aug.tags.map(getTagLabel).join(' / ')}</small>
+              {ownedRewardCards.map((rewardCard) => (
+                <div key={`${rewardCard.kind}-${rewardCard.id}`} className={`reward-card-row reward-card-row-${rewardCard.kind}`}>
+                  <img src={rewardCard.imgUrl || getAsset('sword_gold')} alt={rewardCard.name} />
+                  <span className="reward-card-name" title={`${rewardCard.name} · ${rewardCard.tags.map(getTagLabel).join(' / ')}`}>
+                    {rewardCard.name}
+                    <small>{rewardCard.tags.map(getTagLabel).join(' / ')}</small>
                   </span>
-                  <span className="reward-card-kind">{aug.kind === 'item' ? 'ITEM' : 'AUG'}</span>
-                  <span className="reward-card-value">{aug.effectValue}</span>
+                  <span className="reward-card-kind">{rewardCard.kind === 'item' ? 'ITEM' : 'AUG'}</span>
+                  <span className="reward-card-value">{rewardCard.effectValue}</span>
                 </div>
               ))}
             </div>

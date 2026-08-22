@@ -187,7 +187,7 @@ export const MODIFIER_SYMBOLS: ReelSymbol[] = [
   }
 ];
 
-export const ALL_AUGMENTS: RewardCard[] = [
+export const ALL_REWARD_CARDS: RewardCard[] = [
   {
     id: 'aug_fire_sword',
     kind: 'augment',
