@@ -101,7 +101,8 @@ MVP 비목표는 backend, 계정, 결제, multiplayer, meta progression, branchi
 
 ## Open questions
 
-- [ ] After item-specific UI projection lands, decide whether the temporary `AugmentItem` UI type should be renamed to a neutral reward-card type.
+- [x] Rename the temporary `AugmentItem` UI type to neutral reward-card terminology after item-specific UI projection.
+- [x] Rename stale reward inventory display exports/components away from augment-only terminology.
 - [ ] 동시 사망 시 적 사망 우선 victory 계약을 유지할지 결정한다.
 - [ ] keyboard/screen-reader/browser/viewport 범위를 다음 milestone에 정한다.
 - [ ] 대표 seed 밖의 난이도 분포와 build 선택 다양성을 level-design review로 평가한다.

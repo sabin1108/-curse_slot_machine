@@ -13,7 +13,7 @@ import { RewardModal } from '../components/Reward/RewardModal'
 import { ShowcaseOverlay } from '../components/Showcase/ShowcaseOverlay'
 import { TitleScreen } from '../components/Title/TitleScreen'
 import { GameEngine } from '../game/engine/GameEngine'
-import { MVP_DEMO_SEED } from '../game/demo/MvpDemoTrace'
+import { MVP_DEMO_REWARD_SETUP_COMMANDS, MVP_DEMO_SEED } from '../game/demo/MvpDemoTrace'
 import type { GameCommand as CoreGameCommand } from '../game/engine/commands'
 import type { GameEvent } from '../game/engine/events'
 import { projectUiGameState, type UiFeedback } from '../game/engine/UiProjection'
@@ -28,6 +28,7 @@ const SHOWCASE_STEPS: ShowcaseStep[] = [
   { stepIndex: 3, title: '빌드 보상', instruction: '전투 보상으로 증강과 시너지를 완성합니다.', actionScript: 'reward', highlightMessage: '선택 가능한 보상만 엔진이 승인합니다.' },
   { stepIndex: 4, title: '15 스테이지', instruction: '고정 경로 끝에서 House Sovereign을 쓰러뜨립니다.', actionScript: 'boss', highlightMessage: 'Showcase는 normal run 계산을 우회하지 않습니다.' },
 ]
+const SHOWCASE_REWARD_STEP_INDEX = getShowcaseRewardStepIndex()
 
 type IntroScreen = Extract<GameScreen, 'TITLE' | 'PROLOGUE' | 'ORIGIN'> | null
 
@@ -36,6 +37,12 @@ function createFeedback(): UiFeedback {
     combatLogs: [], lastDamagePop: null, enemyDamagePops: [], isEnemyAttacking: false,
     showcase: { active: false, currentStep: 0, steps: SHOWCASE_STEPS },
   }
+}
+
+function getShowcaseRewardStepIndex(): number {
+  const rewardStepIndex = SHOWCASE_STEPS.findIndex((step) => step.actionScript === 'reward')
+  if (rewardStepIndex < 0) throw new Error('Showcase steps must include a reward action step')
+  return rewardStepIndex
 }
 
 export function App() {
@@ -72,6 +79,25 @@ export function App() {
     setFeedback((previous) => reduceFeedback(previous, events, feedbackId))
   }
 
+  const enterShowcaseRewardStep = (stepIndex: number) => {
+    const nextEngine = new GameEngine(DEFAULT_SEED)
+    const events: GameEvent[] = []
+    for (const command of MVP_DEMO_REWARD_SETUP_COMMANDS) {
+      events.push(...nextEngine.dispatch(command))
+    }
+    engineRef.current = nextEngine
+    setIntroScreen(null)
+    setCoreState(nextEngine.getState())
+    setFeedback((previous) => reduceFeedback({
+      ...previous,
+      showcase: {
+        ...previous.showcase,
+        active: true,
+        currentStep: stepIndex,
+      },
+    }, events, feedbackId))
+  }
+
   const handleDispatch = (command: GameCommand) => {
     soundManager.unlockAudio()
     if (command.type === 'START_RUN') {
@@ -89,11 +115,20 @@ export function App() {
       return
     }
     if (command.type === 'START_SHOWCASE') {
+      const nextEngine = new GameEngine(DEFAULT_SEED)
+      engineRef.current = nextEngine
+      setIntroScreen('TITLE')
+      setCoreState(nextEngine.getState())
       setFeedback((previous) => ({ ...previous, showcase: { ...previous.showcase, active: true, currentStep: 0 } }))
       return
     }
     if (command.type === 'NEXT_SHOWCASE_STEP') {
-      setFeedback((previous) => ({ ...previous, showcase: { ...previous.showcase, currentStep: Math.min(previous.showcase.currentStep + 1, previous.showcase.steps.length - 1) } }))
+      const nextStep = Math.min(gameState.showcase.currentStep + 1, gameState.showcase.steps.length - 1)
+      if (nextStep === SHOWCASE_REWARD_STEP_INDEX && gameState.screen !== 'REWARD') {
+        enterShowcaseRewardStep(nextStep)
+        return
+      }
+      setFeedback((previous) => ({ ...previous, showcase: { ...previous.showcase, currentStep: nextStep } }))
       return
     }
     if (command.type === 'SELECT_ORIGIN') {
@@ -124,7 +159,7 @@ export function App() {
         </div>
       </nav>
 
-      {gameState.showcase.active && <ShowcaseOverlay currentStepIndex={gameState.showcase.currentStep} steps={gameState.showcase.steps} onDispatch={handleDispatch} />}
+      {gameState.showcase.active && gameState.screen !== 'REWARD' && <ShowcaseOverlay currentStepIndex={gameState.showcase.currentStep} steps={gameState.showcase.steps} onDispatch={handleDispatch} />}
       <ScreenTransitionOverlay screen={gameState.screen}><div className="view-stage">
         {gameState.screen === 'TITLE' && <TitleScreen seed={seed} onSeedChange={setSeed} onDispatch={handleDispatch} onOpenCurseLog={() => setIsCurseLogOpen(true)} />}
         {gameState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}

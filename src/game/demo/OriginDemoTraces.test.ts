@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { GameEngine } from '../engine/GameEngine'
 import type { GameEvent } from '../engine/events'
 import type { OriginId } from '../engine/OriginCatalog'
+import { MVP_DEMO_REWARD_SETUP_COMMANDS } from './MvpDemoTrace'
 import { ORIGIN_DEMO_TRACES } from './OriginDemoTraces'
 
 describe('origin demo traces', () => {
@@ -22,6 +23,14 @@ describe('origin demo traces', () => {
       expect(first.events).toContainEqual(expect.objectContaining({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: 10 }))
     })
   }
+
+  it('exposes the MVP demo prefix that stops at the first reward choice', () => {
+    const firstRewardIndex = ORIGIN_DEMO_TRACES.GAMBLER.commands.findIndex((command) => command.type === 'CHOOSE_REWARD')
+
+    expect(firstRewardIndex).toBeGreaterThan(0)
+    expect(MVP_DEMO_REWARD_SETUP_COMMANDS).toEqual(ORIGIN_DEMO_TRACES.GAMBLER.commands.slice(0, firstRewardIndex))
+    expect(MVP_DEMO_REWARD_SETUP_COMMANDS.at(-1)?.type).toBe('CONFIRM_COMBAT_SLOT')
+  })
 })
 
 function replay(origin: OriginId) {
