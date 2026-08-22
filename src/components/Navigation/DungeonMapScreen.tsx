@@ -1,21 +1,18 @@
 import React, { useState } from 'react'
 import { getAsset } from '../../assets/assetHelper'
-import { MVP_ROUTE } from '../../game/run/RunSystem'
-import type { RunStageDefinition, RunStageType } from '../../game/run/RunTypes'
-import type { GameCommand } from '../../types/game'
+import type { GameCommand, MapNodeView, MapViewState, RouteNodeType } from '../../types/game'
 import { soundManager } from '../../utils/soundManager'
 
 interface DungeonMapScreenProps {
-  completedStageIds: number[]
-  currentStage: RunStageDefinition | null
+  map: MapViewState
   onDispatch: (command: GameCommand) => void
 }
 
-const LABELS: Record<RunStageType, string> = {
+const LABELS: Record<RouteNodeType, string> = {
   combat: '전투', elite: '정예', rest: '휴식', shop: '상점', event: '이벤트', gate: '관문', boss: '보스',
 }
 
-function getNodeIcon(type: RunStageType): string {
+function getNodeIcon(type: RouteNodeType): string {
   if (type === 'shop') return getAsset('dg_coin_anim_f0')
   if (type === 'rest') return getAsset('rest_campfire')
   if (type === 'event') return getAsset('dg_crate')
@@ -24,10 +21,10 @@ function getNodeIcon(type: RunStageType): string {
   return getAsset('skull_white')
 }
 
-export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({ completedStageIds, currentStage, onDispatch }) => {
-  const [hoveredStage, setHoveredStage] = useState<RunStageDefinition | null>(null)
-  const nextStage = MVP_ROUTE[completedStageIds.length] ?? null
-  const activeStage = currentStage ?? nextStage
+export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({ map, onDispatch }) => {
+  const [hoveredStage, setHoveredStage] = useState<MapNodeView | null>(null)
+  const activeStage = map.activeNode
+  const currentStage = map.currentNode
 
   const enterNextStage = () => {
     soundManager.playClick()
@@ -50,19 +47,19 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({ completedSta
 
       <div className="map-path-container route-15">
         <svg className="map-lines-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {MVP_ROUTE.slice(0, -1).map((stage, index) => {
-            const next = MVP_ROUTE[index + 1]
-            const cleared = completedStageIds.includes(stage.id) && completedStageIds.includes(next.id)
-            return <line key={`${stage.id}-${next.id}`} x1={5 + ((stage.id - 1) / 14) * 90} y1={50} x2={5 + ((next.id - 1) / 14) * 90} y2={50} stroke={cleared ? '#ffb703' : '#3a2a1b'} strokeWidth={cleared ? '1.8' : '0.7'} />
+          {map.nodes.slice(0, -1).map((stage, index) => {
+            const next = map.nodes[index + 1]
+            const cleared = stage.status === 'completed' && next.status === 'completed'
+            return <line key={`${stage.id}-${next.id}`} x1={stage.positionPct} y1={50} x2={next.positionPct} y2={50} stroke={cleared ? '#ffb703' : '#3a2a1b'} strokeWidth={cleared ? '1.8' : '0.7'} />
           })}
         </svg>
 
-        {MVP_ROUTE.map((stage) => {
-          const completed = completedStageIds.includes(stage.id)
-          const available = !currentStage && nextStage?.id === stage.id
-          const current = currentStage?.id === stage.id
+        {map.nodes.map((stage) => {
+          const completed = stage.status === 'completed'
+          const available = stage.status === 'available'
+          const current = stage.status === 'current'
           return (
-            <button key={stage.id} className={`map-node-card ${completed ? 'cleared' : ''} ${current ? 'current' : ''} ${available ? 'avail' : 'locked'} type-${stage.type}`} style={{ left: `${5 + ((stage.id - 1) / 14) * 90}%`, top: '50%' }} onMouseEnter={() => setHoveredStage(stage)} onMouseLeave={() => setHoveredStage(null)} onClick={() => available && enterNextStage()} disabled={!available} type="button" aria-label={`Stage ${stage.id} ${LABELS[stage.type]}`}>
+            <button key={stage.id} className={`map-node-card ${completed ? 'cleared' : ''} ${current ? 'current' : ''} ${available ? 'avail' : 'locked'} type-${stage.type}`} style={{ left: `${stage.positionPct}%`, top: '50%' }} onMouseEnter={() => setHoveredStage(stage)} onMouseLeave={() => setHoveredStage(null)} onClick={() => available && enterNextStage()} disabled={!available} type="button" aria-label={`Stage ${stage.id} ${LABELS[stage.type]}`}>
               <img src={getNodeIcon(stage.type)} alt="" className="node-icon-img" />
               <div className="node-name-badge">{completed ? 'Clear' : current ? 'Here' : `S${stage.id}`}</div>
             </button>

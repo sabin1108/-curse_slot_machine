@@ -165,7 +165,7 @@ export function App() {
         {gameState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
         {gameState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
         {gameState.screen === 'BATTLE' && <BattleScreen state={gameState} onDispatch={handleDispatch} />}
-        {gameState.screen === 'MAP' && <DungeonMapScreen completedStageIds={coreState.run.completedStageIds} currentStage={coreState.run.currentStage} onDispatch={handleDispatch} />}
+        {gameState.screen === 'MAP' && <DungeonMapScreen map={gameState.map} onDispatch={handleDispatch} />}
         {gameState.screen === 'SHOP' && <ShopScreen gold={coreState.economy.gold} purchases={coreState.economy.shopPurchases} offers={coreState.shop.offers} onDispatch={handleDispatch} />}
         {gameState.screen === 'REST' && <RestScreen player={gameState.player} curseCurrent={gameState.curse.current} onDispatch={handleDispatch} />}
         {gameState.screen === 'REWARD' && <RewardModal candidates={gameState.rewardCandidates} augSlotPresentation={gameState.augSlotPresentation} onDispatch={handleDispatch} />}

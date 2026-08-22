@@ -766,7 +766,48 @@
   - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
   - `git diff --check`: passed.
 - Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/33
+- Later merged into `main`: `c937bb5`.
 - Merge policy: no merge without explicit user approval.
+
+## 2026-08-22 - UI Map Projection
+
+- User approved merging PR #33 and continuing work.
+- Verified PR #33 branch before merge:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 130 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Merged PR #33 into `main`: `c937bb5`.
+- Verified merged `main`:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 130 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Started `feature/ui-map-projection` from merged `main`.
+- Added `docs/superpowers/specs/2026-08-22-ui-map-projection-design.md`.
+- Added `docs/superpowers/plans/2026-08-22-ui-map-projection.md`.
+- Added `RunSystem.getNextStage(run)` so engine transition and projection use one next-stage selector.
+- Added projected map state to `projectUiGameState`.
+- Rewired `App` and `DungeonMapScreen` so the map screen consumes projected map nodes instead of raw core run data.
+- TDD evidence:
+  - `UiProjection` map tests first failed because `projected.map` was missing.
+  - `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: passed with 12 tests.
+  - `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/app/App.test.tsx`: passed with 2 files and 17 tests.
+  - `npm.cmd run test:run -- src/game/run/RunSystem.test.ts src/game/engine/UiProjection.test.ts src/app/App.test.tsx`: passed with 3 files and 21 tests after selector review fix.
+  - `npm.cmd run typecheck`: passed.
+- Review:
+  - Code-review lane found no code defects; process gate depended on architecture evidence.
+  - Architecture lane returned `WATCH` for duplicated next-stage selection; fixed by sharing `RunSystem.getNextStage(run)`.
+  - Architecture re-review returned `CLEAR`.
+- Full branch verification:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 134 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/34
 
 ## 2026-08-20 - Offline Font Fallback
 

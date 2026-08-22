@@ -143,6 +143,27 @@ export type GameMode = 'NORMAL' | 'SHOWCASE';
 
 export type MapNodeType = 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
 
+export type RouteNodeType = 'combat' | 'elite' | 'rest' | 'shop' | 'event' | 'gate' | 'boss';
+
+export type MapNodeStatus = 'completed' | 'current' | 'available' | 'locked';
+
+export interface MapNodeView {
+  id: number;
+  type: RouteNodeType;
+  label: string;
+  rewardPolicy: string;
+  status: MapNodeStatus;
+  positionPct: number;
+}
+
+export interface MapViewState {
+  nodes: MapNodeView[];
+  completedStageIds: number[];
+  currentNode: MapNodeView | null;
+  nextAvailableNode: MapNodeView | null;
+  activeNode: MapNodeView | null;
+}
+
 export type EventChoice = 'OPEN' | 'REST' | 'SKIP';
 
 export interface ShowcaseStep {
@@ -172,6 +193,7 @@ export interface GameState {
   curse: CurseState;
   build: BuildState;
   visitedNodePath: number[]; // Persistent visited map node IDs
+  map: MapViewState;
   
   // Narrative & Origin State
   selectedOrigin?: OriginId;

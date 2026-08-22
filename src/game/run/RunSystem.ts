@@ -35,7 +35,7 @@ export function enterNextStage(run: RunState): RunState {
     throw new Error('current stage must be completed before advancing')
   }
 
-  const nextStage = MVP_ROUTE[run.completedStageIds.length]
+  const nextStage = getNextStage(run)
   if (!nextStage) {
     return {
       ...cloneRunState(run),
@@ -61,6 +61,11 @@ export function completeCurrentStage(run: RunState): RunState {
     currentStage: null,
     completedStageIds,
   }
+}
+
+export function getNextStage(run: RunState): RunStageDefinition | null {
+  if (run.currentStage || run.status === 'victory') return null
+  return MVP_ROUTE[run.completedStageIds.length] ?? null
 }
 
 function cloneRunState(run: RunState): RunState {

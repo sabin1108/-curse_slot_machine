@@ -2,16 +2,16 @@
 
 ## Current Goal
 
-Continue from `feature/reward-effect-condition-resolver` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain and PR #32 have been merged into `main`; the earlier local-source sync attempt was discarded before any push.
+Continue from `feature/ui-map-projection` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. PR #33 has been merged into `main`; the earlier local-source sync attempt was discarded before any push.
 
 ## Current Branch
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
-- Branch: `feature/reward-effect-condition-resolver`
+- Branch: `feature/ui-map-projection`
 - Base branch: `main`
-- Baseline before this resolver boundary: `ad33fcd`
-- Branch status: pushed with draft PR #33 open
-- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/33
+- Baseline before this map projection slice: `c937bb5`
+- Branch status: pushed with draft PR #34 open
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/34
 - Merge policy: do not merge or change PR state without explicit user approval
 
 ## Source Documents
@@ -40,6 +40,34 @@ Continue from `feature/reward-effect-condition-resolver` in `C:\Users\00\Documen
 - PR #28 merged into `feature/enemy-defense-intent` at `7d57de0`.
 - PR #27 merged into `main` at `16e58cb`.
 - PR #32 merged into `main` at `ad33fcd`.
+- PR #33 merged into `main` at `c937bb5`.
+
+## Current Branch: UI Map Projection
+
+- Goal: move map presentation data behind `projectUiGameState`.
+- `RunSystem` and `GameEngine` still own route/progression state.
+- `RunSystem.getNextStage(run)` is the shared next-stage selector used by both `enterNextStage` and `UiProjection`.
+- `UiProjection` now produces map nodes, completed IDs, current node, next available node, and active node.
+- `App` passes `gameState.map` to `DungeonMapScreen`.
+- `DungeonMapScreen` renders projected state and dispatches existing `ENTER_NEXT_STAGE` / `RESOLVE_EVENT` commands only.
+- TDD evidence on 2026-08-22:
+  - `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: failed first because `projected.map` was missing.
+  - `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts`: passed with 12 tests.
+  - `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/app/App.test.tsx`: passed with 2 files and 17 tests.
+  - Review follow-up added selector-backed projection coverage using `enterNextStage` and `completeCurrentStage`.
+  - `npm.cmd run test:run -- src/game/run/RunSystem.test.ts src/game/engine/UiProjection.test.ts src/app/App.test.tsx`: passed with 3 files and 21 tests.
+  - `npm.cmd run typecheck`: passed.
+- Review:
+  - Code-review lane found no code defects; process gate depended on architecture evidence.
+  - Architecture lane returned `WATCH` for duplicated next-stage selection; fixed by sharing `RunSystem.getNextStage(run)`.
+  - Architecture re-review returned `CLEAR`.
+- Full verification:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed with 22 files and 134 tests.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed with 4 Chromium tests.
+  - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/34.
 
 ## Current Branch: Reward Effect Condition Resolver
 

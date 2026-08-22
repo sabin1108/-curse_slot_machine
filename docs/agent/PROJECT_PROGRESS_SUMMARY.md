@@ -6,10 +6,10 @@ Last updated: 2026-08-22
 
 - GitHub: `https://github.com/sabin1108/-curse_slot_machine`
 - Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
-- Current branch: `feature/reward-effect-condition-resolver`
+- Current branch: `feature/ui-map-projection`
 - Current branch base: `main`
-- Baseline before this resolver boundary: `ad33fcd`
-- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/33
+- Baseline before this map projection slice: `c937bb5`
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/34
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
 ## Merged Stack
@@ -22,6 +22,46 @@ The stacked PR chain was merged on 2026-08-22 after explicit user approval:
 - PR #28 -> PR #27 branch: `7d57de0`
 - PR #27 -> `main`: `16e58cb`
 - PR #32 -> `main`: `ad33fcd`
+- PR #33 -> `main`: `c937bb5`
+
+## Current Branch: UI Map Projection
+
+`feature/ui-map-projection` continues the structured UI projection line after PR #33.
+
+Completed in this slice:
+
+1. Added a projected map view model to `GameState`.
+2. Added `RunSystem.getNextStage(run)` so engine transition and projection share one next-stage selector.
+3. Projected route nodes, completed IDs, current node, next available node, and active node from core run state.
+4. Rewired `App` to pass `gameState.map` into the map screen.
+5. Removed `MVP_ROUTE` and `RunStageDefinition` imports from `DungeonMapScreen`; the component now renders projected map nodes and dispatches existing commands only.
+6. Kept shop offer projection, route rules, event outcomes, reward flow, rest behavior, and combat behavior out of scope.
+
+Targeted verification for this branch:
+
+```powershell
+npm.cmd run test:run -- src/game/engine/UiProjection.test.ts  # failed first, projected.map was missing
+npm.cmd run test:run -- src/game/engine/UiProjection.test.ts  # passed, 12 tests
+npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/app/App.test.tsx  # passed, 2 files / 17 tests
+npm.cmd run test:run -- src/game/run/RunSystem.test.ts src/game/engine/UiProjection.test.ts src/app/App.test.tsx  # passed after review fix, 3 files / 21 tests
+npm.cmd run typecheck  # passed
+```
+
+Review status for this branch:
+
+- Code-review lane found no code defects; process gate depended on architecture evidence.
+- Architecture lane returned `WATCH` for duplicated next-stage selection; fixed by sharing `RunSystem.getNextStage(run)` between `enterNextStage` and `UiProjection`.
+- Architecture re-review returned `CLEAR`.
+
+Full verification for this branch:
+
+```powershell
+npm.cmd run typecheck   # passed
+npm.cmd run test:run    # passed, 22 files / 134 tests
+npm.cmd run build       # passed
+npm.cmd run test:e2e    # passed, 4 Chromium tests
+git diff --check         # passed
+```
 
 ## Current Branch: Reward Effect Condition Resolver
 
@@ -201,5 +241,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Review draft PR #33 and merge only after explicit user approval.
+- Review draft PR #34 and merge only after explicit user approval.
 - Do not merge or change PR state without explicit user approval.

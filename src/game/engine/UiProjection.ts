@@ -1,10 +1,11 @@
 import { getAsset } from '../../assets/assetHelper'
-import type { AugmentCard, GameScreen, GameState as UiGameState, ItemCard, ReelSymbol, RewardCard, SlotResult, SynergyProgress as UiSynergyProgress } from '../../types/game'
+import type { AugmentCard, GameScreen, GameState as UiGameState, ItemCard, MapNodeStatus, ReelSymbol, RewardCard, SlotResult, SynergyProgress as UiSynergyProgress } from '../../types/game'
 import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 import type { BuildRewardDefinition, RewardKind, SynergyDefinition, SynergyProgress as CoreSynergyProgress } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import { ACTION_SYMBOLS, MODIFIER_SYMBOLS, TARGET_SYMBOLS } from '../data'
 import type { CombatPreview, EnemyIntent as CoreEnemyIntent } from '../combat/CombatTypes'
+import { getNextStage, MVP_ROUTE } from '../run/RunSystem'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import type { GameState as CoreGameState } from './GameState'
 
@@ -61,6 +62,7 @@ export function projectUiGameState(state: CoreGameState, feedback: UiFeedback): 
       synergyProgress: MVP_BUILD_CATALOG.synergies.map((synergy) => toUiSynergyProgress(synergy, state.build.synergies.progress.find((progress) => progress.synergyId === synergy.id))),
     },
     visitedNodePath: [...state.run.completedStageIds],
+    map: toUiMapState(state),
     selectedOrigin: state.selectedOrigin ?? undefined,
     originTraitState: { freeRerollAvailable: state.originTraitState.freeRerollAvailable },
     narrativeMicrocopy: state.selectedOrigin ? `${state.selectedOrigin} · 결정론적 15 스테이지` : undefined,
@@ -148,6 +150,51 @@ export function toUiRewardCard(reward: BuildRewardDefinition): RewardCard {
 
 export function toUiReward(reward: RewardOption): RewardCard {
   return toUiRewardCard(reward)
+}
+
+function toUiMapState(state: CoreGameState): UiGameState['map'] {
+  const completedStageIds = [...state.run.completedStageIds]
+  const nextStage = getNextStage(state.run)
+  const nodes = MVP_ROUTE.map((stage) => {
+    const completed = completedStageIds.includes(stage.id)
+    const current = state.run.currentStage?.id === stage.id
+    const available = !state.run.currentStage && nextStage?.id === stage.id
+    const status: MapNodeStatus = completed ? 'completed' : current ? 'current' : available ? 'available' : 'locked'
+    return {
+      id: stage.id,
+      type: stage.type,
+      label: getStageLabel(stage.type),
+      rewardPolicy: stage.rewardPolicy,
+      status,
+      positionPct: 5 + ((stage.id - 1) / 14) * 90,
+    }
+  })
+  const currentNode = state.run.currentStage
+    ? nodes.find((node) => node.id === state.run.currentStage?.id) ?? null
+    : null
+  const nextAvailableNode = nextStage
+    ? nodes.find((node) => node.id === nextStage.id) ?? null
+    : null
+
+  return {
+    nodes,
+    completedStageIds,
+    currentNode,
+    nextAvailableNode,
+    activeNode: currentNode ?? nextAvailableNode,
+  }
+}
+
+function getStageLabel(type: UiGameState['map']['nodes'][number]['type']): string {
+  return {
+    combat: 'Combat',
+    elite: 'Elite',
+    rest: 'Rest',
+    shop: 'Shop',
+    event: 'Event',
+    gate: 'Gate',
+    boss: 'Boss',
+  }[type]
 }
 
 function toUiOwnedAugment(reward: BuildRewardDefinition & { kind: 'augment' }): AugmentCard {
