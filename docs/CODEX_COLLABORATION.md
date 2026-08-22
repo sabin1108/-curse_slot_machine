@@ -658,6 +658,41 @@
 - Head commit: `8ba4287`.
 - Merge policy: no merge without explicit user approval.
 
+## 2026-08-22 - Showcase Reward Accessibility Regression Recovery
+
+### Human Direction
+
+- Continue the stacked branch sequence using the default draft-PR workflow.
+- Use subagents for exploration/review and keep fixes scoped.
+
+### Codex Work
+
+- Created `feature/reward-modal-accessibility-coverage` from `feature/reward-inventory-naming-cleanup`.
+- Added `docs/superpowers/specs/2026-08-22-reward-modal-accessibility-coverage-design.md`.
+- Added `docs/superpowers/plans/2026-08-22-reward-modal-accessibility-coverage.md`.
+- Added React Testing Library coverage for Showcase step 3 reward-modal ownership and reward choice role/name/focus/selected state.
+- Restored Showcase step 3 reward presentation by dispatching the deterministic demo command prefix through the pure engine.
+- Added Playwright coverage for focusing a reward choice, pressing Enter, returning to the Showcase overlay, and advancing to step 4.
+- Marked `SHOWCASE-QA-001` and `SHOWCASE-QA-002` resolved in follow-up in the milestone QA review.
+
+### Verification
+
+- `npm.cmd run test:run -- src/app/App.test.tsx`: failed first because Showcase step 3 did not open the reward modal, then passed after implementation.
+- `npm.cmd run test:run -- src/app/App.test.tsx src/game/demo/OriginDemoTraces.test.ts`: passed after replacing the magic Showcase reward setup count with `MVP_DEMO_REWARD_SETUP_COMMANDS`.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test:run`: passed, 109 tests across 21 files.
+- `npm.cmd run build`: passed.
+- `npm.cmd run test:e2e -- tests/e2e/showcase-accessibility.spec.ts --project=chromium`: passed.
+- `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+- `git diff --check`: passed.
+- Code-review lane returned `COMMENT`; one low-severity progress-summary wording issue was fixed.
+- Architecture lane returned `CLEAR`; hard-coded reward-step index tradeoff was removed after review.
+
+### GitHub
+
+- Draft PR: pending.
+- Merge policy: no merge without explicit user approval.
+
 ## 2026-08-20 - Offline Font Fallback
 
 ### Human Direction

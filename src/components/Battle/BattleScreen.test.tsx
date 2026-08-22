@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { GameEngine } from '../../game/engine/GameEngine'
 import { projectUiGameState, type UiFeedback } from '../../game/engine/UiProjection'
 import type { ItemCard } from '../../types/game'
-import { AugmentSidePanel } from './AugmentSidePanel'
+import { RewardInventorySidePanel } from './RewardInventorySidePanel'
 import { BattleScreen } from './BattleScreen'
 
 const emptyFeedback: UiFeedback = {
@@ -63,7 +63,7 @@ describe('BattleScreen build inventory', () => {
     expect(container.querySelector('.cabinet-wrap')).toHaveAttribute('data-multiplier-max', '5')
   })
 
-  it('keeps the legacy side panel aligned with the projected card model', () => {
+  it('keeps the reward inventory side panel aligned with the projected card model', () => {
     const engine = new GameEngine('augment-side-panel-owned-cards', {
       startingRewards: [
         { kind: 'augment', id: 'combo_starter' },
@@ -71,7 +71,7 @@ describe('BattleScreen build inventory', () => {
       ],
     })
     const state = projectUiGameState(engine.getState(), emptyFeedback)
-    render(<AugmentSidePanel build={state.build} />)
+    render(<RewardInventorySidePanel build={state.build} />)
 
     expect(screen.getByText('2/12')).toBeInTheDocument()
     expect(screen.getByText('Combo Starter')).toBeInTheDocument()
