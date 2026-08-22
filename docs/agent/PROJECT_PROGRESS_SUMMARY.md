@@ -6,9 +6,9 @@ Last updated: 2026-08-22
 
 - GitHub: `https://github.com/sabin1108/-curse_slot_machine`
 - Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
-- Current branch: `feature/reward-inventory-naming-cleanup`
-- Current branch base: `feature/reward-card-type-cleanup`
-- Baseline before this stacked cleanup: `e8adb7a`
+- Current branch: `feature/reward-modal-accessibility-coverage`
+- Current branch base: `feature/reward-inventory-naming-cleanup`
+- Baseline before this stacked cleanup: `a3b4a78`
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
 ## Parent Branch
@@ -52,7 +52,35 @@ npm run test:e2e   # passed, 3 Chromium tests
 
 Review feedback and remaining risks are recorded in `docs/agent/SESSION_HANDOFF.md`.
 
-## Current Branch: Reward Inventory Naming Cleanup
+## Current Branch: Reward Modal Accessibility Coverage
+
+`feature/reward-modal-accessibility-coverage` is stacked on `feature/reward-inventory-naming-cleanup`.
+
+Completed in this slice:
+
+1. Added React Testing Library coverage for Showcase step 3 reward-modal ownership and reward choice role/name/focus/selected state.
+2. Restored Showcase step 3 reward presentation by dispatching the existing deterministic demo command prefix through the pure engine.
+3. Added Playwright coverage for keyboard activation of a focused reward choice and step 4 continuation.
+4. Marked `SHOWCASE-QA-001` and `SHOWCASE-QA-002` resolved in follow-up while preserving original milestone evidence.
+
+Targeted verification for this branch:
+
+```powershell
+npm.cmd run test:run -- src/app/App.test.tsx  # passed, 5 tests
+npm.cmd run typecheck                         # passed
+npm.cmd run test:e2e -- tests/e2e/showcase-accessibility.spec.ts --project=chromium  # passed, 1 Chromium test
+npm.cmd run test:run                          # passed, 21 files / 109 tests
+npm.cmd run build                             # passed
+npm.cmd run test:e2e                          # passed, 4 Chromium tests
+git diff --check                              # passed
+```
+
+Review status for this branch:
+
+- Code-review lane: `COMMENT`; one low-severity remaining-work wording issue was fixed.
+- Architecture lane: `CLEAR`; hard-coded reward-step index tradeoff was removed after review.
+
+## Parent Stacked Branch: Reward Inventory Naming Cleanup
 
 `feature/reward-inventory-naming-cleanup` is stacked on `feature/reward-card-type-cleanup`.
 
@@ -133,5 +161,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Push and open a draft PR for the stacked `feature/reward-inventory-naming-cleanup` branch.
+- Open a draft PR for the stacked `feature/reward-modal-accessibility-coverage` branch.
 - Do not merge or change PR state without explicit user approval.
