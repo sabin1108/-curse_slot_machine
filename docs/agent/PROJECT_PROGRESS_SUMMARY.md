@@ -6,9 +6,10 @@ Last updated: 2026-08-22
 
 - GitHub: `https://github.com/sabin1108/-curse_slot_machine`
 - Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
-- Current branch: `feature/effect-resolver-boundary`
+- Current branch: `feature/reward-effect-condition-resolver`
 - Current branch base: `main`
-- Baseline before this resolver boundary: `16e58cb`
+- Baseline before this resolver boundary: `ad33fcd`
+- Draft PR: https://github.com/sabin1108/-curse_slot_machine/pull/33
 - Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
 ## Merged Stack
@@ -20,6 +21,34 @@ The stacked PR chain was merged on 2026-08-22 after explicit user approval:
 - PR #29 -> PR #28 branch: `652e407`
 - PR #28 -> PR #27 branch: `7d57de0`
 - PR #27 -> `main`: `16e58cb`
+- PR #32 -> `main`: `ad33fcd`
+
+## Current Branch: Reward Effect Condition Resolver
+
+`feature/reward-effect-condition-resolver` continues the effect resolver boundary after PR #32.
+
+Completed in this slice:
+
+1. Extended `EffectResolver` with reward facts and active synergy IDs.
+2. Added independent resolver coverage for reward kind, rarity, tag, and active synergy conditions.
+3. Rewired `RewardSystem` content-value scoring to delegate reward/build condition truth evaluation to `effectConditionsMatch`.
+4. Projected only candidate reward facts into the resolver instead of passing full reward definitions.
+5. Added pre-pick synergy regression coverage so a candidate reward cannot score from a synergy it activates only after being picked.
+6. Preserved reward scoring ownership, sorting, active-effect ownership, catalog validation, combat behavior, and UI projection.
+
+Targeted verification for this branch:
+
+```powershell
+npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts  # failed first, reward/build conditions returned false
+npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts  # passed, 12 tests
+npm.cmd run test:run -- src/game/build/RewardSystem.test.ts      # passed, 4 tests
+npm.cmd run test:run -- src/game/effects/EffectResolver.test.ts src/game/build/RewardSystem.test.ts  # passed after review fixes, 2 files / 17 tests
+```
+
+Review status for this branch:
+
+- Code-review lane returned `REQUEST CHANGES`; explicit reward fact projection, direct pre-pick synergy regression coverage, and no-context active-synergy coverage were fixed.
+- Architecture lane returned `CLEAR`; the low-risk pre-pick coverage recommendation was fixed.
 
 ## Parent Branch
 
@@ -54,10 +83,11 @@ Continuation work completed on 2026-08-22:
 Latest verified results for this continuation:
 
 ```powershell
-npm run typecheck  # passed
-npm run test:run   # passed, 19 files / 100 tests
-npm run build      # passed
-npm run test:e2e   # passed, 3 Chromium tests
+npm.cmd run typecheck  # passed
+npm.cmd run test:run   # passed, 22 files / 130 tests
+npm.cmd run build      # passed
+npm.cmd run test:e2e   # passed, 4 Chromium tests
+git diff --check        # passed
 ```
 
 Review feedback and remaining risks are recorded in `docs/agent/SESSION_HANDOFF.md`.
@@ -171,6 +201,5 @@ Review status for this stacked branch:
 
 ## Remaining Work
 
-- Open a draft PR for `feature/effect-resolver-boundary`, which extracts combat condition matching into `src/game/effects/EffectResolver.ts`.
-- Independent code review returned `APPROVE`; architecture re-review returned `CLEAR`.
+- Review draft PR #33 and merge only after explicit user approval.
 - Do not merge or change PR state without explicit user approval.

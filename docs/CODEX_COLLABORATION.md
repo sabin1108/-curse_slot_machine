@@ -725,6 +725,47 @@
   - `npm.cmd run build`: passed.
   - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
   - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/32
+- Later merged into `main`: `ad33fcd`.
+
+## 2026-08-22 - Reward Effect Condition Resolver
+
+- User approved merging PR #32 and continuing work.
+- Verified PR #32 branch before merge:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 124 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Merged PR #32 into `main`: `ad33fcd`.
+- Verified merged `main`:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 124 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Started `feature/reward-effect-condition-resolver` from merged `main`.
+- Added `docs/superpowers/specs/2026-08-22-reward-effect-condition-resolver-design.md`.
+- Added `docs/superpowers/plans/2026-08-22-reward-effect-condition-resolver.md`.
+- Extended `EffectResolver` to support reward facts and active synergy IDs.
+- Rewired `RewardSystem` content-value condition matching through `effectConditionsMatch`.
+- Projected only candidate reward facts into the resolver, preserving the fact-only boundary.
+- Added regression coverage that keeps `build.synergy_active` reward scoring tied to pre-pick active synergies.
+- TDD evidence:
+  - Resolver test first failed because reward/build conditions returned false.
+  - Resolver tests passed with 12 tests after implementation.
+  - RewardSystem tests passed with 4 tests.
+  - Targeted resolver/reward tests passed with 2 files and 17 tests after review fixes.
+- Review:
+  - Code-review lane returned `REQUEST CHANGES`; explicit reward fact projection, direct pre-pick synergy regression coverage, and no-context active-synergy coverage were fixed.
+  - Architecture lane returned `CLEAR`; low-risk pre-pick coverage recommendation was fixed.
+- Full branch verification after review fixes:
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:run`: passed, 130 tests across 22 files.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed, 4 Chromium tests.
+  - `git diff --check`: passed.
+- Draft PR opened: https://github.com/sabin1108/-curse_slot_machine/pull/33
 - Merge policy: no merge without explicit user approval.
 
 ## 2026-08-20 - Offline Font Fallback

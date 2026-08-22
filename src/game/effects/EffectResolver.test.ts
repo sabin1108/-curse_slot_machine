@@ -124,22 +124,58 @@ describe('EffectResolver', () => {
     })).toBe(false)
   })
 
-  it('does not match reward and active synergy conditions in combat-only context', () => {
+  it.each([
+    {
+      name: 'reward kind',
+      condition: { type: 'reward.kind_is', params: { kind: 'item' } } as const,
+      matching: { reward: { kind: 'item', rarity: 'rare', tags: ['COMBO'] } } as const,
+      mismatching: { reward: { kind: 'augment', rarity: 'rare', tags: ['COMBO'] } } as const,
+    },
+    {
+      name: 'reward rarity',
+      condition: { type: 'reward.rarity_is', params: { rarity: 'rare' } } as const,
+      matching: { reward: { kind: 'item', rarity: 'rare', tags: ['COMBO'] } } as const,
+      mismatching: { reward: { kind: 'item', rarity: 'common', tags: ['COMBO'] } } as const,
+    },
+    {
+      name: 'reward tag',
+      condition: { type: 'reward.has_tag', params: { tag: 'COMBO' } } as const,
+      matching: { reward: { kind: 'item', rarity: 'rare', tags: ['COMBO'] } } as const,
+      mismatching: { reward: { kind: 'item', rarity: 'rare', tags: ['RESOURCE'] } } as const,
+    },
+    {
+      name: 'active synergy',
+      condition: { type: 'build.synergy_active', params: { synergyId: 'clockwork_barrage' } } as const,
+      matching: { activeSynergyIds: ['clockwork_barrage'] } as const,
+      mismatching: { activeSynergyIds: ['iron_refrain'] } as const,
+    },
+  ])('matches and rejects $name conditions independently', ({ condition, matching, mismatching }) => {
     const effect: EffectDefinition = {
-      id: 'combo_item_score',
+      id: 'reward_condition',
       type: 'reward.score.add',
       params: { amount: 10 },
-      conditions: [
-        { type: 'reward.kind_is', params: { kind: 'item' } },
-        { type: 'reward.rarity_is', params: { rarity: 'rare' } },
-        { type: 'reward.has_tag', params: { tag: 'COMBO' } },
-        { type: 'build.synergy_active', params: { synergyId: 'clockwork_barrage' } },
-      ],
+      conditions: [condition],
     }
 
-    expect(effectConditionsMatch(effect, {
-      slotResult: { action: 'bullet', target: 'enemy', modifier: 'x1' },
-      lockedReelCount: 1,
-    })).toBe(false)
+    expect(effectConditionsMatch(effect, matching)).toBe(true)
+    expect(effectConditionsMatch(effect, mismatching)).toBe(false)
+  })
+
+  it('does not match reward and build conditions without matching context', () => {
+    const rewardEffect: EffectDefinition = {
+      id: 'item_only_score',
+      type: 'reward.score.add',
+      params: { amount: 10 },
+      conditions: [{ type: 'reward.kind_is', params: { kind: 'item' } }],
+    }
+    const synergyEffect: EffectDefinition = {
+      id: 'active_synergy_only_score',
+      type: 'reward.score.add',
+      params: { amount: 10 },
+      conditions: [{ type: 'build.synergy_active', params: { synergyId: 'clockwork_barrage' } }],
+    }
+
+    expect(effectConditionsMatch(rewardEffect, {})).toBe(false)
+    expect(effectConditionsMatch(synergyEffect, {})).toBe(false)
   })
 })

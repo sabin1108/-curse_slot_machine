@@ -1,11 +1,20 @@
+import type { Rarity, RewardKind, SynergyTag } from '../build/BuildTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
 import type { EffectCondition, EffectDefinition } from './EffectTypes'
+
+export type RewardEffectFacts = {
+  kind: RewardKind
+  rarity: Rarity
+  tags: readonly SynergyTag[]
+}
 
 export type EffectConditionContext = {
   slotResult?: CombatSlotResult
   curseValue?: number
   playerHealthPct?: number
   lockedReelCount?: number
+  reward?: RewardEffectFacts
+  activeSynergyIds?: readonly string[]
 }
 
 export function effectConditionsMatch(
@@ -33,10 +42,13 @@ function conditionMatches(
     case 'combat.player_health_pct_at_most':
       return context.playerHealthPct !== undefined && context.playerHealthPct <= condition.params.percent
     case 'reward.kind_is':
+      return context.reward?.kind === condition.params.kind
     case 'reward.rarity_is':
+      return context.reward?.rarity === condition.params.rarity
     case 'reward.has_tag':
+      return context.reward?.tags.includes(condition.params.tag) ?? false
     case 'build.synergy_active':
-      return false
+      return context.activeSynergyIds?.includes(condition.params.synergyId) ?? false
     default: {
       const exhaustive: never = condition
       return exhaustive
