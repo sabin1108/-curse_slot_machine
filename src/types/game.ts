@@ -43,7 +43,7 @@ export type SynergyTag =
   | 'RESOURCE'
   | 'LIMIT';
 
-export interface AugmentItem {
+interface RewardCardBase {
   id: string;
   name: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'CURSED' | 'LEGENDARY';
@@ -53,6 +53,16 @@ export interface AugmentItem {
   imgUrl?: string;
   effectValue: string;
 }
+
+export interface AugmentCard extends RewardCardBase {
+  kind: 'augment';
+}
+
+export interface ItemCard extends RewardCardBase {
+  kind: 'item';
+}
+
+export type RewardCard = AugmentCard | ItemCard;
 
 export interface SynergyProgress {
   synergyId: string;
@@ -66,8 +76,8 @@ export interface SynergyProgress {
 }
 
 export interface BuildState {
-  augments: AugmentItem[];
-  items: string[];
+  augments: AugmentCard[];
+  items: ItemCard[];
   activeSynergies: string[];
   synergyProgress: SynergyProgress[];
 }
@@ -82,7 +92,7 @@ export interface PlayerState {
 export interface EnemyIntent {
   id: string;
   name: string;
-  type: 'ATTACK' | 'DEFEND' | 'CURSE' | 'HEAL';
+  type: 'ATTACK' | 'WAIT' | 'DEFEND' | 'CURSE' | 'HEAL';
   value: number;
   icon: string;
   description: string;
@@ -190,10 +200,10 @@ export interface GameState {
   isSpinning: boolean;
   
   // Augment Slot Machine Presentation State (Reward reveal)
-  rewardCandidates: AugmentItem[];
+  rewardCandidates: RewardCard[];
   augSlotPresentation: {
     reels: [string, string, string];
-    targetAugment: AugmentItem | null;
+    targetAugment: RewardCard | null;
     isRevealed: boolean;
   } | null;
 
@@ -212,19 +222,19 @@ export interface GameState {
 }
 
 export type GameCommand =
-  | { type: 'START_RUN'; seed?: string; mode?: GameMode }
-  | { type: 'OPEN_PROLOGUE' }
+  | { type: 'START_RUN'; seed?: string }
   | { type: 'SELECT_ORIGIN'; originId: OriginId }
-  | { type: 'SELECT_MAP_NODE'; nodeId: number; nodeType?: MapNodeType }
+  | { type: 'ENTER_NEXT_STAGE' }
   | { type: 'SPIN_COMBAT_SLOT' }
-  | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
+  | { type: 'TOGGLE_REEL_LOCK'; reel: ReelId }
   | { type: 'REROLL_UNLOCKED' }
-  | { type: 'CONFIRM_SLOT_RESULT' }
-  | { type: 'CHOOSE_REWARD'; augmentId: string }
+  | { type: 'CONFIRM_COMBAT_SLOT' }
+  | { type: 'CHOOSE_REWARD'; rewardId: string }
+  | { type: 'RESOLVE_EVENT'; choice: 'reward' | 'gold' | 'rest' | 'skip' }
+  | { type: 'BUY_SHOP_ITEM'; rewardId: string }
+  | { type: 'LEAVE_SHOP' }
+  | { type: 'RESOLVE_REST'; action: 'heal' | 'purify' }
   | { type: 'NAVIGATE'; screen: GameScreen }
   | { type: 'START_SHOWCASE'; scenarioId?: string }
-  | { type: 'NEXT_SHOWCASE_STEP' }
-  | { type: 'RESOLVE_EVENT_CHOICE'; choice: EventChoice }
-  | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
-  | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
+  | { type: 'NEXT_SHOWCASE_STEP' };
 

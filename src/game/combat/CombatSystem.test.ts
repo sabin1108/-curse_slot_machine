@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { createCombatState, resolveCombatSlot } from './CombatSystem'
 
 describe('CombatSystem', () => {
-  it('damages an enemy from a bullet result without raising curse by default', () => {
+  it('damages an enemy from a bullet result, then resolves enemy attack and curse', () => {
     const state = createCombatState()
 
     const result = resolveCombatSlot(state, {
@@ -14,7 +14,7 @@ describe('CombatSystem', () => {
 
     expect(result.enemy.health).toBe(6)
     expect(result.player.health).toBe(26)
-    expect(result.curse.value).toBe(0)
+    expect(result.curse.value).toBe(1)
     expect(result.events.map((event) => event.type)).toEqual([
       'DAMAGE_APPLIED',
       'ENEMY_ATTACKED',
@@ -164,57 +164,5 @@ describe('CombatSystem', () => {
       amount: 0,
       value: 0,
     })
-  })
-
-  it('raises curse only when a matching curse gain effect exists', () => {
-    const result = resolveCombatSlot(
-      createCombatState(),
-      {
-        action: 'bullet',
-        target: 'enemy',
-        modifier: 'x2',
-      },
-      {
-        effects: [
-          {
-            id: 'curse_contract',
-            type: 'combat.curse_gain.add',
-            params: { amount: 1 },
-          },
-        ],
-      },
-    )
-
-    expect(result.curse.value).toBe(1)
-    expect(result.events).toContainEqual({
-      type: 'CURSE_INCREASED',
-      amount: 1,
-      value: 1,
-    })
-  })
-
-  it('increases enemy attack by 10 percent per curse point before block mitigation', () => {
-    const result = resolveCombatSlot(
-      createCombatState({
-        player: { block: 10 },
-        enemy: { health: 100, maxHealth: 100 },
-        enemyIntent: { amount: 20 },
-        curse: { value: 5 },
-      }),
-      {
-        action: 'bullet',
-        target: 'enemy',
-        modifier: 'x1',
-      },
-    )
-
-    expect(result.events).toContainEqual(
-      expect.objectContaining({
-        type: 'ENEMY_ATTACKED',
-        amount: 30,
-        blocked: 10,
-        healthLost: 20,
-      }),
-    )
   })
 })

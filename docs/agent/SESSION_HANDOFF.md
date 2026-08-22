@@ -2,447 +2,171 @@
 
 ## Current Goal
 
-Implement the Curse Slot Machine web game prototype branch by branch from a fresh user-owned clone. Branches through `feature/offline-font-fallback` are merged; `feature/ui-adapter-synergy-progress` is open as draft PR #23. Each feature branch should be verified with typecheck, unit tests, and build before a draft PR is opened. Do not merge without explicit user approval.
+Continue from the stacked branch `feature/reward-modal-accessibility-coverage` in `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`. The GitHub branch chain is the source of truth. The earlier local-source sync attempt was discarded before any push.
 
-## Source Documents Read
-
-- `C:\Users\00\Desktop\코덱스 게임\OpenAI 게임 대회 기획서.md`
-- `C:\Users\00\Desktop\코덱스 게임\curse_slot_machine_integrated_feature_spec_v2.0_build_synergy.md`
-- `C:\Users\00\Desktop\코덱스 게임\as\팀 에이전트 개발 환경 세팅 가이드.md`
-
-## Key Decisions
-
-- React renders `GameState` and `GameEvent`; it must not decide RNG, reel outcomes, damage, healing, rewards, or enemy actions.
-- Pure TypeScript game systems own deterministic outcomes.
-- `CombatSlotMachine` and `AugmentSlotMachine` are separate systems.
-- Combat slot results use one payline: `[action, target, modifier]`.
-- Augment slot animation displays a preselected reward result and must not call `Math.random()` to decide rewards.
-- Normal Game and Showcase Mode stay separate. Showcase uses scripted rewards/scenarios and must not inject direct combat cheats such as `if (showcase) damage *= 100000`.
-- MVP content should favor extensible data structures over hardcoded augment, item, or synergy names.
-- Content effects should use bounded typed effect modules rather than free-form scripts.
-- The visible React app now imports `src/game/engine/UiGameEngine.ts`, a thin adapter. The adapter delegates ordinary legacy UI commands to `src/game/GameEngine.ts` but can project structured reward/combat results from `src/game/engine/*` into the current UI state shape.
-- `UiGameEngine` owns adapter-local pure combat slot RNG for `SPIN_COMBAT_SLOT` and lock-aware `REROLL_UNLOCKED`; React still only dispatches commands and renders projected state.
-
-## Environment Setup Results
-
-- Fresh clone created at `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh` because the requested `curse_slot_machine_repo` folder already existed with dirty changes.
-- Main checkout active branch: `feature/combat-slot-machine`.
-- Combat resolution worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_combat_resolution`.
-- Build reward synergy worktree: `C:\Users\00\Documents\Codex\csm_reward_synergy`.
-- Augment slot worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`.
-- Augment slot branch `feature/augment-slot-machine` was merged through PR #8.
-- Current branch: `feature/ui-adapter-synergy-progress`.
-- Git remote: `https://github.com/sabin1108/-curse_slot_machine.git`.
-- `gh auth status` succeeds for `kimcheolhui9846`.
-- Repository-local Git author identity is configured as `kim cheol hui <144594976+kimcheolhui9846@users.noreply.github.com>`.
-- `npm.cmd install` completed after network approval.
-- `npx.cmd playwright install chromium` completed.
-- Vitest/Vite commands are run outside the sandbox because esbuild scans parent directories while loading config and this sandbox denies `C:\Users\00` directory scans.
-
-## GitHub Repository And Branch Strategy
+## Current Branch
 
 - Repository: `https://github.com/sabin1108/-curse_slot_machine`
-- Base branch: `main`
-- Current branch: `feature/ui-adapter-synergy-progress`
-- Strategy: each feature branch starts from the latest `main`, is verified locally, committed, pushed, and opened as a draft PR.
-- Merge policy: no PR merge without explicit user approval.
+- Branch: `feature/reward-modal-accessibility-coverage`
+- Base branch: `feature/reward-inventory-naming-cleanup`
+- Baseline before this cleanup: `a3b4a78`
+- Branch status before this cleanup: branched locally from `feature/reward-inventory-naming-cleanup`
+- Merge policy: do not merge or change PR state without explicit user approval
 
-## Implemented Branches And PRs
+## Source Documents
 
-| Branch | Commit | PR | Status |
-| --- | --- | --- | --- |
-| `feature/project-baseline` | `2ce9e20` | https://github.com/sabin1108/-curse_slot_machine/pull/1 | Merged |
-| `feature/game-engine-core` | `49f5eab` | https://github.com/sabin1108/-curse_slot_machine/pull/2 | Merged |
-| `feature/combat-slot-machine` | `6edc91d` | https://github.com/sabin1108/-curse_slot_machine/pull/3 | Merged |
-| `feature/combat-resolution` | `445265a` | https://github.com/sabin1108/-curse_slot_machine/pull/6 | Merged |
-| `feature/build-reward-synergy` | `622f52f` | https://github.com/sabin1108/-curse_slot_machine/pull/7 | Merged |
-| `feature/augment-slot-machine` | `ca51454` | https://github.com/sabin1108/-curse_slot_machine/pull/8 | Merged |
-| `feature/content-effect-schema-pilot` | `8be060c` | https://github.com/sabin1108/-curse_slot_machine/pull/10 | Merged |
-| `feature/ui-adapter-confirm-result` | `e8c5884` | https://github.com/sabin1108/-curse_slot_machine/pull/11 | Merged |
-| `feature/ui-adapter-map-node` | `9955372` | https://github.com/sabin1108/-curse_slot_machine/pull/12 | Merged |
-| `feature/ui-adapter-select-map-node` | `1877c21` | https://github.com/sabin1108/-curse_slot_machine/pull/13 | Merged |
-| `feature/ui-adapter-node-type-routing` | `d4ea1bd` | https://github.com/sabin1108/-curse_slot_machine/pull/14 | Merged |
-| `feature/ui-adapter-event-node-entry` | `eae8337` | https://github.com/sabin1108/-curse_slot_machine/pull/15 | Merged |
-| `feature/ui-adapter-event-choice-command` | `2165922` | https://github.com/sabin1108/-curse_slot_machine/pull/16 | Merged |
-| `feature/ui-adapter-showcase-slot-guard` | `5d1a89b` | https://github.com/sabin1108/-curse_slot_machine/pull/17 | Merged |
-| `feature/showcase-ui-entry-overlay` | `fed924e` | https://github.com/sabin1108/-curse_slot_machine/pull/18 | Merged |
-| `review/showcase-playable-qa` | `d5c15f4` | https://github.com/sabin1108/-curse_slot_machine/pull/19 | Merged |
-| `feature/showcase-reward-modal-accessibility` | `428b1ca` | https://github.com/sabin1108/-curse_slot_machine/pull/20 | Merged |
-| `feature/showcase-step-header-spacing` | `605b62d` | https://github.com/sabin1108/-curse_slot_machine/pull/21 | Merged |
-| `feature/offline-font-fallback` | `00a810c` | https://github.com/sabin1108/-curse_slot_machine/pull/22 | Merged |
-| `feature/ui-adapter-synergy-progress` | see PR #23 | https://github.com/sabin1108/-curse_slot_machine/pull/23 | Draft |
+- `AGENTS.md`
+- `DESIGN.md`
+- `docs/design/PLANNING_SUMMARY.md`
+- `docs/superpowers/specs/2026-08-22-enemy-intent-patterns-item-projection-design.md`
+- `docs/superpowers/plans/2026-08-22-enemy-intent-patterns-item-projection.md`
+- `docs/superpowers/specs/2026-08-22-reward-card-type-cleanup-design.md`
+- `docs/superpowers/plans/2026-08-22-reward-card-type-cleanup.md`
+- `docs/superpowers/specs/2026-08-22-reward-inventory-naming-cleanup-design.md`
+- `docs/superpowers/plans/2026-08-22-reward-inventory-naming-cleanup.md`
+- `docs/superpowers/specs/2026-08-22-reward-modal-accessibility-coverage-design.md`
+- `docs/superpowers/plans/2026-08-22-reward-modal-accessibility-coverage.md`
+
+## Architecture Rules To Preserve
+
+- Pure TypeScript game systems own RNG, reel outcomes, combat resolution, rewards, and enemy actions.
+- React renders state, events, controls, and animation only.
+- The same seed and command sequence must produce the same state and events.
+- `CombatSlotMachine` and `AugmentSlotMachine` remain separate systems.
+- Showcase Mode must not add shortcuts to normal combat calculations.
+- Content-specific enemies, rewards, augments, items, and synergies belong in data.
+
+## Enemy Defense Intent Slice
+
+- `attack -> wait -> defend -> attack` was implemented before this continuation.
+- Wait turns produce `ENEMY_WAITED`, deal no player damage, and preview as `enemyAttack: 0`.
+- Defend turns produce `ENEMY_DEFENDED`, add low enemy block, and cap accumulated enemy block.
+- Curse overload can still end combat during wait or defend turns.
+- UI projection maps attack, wait, and defend into existing enemy intent presentation.
+
+## Approved Continuation Scope
+
+1. Refresh documentation and verification notes for `feature/enemy-defense-intent`.
+2. Add data-driven per-enemy intent patterns and balance values.
+3. Continue structured-engine UI migration with explicit item versus augment projection.
 
 ## Verification Commands
 
+Run the smallest targeted check first, then:
+
 ```powershell
-npm.cmd run typecheck
-npm.cmd run test:run
-npm.cmd run build
-npm.cmd run test:e2e
+npm run typecheck
+npm run test:run
+npm run build
+npm run test:e2e
 ```
 
-Latest completed verification:
+Do not claim completion unless the command output was checked in the current working tree.
 
-- Baseline branch: `typecheck`, `test:run`, `build`, and `test:e2e` passed before PR #1 merge.
-- `feature/game-engine-core`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` passed with 3 tests.
-- `feature/game-engine-core`: `npm.cmd run typecheck` passed.
-- `feature/game-engine-core`: full `npm.cmd run test:run` passed with 4 tests across 2 files.
-- `feature/game-engine-core`: `npm.cmd run build` passed.
-- `feature/game-engine-core`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
-- `feature/combat-slot-machine`: targeted `npm.cmd run test:run -- src/game/slot/CombatSlotMachine.test.ts` failed first because slot modules did not exist, then passed with 5 tests after implementation.
-- `feature/combat-slot-machine`: `npm.cmd run typecheck` passed.
-- `feature/combat-slot-machine`: full `npm.cmd run test:run` passed with 9 tests across 3 files.
-- `feature/combat-slot-machine`: `npm.cmd run build` passed.
-- `feature/combat-slot-machine`: `npm.cmd run test:e2e` passed with 1 Playwright Chromium test.
-- `feature/combat-resolution`: targeted `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts` failed first because `CombatSystem` did not exist, then passed with 4 tests after implementation.
-- `feature/combat-resolution`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because combat state and `RESOLVE_COMBAT_SLOT` did not exist, then passed with 4 tests after integration.
-- `feature/combat-resolution`: `npm.cmd run typecheck` passed.
-- `feature/combat-resolution`: full `npm.cmd run test:run` passed with 14 tests across 4 files.
-- `feature/combat-resolution`: `npm.cmd run build` passed.
-- `feature/build-reward-synergy`: targeted `npm.cmd run test:run -- src/game/build/BuildSystem.test.ts` failed first because `BuildSystem` did not exist, then passed with 3 tests after implementation.
-- `feature/build-reward-synergy`: targeted `npm.cmd run test:run -- src/game/build/RewardSystem.test.ts` failed first because `RewardSystem` did not exist, then passed with 2 tests after implementation.
-- `feature/build-reward-synergy`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because build/reward state and reward events did not exist, then passed with 5 tests after integration.
-- `feature/build-reward-synergy`: `npm.cmd run typecheck` passed.
-- `feature/build-reward-synergy`: full `npm.cmd run test:run` passed with 24 tests across 7 files.
-- `feature/build-reward-synergy`: `npm.cmd run build` passed.
-- `feature/augment-slot-machine`: targeted `npm.cmd run test:run -- src/game/slot/AugmentSlotMachine.test.ts` failed first because `AugmentSlotMachine` did not exist, then passed with 3 tests after implementation.
-- `feature/augment-slot-machine`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because reward events/state did not include augment slot presentation, then passed with 5 tests after integration.
-- `feature/augment-slot-machine`: `npm.cmd run typecheck` passed.
-- `feature/augment-slot-machine`: full `npm.cmd run test:run` passed with 27 tests across 8 files.
-- `feature/augment-slot-machine`: `npm.cmd run build` passed.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/build/BuildSystem.test.ts` failed first because `getActiveEffects` did not exist, then passed with 4 tests after implementation.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/combat/CombatSystem.test.ts` failed first because combat effects were ignored, then passed with 7 tests after implementation.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/GameEngine.test.ts` failed first because active build effects were not passed into combat, then passed with 6 tests after implementation.
-- `feature/content-effect-schema-pilot`: `npm.cmd run typecheck` passed.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `UiGameEngine` did not exist, then passed with 1 test after implementation.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured victory rewards were not projected to UI `rewardCandidates`, then passed with 2 tests after implementation.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured slot spin/reroll still used legacy output, then passed with 4 tests after implementation.
-- `feature/content-effect-schema-pilot`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` passed before and after switching `App.tsx` to the adapter import.
-- `feature/content-effect-schema-pilot`: full `npm.cmd run test:run` passed with 40 tests across 9 files.
-- `feature/content-effect-schema-pilot`: `npm.cmd run build` passed.
-- `feature/ui-adapter-confirm-result`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because confirm used mutable UI `currentResult`, then passed with 5 tests after implementation.
-- `feature/ui-adapter-confirm-result`: targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts` failed first because `UiProjection.ts` did not exist.
-- `feature/ui-adapter-confirm-result`: targeted `npm.cmd run test:run -- src/game/engine/UiProjection.test.ts src/game/engine/UiGameEngine.test.ts` passed with 7 tests after helper extraction.
-- `feature/ui-adapter-confirm-result`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-confirm-result`: full `npm.cmd run test:run` passed with 43 tests across 10 files.
-- `feature/ui-adapter-confirm-result`: `npm.cmd run build` passed.
-- `feature/ui-adapter-map-node`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because structured reward selection left UI on `REWARD`, then passed with 6 tests after implementation.
-- `feature/ui-adapter-map-node`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-map-node`: full `npm.cmd run test:run` passed with 44 tests across 10 files.
-- `feature/ui-adapter-map-node`: `npm.cmd run build` passed.
-- `feature/ui-adapter-select-map-node`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `SELECT_MAP_NODE` left UI on `MAP`, then passed with 7 tests after implementation.
-- `feature/ui-adapter-select-map-node`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-select-map-node`: full `npm.cmd run test:run` passed with 45 tests across 10 files.
-- `feature/ui-adapter-select-map-node`: `npm.cmd run build` passed.
-- `feature/ui-adapter-node-type-routing`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `SHOP` and `REST` node selections returned `screen: 'BATTLE'`, then passed with 9 tests after implementation.
-- `feature/ui-adapter-node-type-routing`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-node-type-routing`: full `npm.cmd run test:run` passed with 47 tests across 10 files.
-- `feature/ui-adapter-node-type-routing`: `npm.cmd run build` passed.
-- `feature/ui-adapter-event-node-entry`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `EVENT` node selection returned `screen: 'BATTLE'`, then passed with 10 tests after implementation.
-- `feature/ui-adapter-event-node-entry`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-event-node-entry`: full `npm.cmd run test:run` passed with 48 tests across 10 files.
-- `feature/ui-adapter-event-node-entry`: `npm.cmd run build` passed.
-- `feature/ui-adapter-event-choice-command`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `RESOLVE_EVENT_CHOICE` did not affect `OPEN`, `REST`, or `SKIP`, then passed with 13 tests after implementation.
-- `feature/ui-adapter-event-choice-command`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-event-choice-command`: full `npm.cmd run test:run` passed with 51 tests across 10 files.
-- `feature/ui-adapter-event-choice-command`: `npm.cmd run build` passed.
-- `feature/ui-adapter-showcase-slot-guard`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because showcase spin used structured RNG and `START_SHOWCASE` leaked stale structured slot state, then passed with 15 tests after implementation.
-- `feature/ui-adapter-showcase-slot-guard`: `npm.cmd run typecheck` passed.
-- `feature/ui-adapter-showcase-slot-guard`: full `npm.cmd run test:run` passed with 53 tests across 10 files.
-- `feature/ui-adapter-showcase-slot-guard`: `npm.cmd run build` passed.
-- `feature/showcase-ui-entry-overlay`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because title-screen Showcase entry was missing, then passed with 3 tests after implementation.
-- `feature/showcase-ui-entry-overlay`: `npm.cmd run typecheck` passed.
-- `feature/showcase-ui-entry-overlay`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
-- `feature/showcase-ui-entry-overlay`: `npm.cmd run build` passed.
-- `review/showcase-playable-qa`: `npm.cmd run test:e2e` passed with 1 Chromium smoke test.
-- `review/showcase-playable-qa`: Playwright browser QA at 1280x720 repeated the step 3 reward modal/overlay obstruction and confirmed reward-card click allows step 4 progression.
-- `review/showcase-playable-qa`: `npm.cmd run typecheck` passed.
-- `review/showcase-playable-qa`: full `npm.cmd run test:run` passed with 55 tests across 10 files.
-- `review/showcase-playable-qa`: `npm.cmd run build` passed.
-- `feature/showcase-reward-modal-accessibility`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because `NEXT STEP` remained rendered behind the reward modal, then passed after hiding the Showcase overlay on `REWARD`.
-- `feature/showcase-reward-modal-accessibility`: targeted `npm.cmd run test:run -- src/app/App.test.tsx` failed first because reward cards were clickable `div`s, then passed after converting reward cards to semantic buttons.
-- `feature/showcase-reward-modal-accessibility`: `npm.cmd run typecheck` passed.
-- `feature/showcase-reward-modal-accessibility`: full `npm.cmd run test:run` passed with 57 tests across 10 files.
-- `feature/showcase-reward-modal-accessibility`: `npm.cmd run build` passed.
-- `feature/showcase-reward-modal-accessibility`: `npm.cmd run test:e2e` passed with 1 Chromium smoke test.
-- `feature/showcase-reward-modal-accessibility`: focused Playwright browser check passed; reward modal hides `NEXT STEP`, `방벽 코어` is selectable as a button, and Showcase overlay returns after reward selection.
-- `feature/showcase-step-header-spacing`: targeted `npm.cmd run test:run -- src/components/Showcase/ShowcaseOverlay.test.tsx` failed first because `.showcase-step-heading` did not exist, then passed after separating the counter/title structure.
-- `feature/showcase-step-header-spacing`: `npm.cmd run typecheck` passed.
-- `feature/showcase-step-header-spacing`: full `npm.cmd run test:run` passed with 58 tests across 11 files.
-- `feature/showcase-step-header-spacing`: `npm.cmd run build` passed.
-- `feature/showcase-step-header-spacing`: focused Playwright browser check passed; Showcase step 4 heading is visible, separator renders `•`, and computed heading gap is `10px`.
-- `feature/offline-font-fallback`: targeted `npm.cmd run test:run -- src/app/OfflineAssetPolicy.test.ts` failed first because `src/styles.css` imported Google Fonts, then passed after removing the external font dependency.
-- `feature/offline-font-fallback`: `npm.cmd run typecheck`, full `npm.cmd run test:run`, and `npm.cmd run build` passed; focused browser check reported no Google Fonts failures.
-- `feature/ui-adapter-synergy-progress`: targeted `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed first because `combo_engine` progress stayed at `current: 0`, then passed with 16 tests after adapter projection used structured progress.
-- `feature/ui-adapter-synergy-progress`: `npm.cmd run typecheck`, full `npm.cmd run test:run` with 59 tests, and `npm.cmd run build` passed.
+## Review Requirements
 
-## Remaining Problems
+- Request independent code review after implementation.
+- Treat React-owned enemy behavior, non-deterministic intent progression, and wait/defend amount corruption after curse updates as blocking.
+- Project review findings and final verification evidence back into this handoff before finishing.
 
-- `feature/content-effect-schema-pilot` was merged through PR #10.
-- `feature/ui-adapter-confirm-result` was merged through PR #11.
-- `feature/ui-adapter-map-node` was merged through PR #12.
-- `feature/ui-adapter-select-map-node` was merged through PR #13.
-- `feature/ui-adapter-node-type-routing` was merged through PR #14.
-- `feature/ui-adapter-event-node-entry` was merged through PR #15.
-- `feature/ui-adapter-event-choice-command` was merged through PR #16.
-- `feature/ui-adapter-showcase-slot-guard` was merged through PR #17.
-- `feature/showcase-ui-entry-overlay` was merged through PR #18.
-- `review/showcase-playable-qa` was merged through PR #19.
-- `feature/showcase-reward-modal-accessibility` was merged through PR #20.
-- `feature/offline-font-fallback` was merged through PR #22.
-- `feature/ui-adapter-synergy-progress` is pushed and open as draft PR #23.
-- The visible React app now imports the adapter, but adapter coverage is intentionally narrow. Normal UI commands still delegate to the legacy engine unless a structured reward/build path has been activated.
-- Existing sibling checkout `C:\Users\00\Documents\Codex\curse_slot_machine_repo` contains dirty changes and was not modified.
-- `npm.cmd install` reported an `esbuild` script approval warning, but `esbuild` loaded and verification commands pass outside the sandbox.
+## Continuation Completed On 2026-08-22
 
-## Next Session Work
+- Documentation refreshed for `feature/enemy-defense-intent`.
+- Enemy intent patterns now come from `src/game/combat/MvpEnemyCatalog.ts`.
+- Combat runtime uses a non-empty, discriminated enemy intent pattern type.
+- `recalculateEnemyIntent` derives type and amount from the current pattern index, so restored or recalculated state cannot drift from pattern data.
+- Enemy catalog validation rejects empty patterns and non-defense amount assignments.
+- Reroll, rest purification, and Black-Market Stamp purchase cleansing have public-command regressions for wait and defend amount stability.
+- Reward projection exposes explicit `kind: 'item' | 'augment'`; `RewardModal` no longer infers item cards from icon text.
+- Defense intent UI descriptions interpolate the actual intent amount.
 
-1. Review PR #22 and merge only after explicit user approval.
-2. Next recommended slice: continue structured-engine UI migration.
+## Verification Results
 
-## Branch Log
+- `npm run typecheck`: passed on 2026-08-22.
+- `npm run test:run`: passed on 2026-08-22 with 19 test files and 100 tests.
+- `npm run build`: passed on 2026-08-22.
+- `npm run test:e2e`: passed on 2026-08-22 with 3 Chromium smoke tests.
 
-### feature/project-baseline
+## Review Feedback
 
-- Branch: `feature/project-baseline`
-- Commit: `2ce9e20`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/1
-- Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: none.
-- Next branch: `feature/game-engine-core`
+- Code-review lane initially returned `REQUEST CHANGES` for incomplete handoff docs and a hardcoded defense intent description.
+- The defense description finding was fixed with a projection regression test.
+- The handoff/progress documentation finding is addressed in this section and `docs/agent/PROJECT_PROGRESS_SUMMARY.md`.
+- Code-review re-review returned `APPROVE`.
+- Architecture lane initially returned `WATCH`, not `BLOCK`, for intent-state invariants and missing command-path tests.
+- The WATCH items were hardened with non-empty discriminated pattern types, catalog validation, canonical pattern-index recalculation, and public-command regressions.
+- Architecture re-review returned `CLEAR`.
 
-### feature/game-engine-core
+## Current Stacked Branch: Reward Card Inventory Projection
 
-- Branch: `feature/game-engine-core`
-- Implementation commit: `06b9cdc`; squash merge commit on `main`: `49f5eab`.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/2
-- Implemented so far: seeded RNG, `GameCommand`, `GameEvent`, `GameState`, and minimal deterministic `GameEngine`.
-- Verification: `typecheck`, `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: none for this branch.
-- Next branch: `feature/combat-slot-machine`
+- Branch: `feature/reward-card-inventory-projection`
+- Base: `feature/enemy-defense-intent`
+- Goal: split projected owned augment cards from projected owned item cards while preserving core ID-based build state.
+- `src/types/game.ts` narrows UI owned arrays to `AugmentCard[]` and `ItemCard[]`.
+- `projectUiGameState` resolves owned IDs with the expected kind and throws on mismatches instead of silently placing an item card in the augment array or vice versa.
+- Tests added:
+  - `src/game/engine/UiProjection.test.ts` covers separate projected owned augment and item card arrays.
+  - `src/game/engine/UiProjection.test.ts` covers wrong-kind owned ID rejection.
+  - `src/components/Battle/BattleScreen.test.tsx` covers battle inventory rendering for one augment and one item, combined count, item-card ID multiplier display, and legacy side-panel rendering.
+- Explorer subagent confirmed the safe change boundary is UI projection plus UI consumers; core build and reward systems remain ID-based.
+- Full verification on 2026-08-22:
+  - `npm run typecheck`: passed.
+  - `npm run test:run`: passed with 20 files and 105 tests.
+  - `npm run build`: passed.
+  - `npm run test:e2e`: passed with 3 Chromium smoke tests.
+- Review:
+  - Initial code-review lane returned `REQUEST CHANGES` for unenforced projection kind partition and thin render coverage.
+  - Follow-up fixed both with discriminated card arrays, expected-kind projection validation, and stronger component tests.
+  - Code-review re-review returned `APPROVE`.
+  - Architecture re-review returned `CLEAR`.
 
-### feature/combat-slot-machine
+## Remaining Risks
 
-- Branch: `feature/combat-slot-machine`
-- Commit: `4a2edb5` plus PR documentation updates; squash merge commit on `main`: `6edc91d`.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/3
-- Implemented: weighted combat reels, one-payline `[action, target, modifier]` results, lock-aware rerolls, deterministic seeded spin sequences, and curse costs for 0/1/2 locks.
-- Verification: targeted RED/GREEN test run, `typecheck`, full `test:run`, `build`, and `test:e2e` passed on 2026-08-18.
-- Remaining issues: none.
-- Next branch: `feature/combat-resolution`
+- `feature/reward-modal-accessibility-coverage` restores and covers the Showcase reward-modal accessibility path.
+- Showcase step 3 now dispatches the existing deterministic demo command prefix through the pure engine to reach a projected reward state.
+- `ShowcaseOverlay` is hidden while `gameState.screen === 'REWARD'`, so the reward modal owns input.
+- Reward choices are covered as `button[data-reward-id]` controls with accessible names, selected state, focus, and browser Enter activation.
+- Targeted verification on 2026-08-22:
+  - `npm.cmd run test:run -- src/app/App.test.tsx src/game/demo/OriginDemoTraces.test.ts`: passed with 2 files and 9 tests.
+  - `npm.cmd run typecheck`: passed.
+  - `npm.cmd run test:e2e -- tests/e2e/showcase-accessibility.spec.ts --project=chromium`: passed with 1 Chromium test.
+- Full verification on 2026-08-22:
+  - `npm.cmd run test:run`: passed with 21 files and 109 tests.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed with 4 Chromium tests.
+  - `git diff --check`: passed.
+- Independent review for this branch completed; remaining integration work is draft PR creation.
+- Review:
+  - Code-review lane returned `COMMENT`; one low-severity remaining-work wording issue was fixed.
+  - Architecture lane returned `CLEAR`; hard-coded reward-step index tradeoff was removed after review.
 
-### feature/combat-resolution
+## Parent Branch: Reward Inventory Naming Cleanup
 
-- Branch: `feature/combat-resolution`
-- Base: `main` after PR #3 merge.
-- Commit: `1be0afa` plus PR documentation updates; squash merge commit on `main`: `445265a`.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/6
-- Implemented: deterministic combat actors, curse state, enemy attack intent, slot result resolution for `bullet`/`shield`/`heart`, `enemy`/`self`/`all` targets, `x1`/`x2`/`x3` modifiers, block absorption, capped healing, victory/defeat outcomes, and `GameEngine` command integration.
-- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: none.
-- Next branch: `feature/build-reward-synergy`
+- `feature/reward-inventory-naming-cleanup` removes the remaining stale augment-only display names after the `RewardCard` type cleanup.
+- `RewardInventorySidePanel` replaces the legacy `AugmentSidePanel` export and file name.
+- `ALL_REWARD_CARDS` replaces the legacy `ALL_AUGMENTS` display catalog export.
+- Targeted verification on 2026-08-22:
+  - `npm.cmd run test:run -- src/components/Battle/BattleScreen.test.tsx src/game/data.test.ts src/game/engine/UiProjection.test.ts`: passed with 3 files and 13 tests.
+  - `npm.cmd run typecheck`: passed.
+- Full verification on 2026-08-22:
+  - `npm.cmd run test:run`: passed with 21 files and 107 tests.
+  - `npm.cmd run build`: passed.
+  - `npm.cmd run test:e2e`: passed with 3 Chromium smoke tests.
+  - `git diff --check`: passed.
+- Review:
+  - Code-review lane returned `COMMENT`; one low-severity progress-summary wording issue was fixed.
+  - Architecture lane returned `CLEAR`.
 
-### feature/build-reward-synergy
+## Parent Branch: Reward Card Type Cleanup
 
-- Branch: `feature/build-reward-synergy`
-- Base: `main`
-- Commit: `f2edf57` plus PR documentation updates; squash merge commit on `main`: `622f52f`.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/7
-- Implemented: pure build catalog, build state, synergy evaluation, reward application, reward scoring/candidate generation, and `GameEngine` reward phase integration after combat victory.
-- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Remaining issues: none.
-- Next branch: `feature/augment-slot-machine`
-
-### feature/augment-slot-machine
-
-- Branch: `feature/augment-slot-machine`
-- Base: `main` after PR #7 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `e57b615` plus PR documentation updates.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/8
-- Implemented: deterministic `AugmentSlotMachine` presentation types and pure functions, hidden three-reel reward presentation, immutable reveal helper, random API guard test, and `GameEngine` reward state/event integration.
-- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-19.
-- Merge result: user approved merging PR #8 on 2026-08-20; PR #8 was marked ready and squash merged into `main`.
-- Squash merge commit: `ca51454`.
-- Remaining issues: none for augment slot.
-- Next branch: `feature/content-effect-schema-pilot`
-
-### feature/content-effect-schema-pilot
-
-- Branch: `feature/content-effect-schema-pilot`
-- Base: `main` after PR #8 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `a7ef256`; squash merge commit on `main`: `8be060c`.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/10.
-- Implemented: content logic analysis docs, bounded JSON effect schema plan, pilot archetype/reward pacing docs, `EffectDefinition`/`EffectCondition` types, `getActiveEffects`, optional `CombatSystem` effect context, initial combat amount/extra-hit/curse-gain effects, pure `GameEngine` integration, a narrow `UiGameEngine` adapter imported by React, structured victory reward projection for the RewardModal contract, and pure combat slot spin/reroll routing.
-- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #10 on 2026-08-20; PR #10 was marked ready and squash merged into `main`.
-- Remaining issues: adapter coverage is narrow; map/shop/rest/showcase migration remain future slices.
-- Next branch: `feature/ui-adapter-confirm-result`.
-
-### feature/ui-adapter-confirm-result
-
-- Branch: `feature/ui-adapter-confirm-result`
-- Base: `main` after PR #10 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `1b68c65` plus projection helper extraction follow-up.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/11 (draft).
-- Implemented: `CONFIRM_SLOT_RESULT` now prefers adapter-owned pure `currentStructuredSlot` instead of mutable UI `currentResult`.
-- Implemented: `UiProjection.ts` now owns reusable pure conversions for structured slot results, rewards, augments, synergies, and reel indexes.
-- Verification: targeted RED/GREEN tests, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #11 on 2026-08-20; PR #11 was marked ready and squash merged into `main`.
-- Squash merge commit: `e8c5884`.
-- Remaining issues: map/shop/rest/showcase migration remain future slices.
-
-### feature/ui-adapter-map-node
-
-- Branch: `feature/ui-adapter-map-node`
-- Base: `main` after PR #11 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `e897a7e`.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/12 (draft).
-- Implemented: structured reward selection now returns the visible UI to `MAP`, clears reward candidates and augment slot presentation, advances legacy map/wave/enemy shell state, and preserves projected structured build ownership.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #12 on 2026-08-20; PR #12 was marked ready and squash merged into `main`.
-- Squash merge commit: `9955372`.
-- Remaining issues: deeper map node semantics, shop/rest/showcase migration remain future slices.
-
-### feature/ui-adapter-select-map-node
-
-- Branch: `feature/ui-adapter-select-map-node`
-- Base: `main` after PR #12 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `3a97e93`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/13
-- Implemented: `SELECT_MAP_NODE` now delegates map path bookkeeping to the legacy presentation engine, then prepares clean `BATTLE` entry state and clears stale adapter-owned structured slot results.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #13 on 2026-08-20; PR #13 was marked ready and squash merged into `main`.
-- Squash merge commit: `1877c21`.
-- Remaining issues: shop/rest/showcase migration remain future slices.
-
-### feature/ui-adapter-node-type-routing
-
-- Branch: `feature/ui-adapter-node-type-routing`
-- Base: `main` after PR #13 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `723e0c1`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/14
-- Implemented: `SELECT_MAP_NODE` accepts optional `nodeType`, `UiGameEngine` routes typed map nodes to `SHOP`, `REST`, or battle entry, and `DungeonMapScreen` stops dispatching duplicate `NAVIGATE` commands for battle/shop/rest node selections.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #14 on 2026-08-20; PR #14 was marked ready and squash merged into `main`.
-- Squash merge commit: `d4ea1bd`.
-- Remaining issues: event/showcase migration remain future slices.
-
-### feature/ui-adapter-event-node-entry
-
-- Branch: `feature/ui-adapter-event-node-entry`
-- Base: `main` after PR #14 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `b7d1d9f`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/15
-- Implemented: `SELECT_MAP_NODE` routes typed event nodes to clean `MAP` entry, records event node visits, clears stale adapter-owned slot state, and `DungeonMapScreen` dispatches the event node command before opening its existing event choice modal.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #15 on 2026-08-20; PR #15 was marked ready and squash merged into `main`.
-- Squash merge commit: `eae8337`.
-- Remaining issues: event choice resolution and showcase migration remain future slices.
-
-### feature/ui-adapter-event-choice-command
-
-- Branch: `feature/ui-adapter-event-choice-command`
-- Base: `main` after PR #15 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `8b0f42f`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/16
-- Implemented: `RESOLVE_EVENT_CHOICE` maps `OPEN`, `REST`, and `SKIP` through `UiGameEngine` into existing TypeScript engine behavior, while `DungeonMapScreen` only dispatches the selected event choice.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #16 on 2026-08-20; PR #16 was marked ready and squash merged into `main`.
-- Squash merge commit: `2165922`.
-- Remaining issues: showcase migration remains a future slice.
-
-### feature/ui-adapter-showcase-slot-guard
-
-- Branch: `feature/ui-adapter-showcase-slot-guard`
-- Base: `main` after PR #16 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `16c54a3`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/17
-- Implemented: `START_SHOWCASE` clears adapter-owned structured slot state and showcase active `SPIN_COMBAT_SLOT` delegates to legacy presentation forced results instead of structured slot RNG.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #17 on 2026-08-20; PR #17 was marked ready and squash merged into `main`.
-- Squash merge commit: `5d1a89b`.
-- Remaining issues: focused playable Showcase QA remains a future slice.
-
-### feature/showcase-ui-entry-overlay
-
-- Branch: `feature/showcase-ui-entry-overlay`
-- Base: `main` after PR #17 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `4846552`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/18
-- Implemented: title-screen `Showcase Mode` entry dispatches `START_SHOWCASE`, and `App` renders `ShowcaseOverlay` while `gameState.showcase.active` is true.
-- Verification: targeted RED/GREEN test, `typecheck`, full `test:run`, and `build` passed on 2026-08-20.
-- Merge result: user approved merging PR #18 on 2026-08-20; PR #18 was marked ready and squash merged into `main`.
-- Squash merge commit: `fed924e`.
-- Remaining issues: focused playable Showcase QA remains a future slice.
-
-### review/showcase-playable-qa
-
-- Branch: `review/showcase-playable-qa`
-- Base: `main` after PR #18 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `d5c15f4`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/19
-- Implemented: review-only `docs/reviews/milestone-showcase-playable-qa/qa-review.md` plus screenshot/JSON evidence.
-- Verification: `npm.cmd run test:e2e`, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed; Playwright browser QA repeated the step 3 obstruction and confirmed the reward-card path reaches step 4.
-- Merge result: user approved merging PR #19 on 2026-08-20; PR #19 was marked ready and squash merged into `main`.
-- Squash merge commit: `f1145c6`.
-- Remaining issues: `SHOWCASE-QA-001` and `SHOWCASE-QA-002` accepted and implemented in PR #20; `SHOWCASE-QA-003` and `SHOWCASE-QA-004` remain lower-priority polish/infrastructure findings.
-
-### feature/showcase-reward-modal-accessibility
-
-- Branch: `feature/showcase-reward-modal-accessibility`
-- Base: `main` after PR #19 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `428b1ca`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/20
-- Implemented: `App` hides `ShowcaseOverlay` while the reward modal owns input, and `RewardModal` exposes reward cards as semantic `button type="button"` controls with accessible reward-name labels.
-- Verification: targeted RED/GREEN App tests, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, `npm.cmd run test:e2e`, and focused Playwright browser check passed on 2026-08-20.
-- Merge result: user approved merging PR #20 on 2026-08-20; PR #20 was marked ready and squash merged into `main`.
-- Squash merge commit: `61744f1`.
-- Remaining issues: `SHOWCASE-QA-003` accepted and implemented in PR #21; `SHOWCASE-QA-004` remains lower-priority infrastructure/noise.
-
-### feature/showcase-step-header-spacing
-
-- Branch: `feature/showcase-step-header-spacing`
-- Base: `main` after PR #20 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `8ba4287`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/21
-- Implemented: `ShowcaseOverlay` renders a dedicated `.showcase-step-heading` with separated `.step-num`, `.step-separator`, and `.step-title`; CSS adds wrapping and spacing hooks.
-- Verification: targeted RED/GREEN component test, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, and focused Playwright browser check passed on 2026-08-20.
-- Merge result: user approved merging PR #21 on 2026-08-20; PR #21 was marked ready and squash merged into `main`.
-- Squash merge commit: `605b62d`.
-- Remaining issues: `SHOWCASE-QA-004` accepted and implemented in PR #22.
-
-### feature/offline-font-fallback
-
-- Branch: `feature/offline-font-fallback`
-- Base: `main` after PR #21 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: `00a810c`
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/22
-- Implemented: removed the external Google Fonts import, added an offline-safe Korean/system display font stack, and added an offline asset policy regression test.
-- Verification: targeted RED/GREEN offline asset policy test, `npm.cmd run typecheck`, `npm.cmd run test:run`, `npm.cmd run build`, and a focused browser network check passed on 2026-08-20.
-- Merge result: user approved merging PR #22 on 2026-08-20; PR #22 was marked ready and squash merged into `main`.
-- Squash merge commit: `00a810c`.
-
-### feature/ui-adapter-synergy-progress
-
-- Branch: `feature/ui-adapter-synergy-progress`
-- Base: `main` after PR #22 merge.
-- Worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Commit: see PR #23 branch head after PR #22 merge reconciliation.
-- PR: https://github.com/sabin1108/-curse_slot_machine/pull/23
-- Implemented: `UiGameEngine` projects structured `BuildState.synergies.progress` values into legacy UI `build.synergyProgress`; `toUiSynergyProgress` now accepts structured progress.
-- Verification: targeted RED/GREEN `UiGameEngine` test, `npm.cmd run typecheck`, `npm.cmd run test:run`, and `npm.cmd run build` passed on 2026-08-20.
-- Remaining issues: draft PR #23; do not merge without explicit user approval. Next structured migration slice should address item-specific UI projection.
+- `feature/reward-card-type-cleanup` replaces `AugmentItem` and battle inventory `.aug-*` classes with neutral reward-card terminology.
+- Full verification on 2026-08-22 for the cleanup branch:
+  - `npm run typecheck`: passed.
+  - `npm run test:run`: passed with 20 files and 106 tests.
+  - `npm run build`: passed.
+  - `npm run test:e2e`: passed with 3 Chromium smoke tests.
+- Review:
+  - Initial code-review lane returned `REQUEST CHANGES` for current-branch docs, RewardModal local variable naming, and missing direct `toUiReward` coverage.
+  - Follow-up fixed all three; code-review re-review returned `APPROVE`.
+  - Architecture review returned `CLEAR`.
+- The current MVP enemy patterns preserve low-defense demo balance; later balance changes should rerun origin demo traces and e2e smoke tests.

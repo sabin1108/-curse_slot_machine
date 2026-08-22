@@ -6,12 +6,14 @@ import { soundManager } from '../../utils/soundManager';
 interface TitleScreenProps {
   onDispatch: (cmd: GameCommand) => void;
   onOpenCurseLog?: () => void;
+  seed: string;
+  onSeedChange: (seed: string) => void;
 }
 
-export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurseLog }) => {
+export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurseLog, seed, onSeedChange }) => {
   const handleStartNormal = () => {
     soundManager.playClick();
-    onDispatch({ type: 'START_RUN', mode: 'NORMAL' });
+    onDispatch({ type: 'START_RUN' });
   };
 
   const handleOpenCurseLog = () => {
@@ -67,6 +69,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurs
       </div>
 
       <div className="title-btns" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+        <label className="seed-field">
+          RUN SEED
+          <input aria-label="Run seed" value={seed} onChange={(event) => onSeedChange(event.target.value)} />
+        </label>
         <div className="k-btn big primary glow-pulse" onClick={handleStartNormal}>
           🎮 던전 탐사 시작 (START GAME)
         </div>

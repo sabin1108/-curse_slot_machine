@@ -5,6 +5,8 @@ import type {
 } from '../slot/CombatSlotTypes'
 import type { Rarity, RewardKind, SynergyTag } from '../build/BuildTypes'
 
+export type CombatStatusId = 'primer' | 'burn' | 'exposed' | 'debt'
+
 export type EffectCondition =
   | {
       type: 'slot.action_is'
@@ -74,19 +76,67 @@ export type EffectDefinition =
     }
   | {
       id: string
-      type: 'combat.multiplier.add'
-      params: { amount: number }
-      conditions?: EffectCondition[]
-    }
-  | {
-      id: string
-      type: 'combat.multiplier.max'
-      params: { max: number }
-      conditions?: EffectCondition[]
-    }
-  | {
-      id: string
       type: 'reward.score.add'
       params: { amount: number }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.status.apply'
+      params: { status: CombatStatusId; stacks: number; target: 'player' | 'enemy' }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.status.consume_extra_hit'
+      params: { status: CombatStatusId; percent: number; target: 'player' | 'enemy' }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.extra_hit.status_apply'
+      params: { status: CombatStatusId; stacks: number; target: 'player' | 'enemy' }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.full_block.curse_prevent'
+      params: { uses: 1 }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.full_block.retaliate'
+      params: { amount: number }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.retaliation.status_apply'
+      params: { status: CombatStatusId; stacks: number }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.modifier.step_up'
+      params: { from: CombatModifierSymbol; to: CombatModifierSymbol }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'reroll.status.add'
+      params: { status: CombatStatusId; stacks: number }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'rest.purify.arm_shop_discount'
+      params: { discountPercent: number; purchaseCurseReduction: number }
+      conditions?: EffectCondition[]
+    }
+  | {
+      id: string
+      type: 'combat.curse_gain.prevent_once'
+      params: { trigger: 'block_depleted_or_status_consumed' }
       conditions?: EffectCondition[]
     }

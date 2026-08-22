@@ -1,98 +1,165 @@
 # Project Progress Summary
 
-Last updated: 2026-08-20
+Last updated: 2026-08-22
 
 ## Repository
 
-- GitHub: https://github.com/sabin1108/-curse_slot_machine
-- Main working policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
-- Current worktree: `C:\Users\00\Documents\Codex\csm_augment_slot`
-- Current branch: `feature/ui-adapter-synergy-progress`
-- Current PR: draft PR #23 - https://github.com/sabin1108/-curse_slot_machine/pull/23
-- PR #8 status: merged into `main` with squash commit `ca51454`.
-- PR #10 status: merged into `main` with squash commit `8be060c`.
-- PR #11 status: merged into `main` with squash commit `e8c5884`.
-- PR #12 status: merged into `main` with squash commit `9955372`.
-- PR #13 status: merged into `main` with squash commit `1877c21`.
-- PR #14 status: merged into `main` with squash commit `d4ea1bd`.
-- PR #15 status: merged into `main` with squash commit `eae8337`.
-- PR #16 status: merged into `main` with squash commit `2165922`.
-- PR #17 status: merged into `main` with squash commit `5d1a89b`.
-- PR #18 status: merged into `main` with squash commit `fed924e`.
-- PR #19 status: merged into `main` with squash commit `f1145c6`.
-- PR #20 status: merged into `main` with squash commit `61744f1`.
-- PR #21 status: merged into `main` with squash commit `605b62d`.
-- PR #22 status: merged into `main` with squash commit `00a810c`.
+- GitHub: `https://github.com/sabin1108/-curse_slot_machine`
+- Current worktree: `C:\Users\00\Documents\Codex\curse_slot_machine_repo_fresh`
+- Current branch: `feature/reward-modal-accessibility-coverage`
+- Current branch base: `feature/reward-inventory-naming-cleanup`
+- Baseline before this stacked cleanup: `a3b4a78`
+- Policy: branch-by-branch TDD, local verification, draft PR first, merge only after explicit user approval.
 
-## Completed Branches
+## Parent Branch
 
-| Branch | PR | Main commit | Status |
-| --- | --- | --- | --- |
-| `feature/project-baseline` | #1 | `2ce9e20` | Merged |
-| `feature/game-engine-core` | #2 | `49f5eab` | Merged |
-| `feature/combat-slot-machine` | #3 | `6edc91d` | Merged |
-| `feature/combat-resolution` | #6 | `445265a` | Merged |
-| `feature/build-reward-synergy` | #7 | `622f52f` | Merged |
-| `feature/augment-slot-machine` | #8 | `ca51454` | Merged |
-| `feature/content-effect-schema-pilot` | #10 | `8be060c` | Merged |
-| `feature/ui-adapter-confirm-result` | #11 | `e8c5884` | Merged |
-| `feature/ui-adapter-map-node` | #12 | `9955372` | Merged |
-| `feature/ui-adapter-select-map-node` | #13 | `1877c21` | Merged |
-| `feature/ui-adapter-node-type-routing` | #14 | `d4ea1bd` | Merged |
-| `feature/ui-adapter-event-node-entry` | #15 | `eae8337` | Merged |
-| `feature/ui-adapter-event-choice-command` | #16 | `2165922` | Merged |
-| `feature/ui-adapter-showcase-slot-guard` | #17 | `5d1a89b` | Merged |
-| `feature/showcase-ui-entry-overlay` | #18 | `fed924e` | Merged |
-| `review/showcase-playable-qa` | #19 | `f1145c6` | Merged |
-| `feature/showcase-reward-modal-accessibility` | #20 | `61744f1` | Merged |
-| `feature/showcase-step-header-spacing` | #21 | `605b62d` | Merged |
-| `feature/offline-font-fallback` | #22 | `00a810c` | Merged |
+`feature/enemy-defense-intent` continues from the playable canonical UI integration line.
 
-## Current Branch
+Implemented before this continuation:
 
-`feature/ui-adapter-synergy-progress` is open as draft PR #23.
+- Enemy attacks alternate with wait turns.
+- Enemy wait turns have no incoming damage preview.
+- Enemy defense turns add low block and cap accumulated enemy block.
+- Combat logs and UI projection describe wait and defense outcomes.
 
-Implemented:
+Continuation work completed on 2026-08-22:
 
-- `UiGameEngine` projects real structured `BuildState.synergies.progress` values into the legacy UI build panel state.
-- `toUiSynergyProgress` accepts structured progress while preserving catalog-derived fallback values.
-- React remains display/input only; synergy calculation stays in the pure TypeScript build system.
-
-Current branch commits:
-
-- `4742591` - `docs: plan ui synergy progress projection`
-- `4d44cda` - `fix: project structured synergy progress`
-- `b0811e6` - `docs: update ui synergy progress pr handoff`
-- latest branch head: see PR #23 after PR #22 merge reconciliation.
-
-## Verification
-
-Latest verification on `feature/ui-adapter-synergy-progress`:
-
-- `npm.cmd run typecheck`: passed.
-- `npm.cmd run test:run`: passed, 59 tests across 11 files.
-- `npm.cmd run build`: passed.
-
-TDD evidence:
-
-- RED: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` failed because `combo_engine` UI progress stayed at `current: 0`.
-- GREEN: `npm.cmd run test:run -- src/game/engine/UiGameEngine.test.ts` passed with 16 tests after passing structured progress through the adapter projection.
+1. Refreshed branch documentation and verification notes.
+2. Added data-driven per-enemy intent patterns.
+3. Continued structured-engine UI migration with explicit item-specific reward projection.
+4. Hardened review findings around pattern invariants, catalog validation, and command-path regressions.
 
 ## Architecture Decisions Preserved
 
 - React renders state and events; it does not decide game outcomes.
 - Pure TypeScript systems own deterministic game rules.
-- `CombatSlotMachine` and `AugmentSlotMachine` are separate systems.
+- Enemy intent sequencing is combat-engine data.
+- `CombatSlotMachine` and `AugmentSlotMachine` remain separate systems.
 - `RewardSystem` owns reward option generation.
-- `AugmentSlotMachine` only presents a preselected reward result and must not call random APIs to decide rewards.
 - Showcase Mode remains separate and must not mutate normal combat balance.
-- Content effects are bounded typed data, not free-form scripts.
+- Content effects and enemy balance are bounded typed data, not free-form scripts.
+
+## Verification Status
+
+Latest verified results for this continuation:
+
+```powershell
+npm run typecheck  # passed
+npm run test:run   # passed, 19 files / 100 tests
+npm run build      # passed
+npm run test:e2e   # passed, 3 Chromium tests
+```
+
+Review feedback and remaining risks are recorded in `docs/agent/SESSION_HANDOFF.md`.
+
+## Current Branch: Reward Modal Accessibility Coverage
+
+`feature/reward-modal-accessibility-coverage` is stacked on `feature/reward-inventory-naming-cleanup`.
+
+Completed in this slice:
+
+1. Added React Testing Library coverage for Showcase step 3 reward-modal ownership and reward choice role/name/focus/selected state.
+2. Restored Showcase step 3 reward presentation by dispatching the existing deterministic demo command prefix through the pure engine.
+3. Added Playwright coverage for keyboard activation of a focused reward choice and step 4 continuation.
+4. Marked `SHOWCASE-QA-001` and `SHOWCASE-QA-002` resolved in follow-up while preserving original milestone evidence.
+
+Targeted verification for this branch:
+
+```powershell
+npm.cmd run test:run -- src/app/App.test.tsx  # passed, 5 tests
+npm.cmd run typecheck                         # passed
+npm.cmd run test:e2e -- tests/e2e/showcase-accessibility.spec.ts --project=chromium  # passed, 1 Chromium test
+npm.cmd run test:run                          # passed, 21 files / 109 tests
+npm.cmd run build                             # passed
+npm.cmd run test:e2e                          # passed, 4 Chromium tests
+git diff --check                              # passed
+```
+
+Review status for this branch:
+
+- Code-review lane: `COMMENT`; one low-severity remaining-work wording issue was fixed.
+- Architecture lane: `CLEAR`; hard-coded reward-step index tradeoff was removed after review.
+
+## Parent Stacked Branch: Reward Inventory Naming Cleanup
+
+`feature/reward-inventory-naming-cleanup` is stacked on `feature/reward-card-type-cleanup`.
+
+Completed in this slice:
+
+1. Renamed the legacy battle inventory side panel from `AugmentSidePanel` to `RewardInventorySidePanel`.
+2. Renamed the display reward catalog export from `ALL_AUGMENTS` to `ALL_REWARD_CARDS`.
+3. Updated battle inventory local reward-card variable names without changing rendered class names or gameplay behavior.
+4. Added direct catalog coverage that confirms the display reward catalog includes explicit augment and item card kinds.
+
+Verification for this cleanup branch:
+
+```powershell
+npm.cmd run test:run -- src/components/Battle/BattleScreen.test.tsx src/game/data.test.ts src/game/engine/UiProjection.test.ts  # passed, 3 files / 13 tests
+npm.cmd run typecheck  # passed
+npm.cmd run test:run   # passed, 21 files / 107 tests
+npm.cmd run build      # passed
+npm.cmd run test:e2e   # passed, 3 Chromium tests
+git diff --check        # passed
+```
+
+Review status for this cleanup branch:
+
+- Code-review lane: `COMMENT`; one low-severity progress-summary wording issue was fixed.
+- Architecture lane: `CLEAR`.
+
+## Parent Stacked Branch: Reward Card Type Cleanup
+
+`feature/reward-card-type-cleanup` is stacked on `feature/reward-card-inventory-projection`.
+
+Completed in this slice:
+
+1. Renamed the shared UI card type from `AugmentItem` to `RewardCard`.
+2. Kept `AugmentCard` and `ItemCard` as discriminated UI subtypes for owned inventory arrays.
+3. Renamed `toUiAugment` to `toUiRewardCard` while keeping `toUiReward` as the reward-option adapter.
+4. Renamed battle inventory row/list/value CSS classes from augment-specific names to `reward-card-*`.
+5. Added direct coverage for `toUiReward`, `toUiRewardCard`, and neutral battle inventory selectors.
+
+Verification for this cleanup branch:
+
+```powershell
+npm run typecheck  # passed
+npm run test:run   # passed, 20 files / 106 tests
+npm run build      # passed
+npm run test:e2e   # passed, 3 Chromium tests
+```
+
+Review status for this cleanup branch:
+
+- Code-review lane: initial `REQUEST CHANGES`, re-review `APPROVE`.
+- Architecture lane: `CLEAR`.
+
+## Grandparent Stacked Branch: Reward Card Inventory Projection
+
+`feature/reward-card-inventory-projection` is stacked on `feature/enemy-defense-intent`.
+
+Completed in this slice:
+
+1. UI `BuildState.items` now carries item reward cards instead of raw item IDs.
+2. `projectUiGameState` resolves owned augment IDs and item IDs into separate card arrays.
+3. `projectUiGameState` rejects owned reward IDs stored under the wrong core kind instead of silently projecting them into the wrong UI array.
+4. Battle inventory rendering derives ownership IDs from projected cards and shows both augments and items with `AUG`/`ITEM` badges.
+5. Projection and render regressions cover owned augment/item display, combined counts, legacy side-panel alignment, and item-card ID extraction for display-only multiplier caps.
+
+Verification for this stacked branch:
+
+```powershell
+npm run typecheck  # passed
+npm run test:run   # passed, 20 files / 105 tests
+npm run build      # passed
+npm run test:e2e   # passed, 3 Chromium tests
+```
+
+Review status for this stacked branch:
+
+- Code-review lane: initial `REQUEST CHANGES`, re-review `APPROVE`.
+- Architecture lane: `CLEAR`.
 
 ## Remaining Work
 
-Next planned work:
-
-1. Finish merging PR #23 after conflict resolution and verification.
-2. Next recommended structured-engine UI migration slice: project item cards with item-specific UI shape instead of using augment-shaped presentation.
-
-Do not merge later PRs without explicit user approval.
+- Open a draft PR for the stacked `feature/reward-modal-accessibility-coverage` branch.
+- Do not merge or change PR state without explicit user approval.

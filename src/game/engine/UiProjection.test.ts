@@ -1,36 +1,150 @@
 import { describe, expect, it } from 'vitest'
-import { toUiSlotResult } from './UiProjection'
 
-describe('UiProjection', () => {
-  it('projects bullet enemy x2 slot results into legacy UI slot result shape', () => {
-    const result = toUiSlotResult({
-      action: 'bullet',
-      target: 'enemy',
-      modifier: 'x2',
-    })
+import { GameEngine } from './GameEngine'
+import { createInitialGameState } from './GameState'
+import { projectUiGameState, toUiEnemyIntent, toUiReward, toUiRewardCard, type UiFeedback } from './UiProjection'
 
-    expect(result).toMatchObject({
-      action: { id: 'bullet' },
-      target: { type: 'ENEMY' },
-      modifier: { id: 'x2' },
-      isMiss: false,
-      calculatedValue: 10,
+const emptyFeedback: UiFeedback = {
+  combatLogs: [],
+  lastDamagePop: null,
+  enemyDamagePops: [],
+  isEnemyAttacking: false,
+  showcase: {
+    active: false,
+    currentStep: 0,
+    steps: [],
+  },
+}
+
+const emptyScore = {
+  immediatePower: 0,
+  synergyValue: 0,
+  completionValue: 0,
+  futureValue: 0,
+  contentValue: 0,
+  total: 0,
+}
+
+describe('UiProjection enemy intent', () => {
+  it('projects attack damage', () => {
+    expect(toUiEnemyIntent({ type: 'attack', baseAmount: 7, amount: 8 })).toMatchObject({
+      id: 'attack',
+      type: 'ATTACK',
+      value: 8,
     })
   })
 
-  it('projects shield self x3 slot results into legacy UI slot result shape', () => {
-    const result = toUiSlotResult({
-      action: 'shield',
-      target: 'self',
-      modifier: 'x3',
+  it('projects a harmless wait', () => {
+    expect(toUiEnemyIntent({ type: 'wait', baseAmount: 7, amount: 0 })).toMatchObject({
+      id: 'wait',
+      type: 'WAIT',
+      value: 0,
+    })
+  })
+
+  it('projects a low defense intent', () => {
+    expect(toUiEnemyIntent({ type: 'defend', baseAmount: 7, amount: 1 })).toMatchObject({
+      id: 'defend',
+      type: 'DEFEND',
+      value: 1,
+    })
+  })
+
+  it('projects defense intent descriptions from the intent amount', () => {
+    const intent = toUiEnemyIntent({ type: 'defend', baseAmount: 7, amount: 2 })
+
+    expect(intent.description).toContain('2')
+    expect(intent.description).not.toContain('1 ')
+  })
+})
+
+describe('UiProjection reward cards', () => {
+  it('projects owned augments and items as separate UI card arrays', () => {
+    const engine = new GameEngine('owned-card-projection', {
+      startingRewards: [
+        { kind: 'augment', id: 'combo_starter' },
+        { kind: 'item', id: 'multi_hit_charm' },
+      ],
     })
 
-    expect(result).toMatchObject({
-      action: { id: 'shield' },
-      target: { type: 'SELF' },
-      modifier: { id: 'x3' },
-      isMiss: false,
-      calculatedValue: 15,
+    const projected = projectUiGameState(engine.getState(), emptyFeedback)
+
+    expect(projected.build.augments).toEqual([
+      expect.objectContaining({
+        id: 'combo_starter',
+        kind: 'augment',
+        icon: 'AUG',
+      }),
+    ])
+    expect(projected.build.items).toEqual([
+      expect.objectContaining({
+        id: 'multi_hit_charm',
+        kind: 'item',
+        icon: 'ITEM',
+      }),
+    ])
+  })
+
+  it('rejects owned reward IDs stored under the wrong core kind', () => {
+    const state = createInitialGameState('wrong-owned-kind')
+    state.build = {
+      ...state.build,
+      augments: ['multi_hit_charm'],
+    }
+
+    expect(() => projectUiGameState(state, emptyFeedback)).toThrow(
+      'Reward kind mismatch for multi_hit_charm: expected augment, found item',
+    )
+  })
+
+  it('projects items with explicit item kind and item label fields', () => {
+    expect(toUiRewardCard({
+      id: 'multi_hit_charm',
+      kind: 'item',
+      name: 'Multi-Hit Charm',
+      rarity: 'uncommon',
+      tags: ['MULTI_HIT'],
+      description: 'Bullets add a 35% extra hit.',
+      effectLabel: 'Bullets add a 35% extra hit.',
+    })).toMatchObject({
+      id: 'multi_hit_charm',
+      kind: 'item',
+      icon: 'ITEM',
+      effectValue: 'Bullets add a 35% extra hit.',
+    })
+  })
+
+  it('projects augments with explicit augment kind', () => {
+    expect(toUiRewardCard({
+      id: 'combo_starter',
+      kind: 'augment',
+      name: 'Combo Starter',
+      rarity: 'common',
+      tags: ['COMBO'],
+      description: 'Locked bullets apply Primer.',
+      effectLabel: 'Locked bullets apply Primer.',
+    })).toMatchObject({
+      id: 'combo_starter',
+      kind: 'augment',
+      icon: 'AUG',
+    })
+  })
+
+  it('keeps the reward-option adapter on the neutral reward card shape', () => {
+    expect(toUiReward({
+      id: 'black_market_stamp',
+      kind: 'item',
+      name: 'Black-Market Stamp',
+      rarity: 'rare',
+      tags: ['CURSE', 'RESOURCE'],
+      description: 'Purify arms a 25% discount and purchase cleanse.',
+      effectLabel: 'Purify arms a 25% discount and purchase cleanse.',
+      score: emptyScore,
+    })).toMatchObject({
+      id: 'black_market_stamp',
+      kind: 'item',
+      icon: 'ITEM',
+      rarity: 'RARE',
     })
   })
 })

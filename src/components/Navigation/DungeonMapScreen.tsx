@@ -1,293 +1,91 @@
-import React, { useMemo, useState } from 'react';
-import { GameCommand, MapNodeType } from '../../types/game';
-import { getAsset } from '../../assets/assetHelper';
-import { soundManager } from '../../utils/soundManager';
-
-interface MapNodeData {
-  id: number;
-  stage: number;
-  lane: number;
-  name: string;
-  type: MapNodeType;
-  icon: string;
-  x: number;
-  y: number;
-  description: string;
-}
+import React, { useState } from 'react'
+import { getAsset } from '../../assets/assetHelper'
+import { MVP_ROUTE } from '../../game/run/RunSystem'
+import type { RunStageDefinition, RunStageType } from '../../game/run/RunTypes'
+import type { GameCommand } from '../../types/game'
+import { soundManager } from '../../utils/soundManager'
 
 interface DungeonMapScreenProps {
-  currentWave: number;
-  totalWaves: number;
-  visitedNodePath: number[];
-  onDispatch: (cmd: GameCommand) => void;
+  completedStageIds: number[]
+  currentStage: RunStageDefinition | null
+  onDispatch: (command: GameCommand) => void
 }
 
-const STAGE_LANES: Record<number, number[]> = {
-  1: [2],
-  2: [2],
-  3: [1, 2, 3],
-  4: [1, 2, 3, 4],
-  5: [1, 2, 3],
-  6: [1, 3],
-  7: [1, 2, 3, 4],
-  8: [1, 2, 3],
-  9: [1, 2, 3, 4],
-  10: [1, 3],
-  11: [1, 2, 3],
-  12: [1, 2, 3],
-  13: [2],
-  14: [2],
-  15: [2],
-};
-
-function getNodeId(stage: number, lane: number): number {
-  return stage * 100 + lane;
+const LABELS: Record<RunStageType, string> = {
+  combat: '전투', elite: '정예', rest: '휴식', shop: '상점', event: '이벤트', gate: '관문', boss: '보스',
 }
 
-function getNodeType(stage: number, lane: number): MapNodeType {
-  if (stage === 13) return 'SHOP';
-  if (stage === 14) return 'REST';
-  if (stage === 15) return 'BOSS';
-  if ((stage === 5 || stage === 8 || stage === 11) && lane === 2) return 'REST';
-  if ((stage === 6 || stage === 10 || stage === 12) && lane !== 2) return 'ELITE';
-  if (stage === 5 || stage === 8 || stage === 11) return 'EVENT';
-  return 'BATTLE';
+function getNodeIcon(type: RunStageType): string {
+  if (type === 'shop') return getAsset('dg_coin_anim_f0')
+  if (type === 'rest') return getAsset('rest_campfire')
+  if (type === 'event') return getAsset('dg_crate')
+  if (type === 'boss') return getAsset('skull_red')
+  if (type === 'elite' || type === 'gate') return getAsset('ogre')
+  return getAsset('skull_white')
 }
 
-function getNodeMeta(type: MapNodeType) {
-  if (type === 'SHOP') {
-    return { icon: getAsset('dg_coin_anim_f0'), label: '상점', description: '보스 등반 전 마지막 상점입니다.' };
-  }
-  if (type === 'REST') {
-    return { icon: getAsset('rest_campfire'), label: '휴식', description: '체력을 회복하거나 현재 저주의 80%를 정화합니다.' };
-  }
-  if (type === 'BOSS') {
-    return { icon: getAsset('skull_red'), label: '보스', description: '15층 최종 보스 방입니다.' };
-  }
-  if (type === 'ELITE') {
-    return { icon: getAsset('ogre'), label: '정예', description: '더 강하지만 보상이 좋은 전투입니다.' };
-  }
-  if (type === 'EVENT') {
-    return { icon: getAsset('dg_crate'), label: '이벤트', description: '골드, 회복, 빈손 중 하나가 걸린 우회로입니다.' };
-  }
-  return { icon: getAsset('skull_white'), label: '전투', description: '일반 전투 방입니다.' };
-}
+export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({ completedStageIds, currentStage, onDispatch }) => {
+  const [hoveredStage, setHoveredStage] = useState<RunStageDefinition | null>(null)
+  const nextStage = MVP_ROUTE[completedStageIds.length] ?? null
+  const activeStage = currentStage ?? nextStage
 
-function buildNodes(): MapNodeData[] {
-  return Object.entries(STAGE_LANES).flatMap(([stageKey, lanes]) => {
-    const stage = Number(stageKey);
-    return lanes.map((lane) => {
-      const type = getNodeType(stage, lane);
-      const meta = getNodeMeta(type);
-      return {
-        id: getNodeId(stage, lane),
-        stage,
-        lane,
-        name: `Stage ${stage} ${meta.label}`,
-        type,
-        icon: meta.icon,
-        x: 5 + ((stage - 1) / 14) * 90,
-        y: 18 + (lane - 1) * 21,
-        description: meta.description,
-      };
-    });
-  });
-}
-
-function canConnect(from: MapNodeData, to: MapNodeData): boolean {
-  if (to.stage !== from.stage + 1) {
-    return false;
-  }
-  if (to.stage <= 2 || to.stage >= 13) {
-    return true;
+  const enterNextStage = () => {
+    soundManager.playClick()
+    onDispatch({ type: 'ENTER_NEXT_STAGE' })
   }
 
-  const distance = Math.abs(from.lane - to.lane);
-  if (distance > 1) {
-    return false;
+  const resolveEvent = (choice: 'reward' | 'gold' | 'rest' | 'skip') => {
+    soundManager.playClick()
+    onDispatch({ type: 'RESOLVE_EVENT', choice })
   }
-
-  const blockedEdges = new Set([
-    `${getNodeId(4, 4)}>${getNodeId(5, 3)}`,
-    `${getNodeId(7, 1)}>${getNodeId(8, 1)}`,
-    `${getNodeId(9, 4)}>${getNodeId(10, 3)}`,
-    `${getNodeId(11, 1)}>${getNodeId(12, 1)}`,
-  ]);
-
-  return !blockedEdges.has(`${from.id}>${to.id}`);
-}
-
-function buildConnections(nodes: MapNodeData[]): [number, number][] {
-  const result: [number, number][] = [];
-  for (const from of nodes) {
-    for (const to of nodes) {
-      if (canConnect(from, to)) {
-        result.push([from.id, to.id]);
-      }
-    }
-  }
-  return result;
-}
-
-export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
-  currentWave,
-  totalWaves,
-  visitedNodePath = [],
-  onDispatch,
-}) => {
-  const [hoveredNode, setHoveredNode] = useState<MapNodeData | null>(null);
-  const [activeEventNode, setActiveEventNode] = useState<MapNodeData | null>(null);
-  const nodes = useMemo(buildNodes, []);
-  const connections = useMemo(() => buildConnections(nodes), [nodes]);
-
-  const getNodeById = (id: number) => nodes.find((node) => node.id === id);
-  const lastVisitedId = visitedNodePath.length > 0 ? visitedNodePath[visitedNodePath.length - 1] : null;
-  const lastVisitedNode = lastVisitedId ? getNodeById(lastVisitedId) : null;
-  const activeStage = lastVisitedNode ? Math.min(totalWaves, lastVisitedNode.stage + 1) : currentWave;
-
-  const isVisitedSegment = (fromId: number, toId: number) => (
-    visitedNodePath.some((id, index) => id === fromId && visitedNodePath[index + 1] === toId)
-  );
-
-  const isAvailableNode = (node: MapNodeData) => {
-    if (visitedNodePath.includes(node.id)) {
-      return false;
-    }
-    if (!lastVisitedId) {
-      return node.stage === 1;
-    }
-    return node.stage === activeStage && connections.some(([fromId, toId]) => fromId === lastVisitedId && toId === node.id);
-  };
-
-  const handleSelectNode = (node: MapNodeData) => {
-    soundManager.playClick();
-    onDispatch({ type: 'SELECT_MAP_NODE', nodeId: node.id, nodeType: node.type });
-    if (node.type === 'EVENT') {
-      setActiveEventNode(node);
-    }
-  };
-
-  const handleEventChoice = (action: 'OPEN' | 'REST' | 'SKIP') => {
-    soundManager.playClick();
-    onDispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: action });
-    setActiveEventNode(null);
-  };
 
   return (
-    <div
-      id="frame-map"
-      className="frame map-screen"
-      style={{
-        ['--floor-tile' as string]: `url(${getAsset('dg_floor_1')})`,
-      }}
-    >
+    <div id="frame-map" className="frame map-screen" style={{ ['--floor-tile' as string]: `url(${getAsset('dg_floor_1')})` }}>
       <div className="map-floor-texture" />
-
-      <div className="map-boss-goal-banner">
-        경로 규칙: 1층은 외길, 3-12층은 다중 갈림길, 13층 상점, 14층 휴식, 15층 보스.
-      </div>
+      <div className="map-boss-goal-banner">고정 경로 · 동일한 시드와 명령 순서는 항상 동일한 결과를 만듭니다.</div>
       <div className="map-header-banner">
-        <div className="map-chapter-title">저주받은 성채 경로 - {activeStage} / {totalWaves}층</div>
-        <div className="map-chapter-sub">
-          {visitedNodePath.length === 0
-            ? '첫 방은 외길입니다. 이후 선택한 길에 따라 닿을 수 없는 경로가 잠깁니다.'
-            : `클리어한 방: ${visitedNodePath.length}. ${activeStage}층에서 연결된 방 하나를 고르세요.`}
-        </div>
+        <div className="map-chapter-title">저주받은 성채 · {activeStage?.id ?? 15} / 15 스테이지</div>
+        <div className="map-chapter-sub">분기 선택 없이 코어가 정의한 순서대로 진행합니다.</div>
       </div>
 
       <div className="map-path-container route-15">
         <svg className="map-lines-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {connections.map(([fromId, toId]) => {
-            const fromNode = getNodeById(fromId);
-            const toNode = getNodeById(toId);
-            if (!fromNode || !toNode) return null;
-
-            const goldTrail = isVisitedSegment(fromId, toId);
-            const nextLine = lastVisitedId === fromId && toNode.stage === activeStage;
-            const startLine = visitedNodePath.length === 0 && fromNode.stage === 1;
-
-            return (
-              <line
-                key={`${fromId}-${toId}`}
-                x1={fromNode.x}
-                y1={fromNode.y}
-                x2={toNode.x}
-                y2={toNode.y}
-                stroke={goldTrail ? '#ffb703' : nextLine || startLine ? '#7fd8ff' : '#3a2a1b'}
-                strokeWidth={goldTrail ? '1.8' : nextLine || startLine ? '0.9' : '0.35'}
-                strokeDasharray={goldTrail ? 'none' : '1.2 1.4'}
-                opacity={goldTrail ? 1 : nextLine || startLine ? 0.95 : 0.22}
-              />
-            );
+          {MVP_ROUTE.slice(0, -1).map((stage, index) => {
+            const next = MVP_ROUTE[index + 1]
+            const cleared = completedStageIds.includes(stage.id) && completedStageIds.includes(next.id)
+            return <line key={`${stage.id}-${next.id}`} x1={5 + ((stage.id - 1) / 14) * 90} y1={50} x2={5 + ((next.id - 1) / 14) * 90} y2={50} stroke={cleared ? '#ffb703' : '#3a2a1b'} strokeWidth={cleared ? '1.8' : '0.7'} />
           })}
         </svg>
 
-        {nodes.map((node) => {
-          const isVisited = visitedNodePath.includes(node.id);
-          const isCurrent = lastVisitedId === node.id;
-          const isClearedPast = isVisited && !isCurrent;
-          const isAvailable = isAvailableNode(node);
-          const isLockedOrPassed = !isAvailable && !isVisited;
-
+        {MVP_ROUTE.map((stage) => {
+          const completed = completedStageIds.includes(stage.id)
+          const available = !currentStage && nextStage?.id === stage.id
+          const current = currentStage?.id === stage.id
           return (
-            <button
-              key={node.id}
-              className={`map-node-card ${isCurrent ? 'current' : ''} ${isClearedPast ? 'cleared' : ''} ${
-                isAvailable ? 'avail' : 'locked'
-              } ${isLockedOrPassed ? 'passed' : ''} type-${node.type.toLowerCase()}`}
-              style={{ left: `${node.x}%`, top: `${node.y}%` }}
-              onMouseEnter={() => setHoveredNode(node)}
-              onMouseLeave={() => setHoveredNode(null)}
-              onClick={() => isAvailable && handleSelectNode(node)}
-              disabled={!isAvailable}
-              type="button"
-            >
-              <img src={node.icon} alt="" className="node-icon-img" />
-              <div className="node-name-badge">
-                {isCurrent ? 'Here' : isClearedPast ? 'Cleared' : isAvailable ? `S${node.stage}` : node.name}
-              </div>
+            <button key={stage.id} className={`map-node-card ${completed ? 'cleared' : ''} ${current ? 'current' : ''} ${available ? 'avail' : 'locked'} type-${stage.type}`} style={{ left: `${5 + ((stage.id - 1) / 14) * 90}%`, top: '50%' }} onMouseEnter={() => setHoveredStage(stage)} onMouseLeave={() => setHoveredStage(null)} onClick={() => available && enterNextStage()} disabled={!available} type="button" aria-label={`Stage ${stage.id} ${LABELS[stage.type]}`}>
+              <img src={getNodeIcon(stage.type)} alt="" className="node-icon-img" />
+              <div className="node-name-badge">{completed ? 'Clear' : current ? 'Here' : `S${stage.id}`}</div>
             </button>
-          );
+          )
         })}
       </div>
 
-      {activeEventNode && (
-        <div className="reward-modal-backdrop">
-          <div className="reward-modal-content">
-            <div className="reward-header">
-              <h2>{activeEventNode.name}</h2>
-              <p>{activeEventNode.description}</p>
-            </div>
-
-            <div className="event-choices-grid" style={{ display: 'flex', gap: '16px', justifyContent: 'center', margin: '20px 0' }}>
-              <button className="k-btn primary big" onClick={() => handleEventChoice('OPEN')} type="button">
-                은닉품 열기
-              </button>
-              <button className="k-btn warning big" onClick={() => handleEventChoice('REST')} type="button">
-                잠시 피신
-              </button>
-              <button className="k-btn big" onClick={() => handleEventChoice('SKIP')} type="button">
-                계속 전진
-              </button>
-            </div>
+      {currentStage?.type === 'event' && (
+        <div className="reward-modal-backdrop"><div className="reward-modal-content">
+          <div className="reward-header"><h2>Stage {currentStage.id} · 깊은 밤의 제단</h2><p>보상, 골드, 회복 중 하나를 택하거나 지나칩니다.</p></div>
+          <div className="event-choices-grid" style={{ display: 'flex', gap: '16px', justifyContent: 'center', margin: '20px 0' }}>
+            <button data-event-choice="reward" className="k-btn primary big" onClick={() => resolveEvent('reward')} type="button">보상 탐색</button>
+            <button data-event-choice="gold" className="k-btn big" onClick={() => resolveEvent('gold')} type="button">골드 +50</button>
+            <button data-event-choice="rest" className="k-btn warning big" onClick={() => resolveEvent('rest')} type="button">HP +15</button>
+            <button data-event-choice="skip" className="k-btn big" onClick={() => resolveEvent('skip')} type="button">지나치기</button>
           </div>
-        </div>
+        </div></div>
       )}
 
       <div className="map-hover-info-box">
-        {hoveredNode ? (
-          <>
-            <div className="hover-title">
-              [{hoveredNode.type}] {hoveredNode.name}
-            </div>
-            <div className="hover-desc">{hoveredNode.description}</div>
-          </>
-        ) : (
-          <div className="hover-hint">방 위에 마우스를 올리면 정보를 볼 수 있습니다. 연결되지 않은 방은 현재 경로에서 잠깁니다.</div>
-        )}
+        {hoveredStage ? <><div className="hover-title">Stage {hoveredStage.id} · {LABELS[hoveredStage.type]}</div><div className="hover-desc">보상 정책: {hoveredStage.rewardPolicy}</div></> : <div className="hover-hint">파란색으로 표시된 다음 방만 진입할 수 있습니다.</div>}
       </div>
-
       <div className="vignette" />
     </div>
-  );
-};
+  )
+}

@@ -1,4 +1,4 @@
-import { ReelSymbol, AugmentItem, SynergyProgress, EnemyState, ShowcaseStep } from '../types/game';
+import { ReelSymbol, RewardCard, SynergyProgress, EnemyState, ShowcaseStep } from '../types/game';
 import { getAsset } from '../assets/assetHelper';
 import { DEFAULT_BUILD_CATALOG } from './build/BuildCatalog';
 
@@ -187,9 +187,10 @@ export const MODIFIER_SYMBOLS: ReelSymbol[] = [
   }
 ];
 
-export const ALL_AUGMENTS: AugmentItem[] = [
+export const ALL_REWARD_CARDS: RewardCard[] = [
   {
     id: 'aug_fire_sword',
+    kind: 'augment',
     name: '화염검 강결',
     rarity: 'RARE',
     tags: ['RISK', 'CRITICAL'],
@@ -200,6 +201,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   {
     id: 'aug_barrier',
+    kind: 'augment',
     name: '방벽 코어',
     rarity: 'COMMON',
     tags: ['DEFENSE'],
@@ -210,6 +212,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   {
     id: 'aug_regen',
+    kind: 'augment',
     name: '재생 물약',
     rarity: 'COMMON',
     tags: ['RESOURCE'],
@@ -220,6 +223,7 @@ export const ALL_AUGMENTS: AugmentItem[] = [
   },
   {
     id: 'aug_frenzy_core',
+    kind: 'augment',
     name: '폭주 코어',
     rarity: 'LEGENDARY',
     tags: ['BURN', 'MULTI_HIT'],
@@ -228,10 +232,11 @@ export const ALL_AUGMENTS: AugmentItem[] = [
     imgUrl: getAsset('orb_purple'),
     effectValue: 'NEW'
   },
-  ...DEFAULT_BUILD_CATALOG.rewards.map((reward): AugmentItem => ({
+  ...DEFAULT_BUILD_CATALOG.rewards.map((reward): RewardCard => ({
     id: reward.id,
+    kind: reward.kind,
     name: reward.name,
-    rarity: reward.rarity.toUpperCase() as AugmentItem['rarity'],
+    rarity: reward.rarity.toUpperCase() as RewardCard['rarity'],
     tags: reward.tags,
     description: reward.description,
     icon: reward.kind === 'item' ? 'ITEM' : 'AUG',
