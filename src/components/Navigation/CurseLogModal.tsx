@@ -6,10 +6,10 @@ interface CurseLogModalProps {
   onClose: () => void;
 }
 
-export const CurseLogModal: React.FC<CurseLogModalProps> = ({ unlockedLogs = ['log_01'], onClose }) => {
+export const CurseLogModal: React.FC<CurseLogModalProps> = ({ unlockedLogs = [], onClose }) => {
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content curse-log-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content curse-log-modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal-header">
           <h2>📜 저주 일지 (Curse Log)</h2>
           <button className="close-btn" onClick={onClose} type="button">

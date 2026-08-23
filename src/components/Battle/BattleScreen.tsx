@@ -25,6 +25,8 @@ function getTagLabel(tag: string): string {
   return TAG_LABELS[tag] ?? tag;
 }
 
+const VISIBLE_AUGMENT_LIMIT = 6;
+
 function getEnemyDamageTone(value: number): 'low' | 'mid' | 'high' {
   if (value <= 10) return 'low';
   if (value <= 30) return 'mid';
@@ -197,9 +199,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               <span>{state.build.augments.length}/12</span>
             </div>
 
-            <div className="aug-list">
-              {state.build.augments.map((aug) => (
-                <div key={aug.id} className="aug-row">
+            <div
+              className="aug-list"
+              tabIndex={0}
+              aria-label="보유 증강 및 아이템 목록"
+              data-hidden-count={Math.max(0, state.build.augments.length - VISIBLE_AUGMENT_LIMIT)}
+            >
+              {state.build.augments.map((aug, index) => (
+                <div key={aug.id} className={`aug-row ${index >= VISIBLE_AUGMENT_LIMIT ? 'aug-row-overflow' : ''}`}>
                   <img src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
                   <span className="aug-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
                     {aug.name}
@@ -208,6 +215,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
                   <span className="aug-val">{aug.effectValue}</span>
                 </div>
               ))}
+              {state.build.augments.length > VISIBLE_AUGMENT_LIMIT && (
+                <div className="aug-overflow-summary">
+                  +{state.build.augments.length - VISIBLE_AUGMENT_LIMIT}개 더 보기
+                </div>
+              )}
             </div>
 
             <div className="synergy-box">

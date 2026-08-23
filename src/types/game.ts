@@ -1,3 +1,5 @@
+import type { ShopState } from '../game/shop/ShopTypes';
+
 export type ReelId = 'action' | 'target' | 'modifier';
 
 export type ActionType = 'BULLET' | 'SHIELD' | 'HEART' | 'DAGGER' | 'POISON' | 'BOMB';
@@ -162,6 +164,7 @@ export interface GameState {
   enemy: EnemyState;
   curse: CurseState;
   build: BuildState;
+  shop: ShopState;
   visitedNodePath: number[]; // Persistent visited map node IDs
   
   // Narrative & Origin State
@@ -227,6 +230,6 @@ export type GameCommand =
   | { type: 'START_SHOWCASE'; scenarioId?: string }
   | { type: 'NEXT_SHOWCASE_STEP' }
   | { type: 'RESOLVE_EVENT_CHOICE'; choice: EventChoice }
-  | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
+  | { type: 'BUY_SHOP_ITEM'; itemId: string }
   | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
 

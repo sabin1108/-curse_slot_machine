@@ -20,6 +20,7 @@ import {
   SHOWCASE_STEPS
 } from './data';
 import { SeededRNG } from './rng';
+import { createShopState } from './shop/ShopSystem';
 
 import { ORIGINS, CURSE_LOGS } from './origins';
 
@@ -67,6 +68,7 @@ export class GameEngine {
         activeSynergies: [],
         synergyProgress: JSON.parse(JSON.stringify(INITIAL_SYNERGIES))
       },
+      shop: createShopState(),
       visitedNodePath: [],
       selectedOrigin: 'SWORDSMAN',
       originTraitState: {
@@ -144,7 +146,7 @@ export class GameEngine {
         this.handleNextShowcaseStep();
         break;
       case 'BUY_SHOP_ITEM':
-        this.handleBuyShopItem(command.itemId, command.price);
+        this.handleBuyShopItem(command.itemId);
         break;
       case 'REST_ACTION':
         this.handleRestAction(command.actionType);
@@ -243,7 +245,7 @@ export class GameEngine {
     if (choice === 'REST') {
       this.handleRestAction('HEAL');
     } else if (choice === 'SKIP') {
-      this.state.combatLogs.push('[Event] Reward skipped. Route exploration continues.');
+      this.state.combatLogs.push('[이벤트] 보상을 건너뛰었습니다. 경로 탐사를 계속합니다.');
     }
 
     this.state.screen = choice === 'OPEN' ? 'REWARD' : 'MAP';
@@ -342,7 +344,7 @@ export class GameEngine {
     this.state.currentResult = this.calculateSlotResult(actionSym, targetSym, modifierSym);
     this.state.combatLogs.push(
       hasFreeReroll
-        ? `[Origin:Gambler] free reroll, locks ${lockedCount}, curse +0 => ${actionSym.name} + ${targetSym.name} x ${modifierSym.name}`
+        ? `[기원:도박사] 무료 재회전: 잠금 ${lockedCount}개, 저주 +0 => ${actionSym.name} + ${targetSym.name} × ${modifierSym.name}`
         : `[재회전] (잠금: ${lockedCount}개, 저주 +${curseDelta}) => ${actionSym.name} + ${targetSym.name} × ${modifierSym.name}`
     );
   }
@@ -452,7 +454,7 @@ export class GameEngine {
             ...this.state.enemyDamagePops,
             ...this.createEnemyDamagePops(extraDmg, 1)
           ];
-          this.state.combatLogs.push(`[Multi-Hit] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
+          this.state.combatLogs.push(`[연속 타격] 추가 타격 ${extraDmg} 피해! (남은 체력: ${this.state.enemy.hp})`);
         }
         this.applySwordsmanBonusStrike(dmg);
         this.applyGamblerJackpotTrait(res.modifier.id);
@@ -482,7 +484,7 @@ export class GameEngine {
     const thornDamage = this.getLegacyThornDamage(absorbedTotal);
     if (thornDamage > 0) {
       this.state.enemy.hp = Math.max(0, this.state.enemy.hp - thornDamage);
-      this.state.combatLogs.push(`[Thorns] 방어막 반격 ${thornDamage} 피해!`);
+      this.state.combatLogs.push(`[가시] 방어막 반격 ${thornDamage} 피해!`);
     }
     if (enemyDmg > 0) {
       this.state.player.hp = Math.max(0, this.state.player.hp - enemyDmg);
@@ -542,7 +544,7 @@ export class GameEngine {
       ...this.state.enemyDamagePops,
       ...this.createEnemyDamagePops(bonusDamage, 1)
     ];
-    this.state.combatLogs.push(`[Origin:Swordsman] half-power follow-up ${bonusDamage} damage! (enemy HP: ${this.state.enemy.hp})`);
+    this.state.combatLogs.push(`[기원:검사] 절반 위력 후속타 ${bonusDamage} 피해! (적 HP: ${this.state.enemy.hp})`);
   }
 
   private createEnemyDamagePops(totalDamage: number, hitCount: number) {
@@ -563,7 +565,7 @@ export class GameEngine {
     }
 
     this.state.curse.current = Math.max(0, this.state.curse.current - 1);
-    this.state.combatLogs.push('[Origin:Priest] shield/heart result purified curse -1');
+    this.state.combatLogs.push('[기원:사제] 방어·회복 결과로 저주 -1 정화');
   }
 
   private applyGamblerJackpotTrait(modifierId: string) {
@@ -576,8 +578,8 @@ export class GameEngine {
     this.state.curse.current = Math.max(0, this.state.curse.current - 1);
     this.state.combatLogs.push(
       purifiedCurse
-        ? `[Origin:Gambler] x3 jackpot: gold +25, curse -1`
-        : `[Origin:Gambler] x3 jackpot: gold +25`
+        ? `[기원:도박사] x3 잭팟: 골드 +25, 저주 -1`
+        : `[기원:도박사] x3 잭팟: 골드 +25`
     );
   }
 
@@ -660,7 +662,7 @@ export class GameEngine {
     if (this.state.wave >= this.state.totalWaves) {
       this.state.rewardSource = null;
       this.state.screen = 'VICTORY';
-      this.state.narrativeMicrocopy = 'Stage 15 final boss cleared. The cursed slot machine is broken.';
+      this.state.narrativeMicrocopy = '15단계 최종 보스를 처치했습니다. 저주받은 슬롯머신이 파괴되었습니다.';
       return;
     } else {
       this.state.wave += 1;
@@ -822,7 +824,7 @@ export class GameEngine {
     this.handleStartRun('showcase_seed_2026', 'SHOWCASE');
     this.state.showcase.active = true;
     this.state.showcase.currentStep = 0;
-    this.state.combatLogs.push('[Showcase Mode] 3분 시연 모드가 시작되었습니다.');
+    this.state.combatLogs.push('[시연 모드] 3분 시연 모드가 시작되었습니다.');
   }
 
   private handleNextShowcaseStep() {
@@ -831,7 +833,7 @@ export class GameEngine {
     this.state.showcase.currentStep = (this.state.showcase.currentStep + 1) % this.state.showcase.steps.length;
     const step = this.state.showcase.steps[this.state.showcase.currentStep];
 
-    this.state.combatLogs.push(`[Showcase Step ${step.stepIndex}] ${step.title}`);
+    this.state.combatLogs.push(`[시연 단계 ${step.stepIndex}] ${step.title}`);
 
     if (step.stepIndex === 3) {
       this.prepareRewardScreen();
@@ -842,10 +844,12 @@ export class GameEngine {
     }
   }
 
-  private handleBuyShopItem(itemId: string, price: number) {
-    if (this.state.player.gold >= price) {
-      this.state.player.gold -= price;
+  private handleBuyShopItem(itemId: string) {
+    const offer = this.state.shop.offers.find((candidate) => candidate.id === itemId);
+    if (offer && !offer.purchased && !this.state.build.items.includes(itemId) && this.state.player.gold >= offer.price) {
+      this.state.player.gold -= offer.price;
       this.state.build.items.push(itemId);
+      offer.purchased = true;
       this.state.combatLogs.push(`[상점 구매] '${itemId}' 아이템을 구매했습니다.`);
     }
   }

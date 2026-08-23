@@ -9,7 +9,7 @@ test('keeps shop purchase buttons inside their cards at 1280x720', async ({ page
 
   for (let index = 0; index < await cards.count(); index += 1) {
     const card = cards.nth(index)
-    const button = card.getByRole('button', { name: '구매하기' })
+    const button = card.getByRole('button', { name: '구매' })
     const cardBox = await card.boundingBox()
     const buttonBox = await button.boundingBox()
 

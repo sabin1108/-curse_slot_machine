@@ -34,3 +34,9 @@ export type GameEvent =
       reward: RewardRef
       buildEvents: BuildEvent[]
     }
+  | {
+      type: 'SHOP_REWARD_APPLIED'
+      reward: RewardRef
+      buildEvents: BuildEvent[]
+      added: boolean
+    }

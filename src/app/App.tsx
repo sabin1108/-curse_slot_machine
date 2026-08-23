@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { GameEngine } from '../game/engine/UiGameEngine';
-import { GameCommand } from '../types/game';
+import { GameCommand, GameState } from '../types/game';
 
 import { TitleScreen } from '../components/Title/TitleScreen';
 import { PrologueScreen } from '../components/Navigation/PrologueScreen';
@@ -19,15 +19,27 @@ import { soundManager } from '../utils/soundManager';
 
 import '../styles.css';
 
-export function App() {
-  const engine = useMemo(() => new GameEngine(), []);
+interface AppProps {
+  engine?: GameEngine;
+}
+
+export function App({ engine: providedEngine }: AppProps = {}) {
+  const engine = useMemo(() => providedEngine ?? new GameEngine(), [providedEngine]);
   const [gameState, setGameState] = useState(() => engine.getState());
+  const [defeatPresentation, setDefeatPresentation] = useState<GameState | null>(null);
+  const defeatTimerRef = useRef<number | null>(null);
   const [isCurseLogOpen, setIsCurseLogOpen] = useState(false);
   const [musicVolume, setMusicVolume] = useState(() => soundManager.getMusicVolume());
+  const [sfxVolume, setSfxVolume] = useState(() => soundManager.getSfxVolume());
   const [audioEnabled, setAudioEnabled] = useState(() => soundManager.isEnabled());
 
   const syncMusicForState = (state: ReturnType<GameEngine['getState']>) => {
-    const shouldPlayMusic = !['TITLE', 'PROLOGUE', 'ORIGIN', 'GAMEOVER', 'VICTORY'].includes(state.screen);
+    if (state.screen === 'TITLE') {
+      soundManager.startTitleMusic();
+      return;
+    }
+
+    const shouldPlayMusic = !['PROLOGUE', 'ORIGIN', 'GAMEOVER', 'VICTORY'].includes(state.screen);
     if (!shouldPlayMusic) {
       soundManager.stopMusic();
       return;
@@ -47,11 +59,48 @@ export function App() {
 
   const handleDispatch = (command: GameCommand) => {
     soundManager.unlockAudio();
+    if (defeatTimerRef.current !== null) {
+      window.clearTimeout(defeatTimerRef.current);
+      defeatTimerRef.current = null;
+      setDefeatPresentation(null);
+    }
+    const previousState = engine.getState();
     const updatedState = engine.dispatch(command);
     syncMusicForState(updatedState);
-    // Clone state object to force React state trigger
     setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
+    if (
+      command.type === 'CONFIRM_SLOT_RESULT'
+      && updatedState.isEnemyDefeated
+      && (updatedState.screen === 'REWARD' || updatedState.screen === 'VICTORY')
+    ) {
+      const defeatState: GameState = {
+        ...updatedState,
+        screen: 'BATTLE',
+        enemy: {
+          ...previousState.enemy,
+          hp: 0,
+        },
+        currentResult: null,
+        hasSpunThisTurn: false,
+        isEnemyDefeated: true,
+        isEnemyAttacking: false,
+        lockedReels: new Set(updatedState.lockedReels),
+      };
+      setDefeatPresentation(defeatState);
+      defeatTimerRef.current = window.setTimeout(() => {
+        defeatTimerRef.current = null;
+        setDefeatPresentation(null);
+        syncMusicForState(updatedState);
+      }, 900);
+      return;
+    }
   };
+
+  useEffect(() => () => {
+    if (defeatTimerRef.current !== null) {
+      window.clearTimeout(defeatTimerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     syncMusicForState(gameState);
@@ -62,9 +111,15 @@ export function App() {
     setMusicVolume(nextVolume);
   };
 
+  const handleSfxVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextVolume = soundManager.setSfxVolume(Number(event.target.value));
+    setSfxVolume(nextVolume);
+  };
+
+  const displayState = defeatPresentation ?? gameState;
+
   return (
     <main className="app-shell">
-      {/* Top Navigation Bar */}
       <nav className="global-nav-bar">
         <div className="nav-brand">
           <span className="brand-tag">OpenAI Hackathon</span>
@@ -72,42 +127,42 @@ export function App() {
         </div>
         <div className="nav-screen-tabs">
           <button
-            className={`tab-btn ${gameState.screen === 'TITLE' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'TITLE' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'TITLE' })}
             type="button"
           >
             타이틀
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'PROLOGUE' || gameState.screen === 'ORIGIN' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'PROLOGUE' || displayState.screen === 'ORIGIN' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'OPEN_PROLOGUE' })}
             type="button"
           >
             프롤로그/기원
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'BATTLE' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'BATTLE' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'BATTLE' })}
             type="button"
           >
             전투
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'MAP' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'MAP' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'MAP' })}
             type="button"
           >
             경로 맵
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'SHOP' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'SHOP' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'SHOP' })}
             type="button"
           >
             암시장
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'REST' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'REST' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'REST' })}
             type="button"
           >
@@ -135,76 +190,94 @@ export function App() {
           >
             {audioEnabled ? 'Audio' : 'Muted'}
           </button>
-          <input
-            aria-label="Music volume"
-            className="music-volume-slider"
-            max="1"
-            min="0"
-            onChange={handleMusicVolumeChange}
-            step="0.05"
-            type="range"
-            value={musicVolume}
-          />
+          <label className="audio-slider-label">
+            BGM
+            <input
+              aria-label="Music volume"
+              className="music-volume-slider"
+              max="1"
+              min="0"
+              onChange={handleMusicVolumeChange}
+              step="0.05"
+              type="range"
+              value={musicVolume}
+            />
+          </label>
+          <label className="audio-slider-label">
+            SFX
+            <input
+              aria-label="Sound effects volume"
+              className="music-volume-slider sfx-volume-slider"
+              max="1"
+              min="0"
+              onChange={handleSfxVolumeChange}
+              step="0.05"
+              type="range"
+              value={sfxVolume}
+            />
+          </label>
         </div>
       </nav>
 
-      {gameState.showcase.active && gameState.screen !== 'REWARD' && (
+      {displayState.showcase.active && displayState.screen !== 'REWARD' && (
         <ShowcaseOverlay
-          currentStepIndex={gameState.showcase.currentStep}
-          steps={gameState.showcase.steps}
+          currentStepIndex={displayState.showcase.currentStep}
+          steps={displayState.showcase.steps}
           onDispatch={handleDispatch}
         />
       )}
 
-      {/* Main View Area with Screen Transition Wipe */}
-      <ScreenTransitionOverlay screen={gameState.screen}>
+      <ScreenTransitionOverlay screen={displayState.screen}>
         <div className="view-stage">
-          {gameState.screen === 'TITLE' && (
+          {displayState.screen === 'TITLE' && (
             <TitleScreen
               onDispatch={handleDispatch}
               onOpenCurseLog={() => setIsCurseLogOpen(true)}
             />
           )}
 
-          {gameState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
+          {displayState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
 
-          {gameState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
+          {displayState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
 
-          {gameState.screen === 'BATTLE' && <BattleScreen state={gameState} onDispatch={handleDispatch} />}
+          {displayState.screen === 'BATTLE' && <BattleScreen state={displayState} onDispatch={handleDispatch} />}
 
-          {gameState.screen === 'MAP' && (
+          {displayState.screen === 'MAP' && (
             <DungeonMapScreen
-              currentWave={gameState.wave}
-              totalWaves={gameState.totalWaves}
-              visitedNodePath={gameState.visitedNodePath}
+              currentWave={displayState.wave}
+              totalWaves={displayState.totalWaves}
+              visitedNodePath={displayState.visitedNodePath}
               onDispatch={handleDispatch}
             />
           )}
 
-          {gameState.screen === 'SHOP' && <ShopScreen player={gameState.player} onDispatch={handleDispatch} />}
+          {displayState.screen === 'SHOP' && (
+            <ShopScreen player={displayState.player} offers={displayState.shop.offers} onDispatch={handleDispatch} />
+          )}
 
-          {gameState.screen === 'REST' && (
+          {displayState.screen === 'REST' && (
             <RestScreen
-              player={gameState.player}
-              curseCurrent={gameState.curse.current}
+              player={displayState.player}
+              curseCurrent={displayState.curse.current}
               onDispatch={handleDispatch}
             />
           )}
 
-          {gameState.screen === 'REWARD' && (
+          {displayState.screen === 'REWARD' && (
             <RewardModal
-              candidates={gameState.rewardCandidates}
-              source={gameState.rewardSource}
-              augSlotPresentation={gameState.augSlotPresentation}
+              candidates={displayState.rewardCandidates}
+              source={displayState.rewardSource}
+              augSlotPresentation={displayState.augSlotPresentation}
               onDispatch={handleDispatch}
             />
           )}
 
-          {(gameState.screen === 'GAMEOVER' || gameState.screen === 'VICTORY') && (
+          {(displayState.screen === 'GAMEOVER' || displayState.screen === 'VICTORY') && (
             <GameOverVictoryModal
-              screen={gameState.screen}
-              wave={gameState.wave}
-              combatLogs={gameState.combatLogs}
+              screen={displayState.screen}
+              wave={displayState.wave}
+              totalWaves={displayState.totalWaves}
+              combatLogs={displayState.combatLogs}
               onDispatch={handleDispatch}
             />
           )}
@@ -222,5 +295,3 @@ export function App() {
 }
 
 export default App;
-
-

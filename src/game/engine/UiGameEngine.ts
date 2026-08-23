@@ -6,6 +6,7 @@ import type { BuildRewardDefinition } from '../build/BuildTypes'
 import type { EffectDefinition } from '../effects/EffectTypes'
 import type { CombatEvent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import { generateShopOffers } from '../shop/ShopSystem'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
 import { GameEngine as StructuredGameEngine } from './GameEngine'
 import {
@@ -27,6 +28,8 @@ export class GameEngine {
 
   private slotRng: SeededRng
 
+  private shopRng: SeededRng
+
   private currentStructuredSlot: CombatSlotResult | null
 
   private presentation: UiGameState
@@ -35,6 +38,7 @@ export class GameEngine {
     this.legacy = new LegacyGameEngine(seedString)
     this.structured = new StructuredGameEngine(seedString)
     this.slotRng = createSeededRng(seedString)
+    this.shopRng = createSeededRng(`${seedString}:shop`)
     this.currentStructuredSlot = null
     this.presentation = this.legacy.getState()
   }
@@ -50,6 +54,7 @@ export class GameEngine {
       this.structured = new StructuredGameEngine(seed)
       this.structured.dispatch({ type: 'START_RUN' })
       this.slotRng = createSeededRng(seed)
+      this.shopRng = createSeededRng(`${seed}:shop`)
       this.currentStructuredSlot = null
       this.presentation = state
       return this.presentation
@@ -60,6 +65,7 @@ export class GameEngine {
       this.structured = new StructuredGameEngine(state.seed)
       this.structured.dispatch({ type: 'START_RUN' })
       this.slotRng = createSeededRng(state.seed)
+      this.shopRng = createSeededRng(`${state.seed}:shop`)
       this.currentStructuredSlot = null
       this.presentation = state
       return this.presentation
@@ -101,7 +107,7 @@ export class GameEngine {
       )
       this.projectStructuredSlot(this.currentStructuredSlot)
       if (hasFreeReroll) {
-        this.presentation.combatLogs.push('[Origin:Gambler] free reroll ignored curse gain')
+        this.presentation.combatLogs.push('[기원:도박사] 무료 재회전으로 저주 증가 무효')
       }
       return this.presentation
     }
@@ -129,12 +135,28 @@ export class GameEngine {
         this.projectStructuredBuild()
         this.projectStructuredRewards()
         this.resetOriginTraitState()
-        this.presentation.combatLogs.push(`[Reward] ${reward.name}`)
+        this.presentation.combatLogs.push(`[보상 획득] ${reward.name}`)
         return this.presentation
       }
     }
 
+    if (command.type === 'NAVIGATE') {
+      if (this.presentation.rewardSource !== null) {
+        return this.presentation
+      }
+
+      this.presentation = this.legacy.dispatch(command)
+      if (command.screen === 'SHOP') {
+        this.ensureShopOffers()
+      }
+      return this.presentation
+    }
+
     if (command.type === 'SELECT_MAP_NODE') {
+      if (this.presentation.rewardSource !== null) {
+        return this.presentation
+      }
+
       this.presentation = this.legacy.dispatch(command)
       this.presentation.screen = getMapNodeDestinationScreen(command.nodeType)
       this.currentStructuredSlot = null
@@ -149,6 +171,9 @@ export class GameEngine {
       this.resetOriginTraitState()
       this.projectStructuredBuild()
       this.syncStructuredCombatFromPresentation()
+      if (this.presentation.screen === 'SHOP') {
+        this.ensureShopOffers()
+      }
       return this.presentation
     }
 
@@ -161,9 +186,39 @@ export class GameEngine {
         if (this.presentation.rewardCandidates.length === 0) {
           this.presentation.screen = 'MAP'
           this.presentation.rewardSource = null
-          this.presentation.combatLogs.push('[Event] No unowned rewards remain.')
+          this.presentation.combatLogs.push('[이벤트] 획득 가능한 새 보상이 없어 경로 지도로 돌아갑니다.')
         }
       }
+      return this.presentation
+    }
+
+    if (command.type === 'BUY_SHOP_ITEM') {
+      if (this.presentation.rewardSource !== null) {
+        return this.presentation
+      }
+
+      const reward = getStructuredReward(command.itemId)
+      const offer = this.presentation.shop.offers.find((candidate) => candidate.id === command.itemId)
+      if (!reward || reward.kind !== 'item' || !offer || offer.purchased || this.presentation.player.gold < offer.price) {
+        return this.presentation
+      }
+
+      const events = this.structured.dispatch({
+        type: 'APPLY_SHOP_REWARD',
+        reward: {
+          kind: reward.kind,
+          id: reward.id,
+        },
+      })
+      const applied = events.some((event) => event.type === 'SHOP_REWARD_APPLIED' && event.added)
+      if (!applied) {
+        return this.presentation
+      }
+
+      this.presentation.player.gold -= offer.price
+      offer.purchased = true
+      this.projectStructuredBuild()
+      this.presentation.combatLogs.push(`[상점 구매] ${reward.name}`)
       return this.presentation
     }
 
@@ -199,6 +254,19 @@ export class GameEngine {
     this.presentation.enemyDamagePops = []
   }
 
+  private ensureShopOffers(): void {
+    if (this.presentation.shop.offers.length > 0) {
+      return
+    }
+
+    this.presentation.shop = {
+      offers: generateShopOffers(
+        this.structured.getState().build,
+        (maxExclusive) => this.shopRng.nextInt(maxExclusive),
+      ),
+    }
+  }
+
   private hasStructuredBuild(): boolean {
     const build = this.structured.getState().build
     return build.augments.length > 0 || build.items.length > 0
@@ -226,7 +294,14 @@ export class GameEngine {
       ...this.presentation.curse,
       current: combat.curse.value,
     }
-    this.presentation.screen = state.phase === 'reward' ? 'REWARD' : state.phase === 'defeat' ? 'GAMEOVER' : 'BATTLE'
+    const clearedFinalBoss = state.phase === 'reward' && this.presentation.wave >= this.presentation.totalWaves
+    this.presentation.screen = clearedFinalBoss
+      ? 'VICTORY'
+      : state.phase === 'reward'
+        ? 'REWARD'
+        : state.phase === 'defeat'
+          ? 'GAMEOVER'
+          : 'BATTLE'
     this.presentation.hasSpunThisTurn = false
     this.presentation.currentResult = null
     this.presentation.isEnemyAttacking = combatEvents.some((event) => event.type === 'ENEMY_ATTACKED')
@@ -235,7 +310,14 @@ export class GameEngine {
     this.presentation.lastEnemyDamagePop = this.presentation.enemyDamagePops.at(-1) ?? null
     this.presentation.lockedReels.clear()
     this.projectStructuredBuild()
-    this.projectStructuredRewards()
+    if (clearedFinalBoss) {
+      this.presentation.rewardCandidates = []
+      this.presentation.augSlotPresentation = null
+      this.presentation.narrativeMicrocopy = '15단계 최종 보스를 처치했습니다. 저주받은 슬롯머신이 파괴되었습니다.'
+      this.presentation.combatLogs.push('[승리] 최종 보스를 처치해 결말이 해금되었습니다.')
+    } else {
+      this.projectStructuredRewards()
+    }
     this.appendCombatLogs(events)
   }
 
@@ -303,7 +385,7 @@ export class GameEngine {
     }
 
     this.presentation.player.gold += 25
-    this.presentation.combatLogs.push('[Origin:Gambler] x3 jackpot: gold +25, curse -1')
+    this.presentation.combatLogs.push('[기원:도박사] x3 잭팟: 골드 +25, 저주 -1')
   }
 
   private projectStructuredRewards(): void {

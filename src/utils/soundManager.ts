@@ -1,4 +1,4 @@
-type MusicTrack = 'backmusic' | 'boss';
+type MusicTrack = 'title' | 'backmusic' | 'boss';
 
 class SoundManager {
   private enabled = true;
@@ -54,6 +54,10 @@ class SoundManager {
     return this.musicVolume;
   }
 
+  public getSfxVolume(): number {
+    return this.sfxVolume;
+  }
+
   public setMusicVolume(volume: number): number {
     this.musicVolume = Math.max(0, Math.min(1, volume));
     if (this.musicAudio) {
@@ -62,8 +66,20 @@ class SoundManager {
     return this.musicVolume;
   }
 
+  public setSfxVolume(volume: number): number {
+    this.sfxVolume = Math.max(0, Math.min(1, volume));
+    if (this.activeSpinAudio) {
+      this.activeSpinAudio.volume = 0.78 * this.sfxVolume;
+    }
+    return this.sfxVolume;
+  }
+
   public startBackgroundMusic() {
     this.startMusic('backmusic');
+  }
+
+  public startTitleMusic() {
+    this.startMusic('title');
   }
 
   public startBossMusic() {
@@ -89,10 +105,21 @@ class SoundManager {
     this.pauseMusic();
     this.pendingMusicTrack = null;
 
-    const audio = new Audio(track === 'boss' ? '/sounds/boss_bgm_40.mp3' : '/sounds/backmusic.mp3');
+    const audio = new Audio(this.getMusicPath(track));
     audio.volume = this.musicVolume;
     audio.loop = track === 'backmusic';
     audio.preload = 'auto';
+
+    if (track === 'title') {
+      audio.currentTime = 24;
+      audio.addEventListener('loadedmetadata', () => {
+        audio.currentTime = 24;
+      });
+      audio.addEventListener('ended', () => {
+        audio.currentTime = 24;
+        this.playSafely(audio);
+      });
+    }
 
     if (track === 'boss') {
       audio.addEventListener('ended', () => {
@@ -104,6 +131,12 @@ class SoundManager {
     this.musicAudio = audio;
     this.activeMusicTrack = track;
     this.playSafely(audio);
+  }
+
+  private getMusicPath(track: MusicTrack): string {
+    if (track === 'title') return '/sounds/mainmusic.mp3';
+    if (track === 'boss') return '/sounds/boss_bgm_40.mp3';
+    return '/sounds/backmusic.mp3';
   }
 
   private playSafely(audio: HTMLAudioElement | null | undefined, fallbackOscillator?: () => void) {
