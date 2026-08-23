@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 import { createCombatState, resolveCombatSlot } from './CombatSystem'
-import type { EffectDefinition } from '../effects/EffectTypes'
 
 describe('CombatSystem', () => {
-  it('damages an enemy from a bullet result, then resolves enemy attack and curse', () => {
+  it('damages an enemy from a bullet result without raising curse by default', () => {
     const state = createCombatState()
 
     const result = resolveCombatSlot(state, {
@@ -15,7 +14,7 @@ describe('CombatSystem', () => {
 
     expect(result.enemy.health).toBe(6)
     expect(result.player.health).toBe(26)
-    expect(result.curse.value).toBe(1)
+    expect(result.curse.value).toBe(0)
     expect(result.events.map((event) => event.type)).toEqual([
       'DAMAGE_APPLIED',
       'ENEMY_ATTACKED',
@@ -167,188 +166,105 @@ describe('CombatSystem', () => {
     })
   })
 
-  it('keeps modifier steps ordered before modifier-conditioned amount bonuses', () => {
-    const result = resolveCombatSlot(
-      createCombatState({ enemy: { health: 60, maxHealth: 60 }, enemyIntent: { amount: 0 } }),
-      {
-        action: 'bullet',
-        target: 'enemy',
-        modifier: 'x1',
-      },
-      {
-        effects: [
-          {
-            id: 'step_to_x2',
-            type: 'combat.modifier.step_up',
-            params: { from: 'x1', to: 'x2' },
-          },
-          {
-            id: 'x2_bonus',
-            type: 'combat.action_amount.add_pct',
-            params: { action: 'bullet', percent: 50 },
-            conditions: [{ type: 'slot.modifier_is', params: { modifier: 'x2' } }],
-          },
-        ],
-      },
-    )
-
-    expect(result.enemy.health).toBe(42)
-    expect(result.events).toContainEqual(
-      expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 18 }),
-    )
-  })
-
-  it('keeps chained modifier steps in combat resolution order', () => {
-    const result = resolveCombatSlot(
-      createCombatState({ enemy: { health: 60, maxHealth: 60 }, enemyIntent: { amount: 0 } }),
-      {
-        action: 'bullet',
-        target: 'enemy',
-        modifier: 'x1',
-      },
-      {
-        effects: [
-          {
-            id: 'step_to_x2',
-            type: 'combat.modifier.step_up',
-            params: { from: 'x1', to: 'x2' },
-          },
-          {
-            id: 'step_to_x3',
-            type: 'combat.modifier.step_up',
-            params: { from: 'x2', to: 'x3' },
-          },
-        ],
-      },
-    )
-
-    expect(result.enemy.health).toBe(42)
-    expect(result.events).toContainEqual(
-      expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 18 }),
-    )
-  })
-
-  it('filters non-aggregated status effects through shared combat conditions', () => {
-    const state = createCombatState()
-    const effect = {
-      id: 'locked_primer',
-      type: 'combat.status.apply' as const,
-      params: { status: 'primer' as const, stacks: 1, target: 'enemy' as const },
-      conditions: [{ type: 'slot.locked_reels_at_least' as const, params: { count: 1 as const } }],
-    }
-
-    const withoutLock = resolveCombatSlot(
-      state,
-      { action: 'bullet', target: 'enemy', modifier: 'x1' },
-      { effects: [effect], lockedReels: {} },
-    )
-    const withLock = resolveCombatSlot(
-      state,
-      { action: 'bullet', target: 'enemy', modifier: 'x1' },
-      { effects: [effect], lockedReels: { action: true } },
-    )
-
-    expect(withoutLock.statuses.enemy).toEqual([])
-    expect(withLock.statuses.enemy).toEqual([{ id: 'primer', stacks: 1 }])
-  })
-
-  it('filters full-block retaliation through shared combat conditions', () => {
-    const effects: EffectDefinition[] = [
-      {
-        id: 'bullet_retaliate',
-        type: 'combat.full_block.retaliate',
-        params: { amount: 6 },
-        conditions: [{ type: 'slot.action_is', params: { action: 'bullet' } }],
-      },
-    ]
-
-    const result = resolveCombatSlot(
-      createCombatState({ enemy: { health: 40, maxHealth: 40 } }),
-      { action: 'shield', target: 'self', modifier: 'x1' },
-      { effects },
-    )
-
-    expect(result.enemy.health).toBe(40)
-    expect(result.events).not.toContainEqual(
-      expect.objectContaining({ type: 'DAMAGE_APPLIED', amount: 6 }),
-    )
-  })
-
-  it('filters extra-hit status application through shared combat conditions', () => {
-    const effects: EffectDefinition[] = [
-      {
-        id: 'extra_hit',
-        type: 'combat.bullet.extra_hit',
-        params: { percent: 50 },
-      },
-      {
-        id: 'x3_burn',
-        type: 'combat.extra_hit.status_apply',
-        params: { status: 'burn', stacks: 1, target: 'enemy' },
-        conditions: [{ type: 'slot.modifier_is', params: { modifier: 'x3' } }],
-      },
-    ]
-
-    const result = resolveCombatSlot(
-      createCombatState({ enemy: { health: 40, maxHealth: 40 }, enemyIntent: { amount: 0 } }),
-      { action: 'bullet', target: 'enemy', modifier: 'x1' },
-      { effects },
-    )
-
-    expect(result.statuses.enemy).toEqual([])
-  })
-
-  it('filters full-block curse prevention through shared combat conditions', () => {
-    const effects: EffectDefinition[] = [
-      {
-        id: 'bullet_guard',
-        type: 'combat.full_block.curse_prevent',
-        params: { uses: 1 },
-        conditions: [{ type: 'slot.action_is', params: { action: 'bullet' } }],
-      },
-    ]
-
+  it('raises curse only when a matching curse gain effect exists', () => {
     const result = resolveCombatSlot(
       createCombatState(),
-      { action: 'shield', target: 'self', modifier: 'x1' },
-      { effects },
+      {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x2',
+      },
+      {
+        effects: [
+          {
+            id: 'curse_contract',
+            type: 'combat.curse_gain.add',
+            params: { amount: 1 },
+          },
+        ],
+      },
     )
 
     expect(result.curse.value).toBe(1)
-    expect(result.events).not.toContainEqual(
-      expect.objectContaining({ type: 'CURSE_PREVENTED', effectId: 'bullet_guard' }),
+    expect(result.events).toContainEqual({
+      type: 'CURSE_INCREASED',
+      amount: 1,
+      value: 1,
+    })
+  })
+
+  it('increases enemy attack by 10 percent per curse point before block mitigation', () => {
+    const result = resolveCombatSlot(
+      createCombatState({
+        player: { block: 10 },
+        enemy: { health: 100, maxHealth: 100 },
+        enemyIntent: { amount: 20 },
+        curse: { value: 5 },
+      }),
+      {
+        action: 'bullet',
+        target: 'enemy',
+        modifier: 'x1',
+      },
+    )
+
+    expect(result.events).toContainEqual(
+      expect.objectContaining({
+        type: 'ENEMY_ATTACKED',
+        amount: 30,
+        blocked: 10,
+        healthLost: 20,
+      }),
     )
   })
 
-  it('filters safety curse prevention through shared combat conditions', () => {
-    const effects: EffectDefinition[] = [
-      {
-        id: 'consume_debt',
-        type: 'combat.status.consume_extra_hit',
-        params: { status: 'debt', percent: 50, target: 'player' },
-        conditions: [{ type: 'slot.action_is', params: { action: 'bullet' } }],
-      },
-      {
-        id: 'shield_safety',
-        type: 'combat.curse_gain.prevent_once',
-        params: { trigger: 'block_depleted_or_status_consumed' },
-        conditions: [{ type: 'slot.action_is', params: { action: 'shield' } }],
-      },
-    ]
-
-    const result = resolveCombatSlot(
-      createCombatState({
-        enemy: { health: 40, maxHealth: 40 },
-        enemyIntent: { amount: 0 },
-        statuses: { player: [{ id: 'debt', stacks: 1 }] },
-      }),
-      { action: 'bullet', target: 'enemy', modifier: 'x1' },
-      { effects },
+  it('cycles enemy attack, wait, and low defense intents', () => {
+    const attack = resolveCombatSlot(
+      createCombatState({ enemy: { health: 100, maxHealth: 100 } }),
+      { action: 'shield', target: 'self', modifier: 'x1' },
     )
 
-    expect(result.curse.value).toBe(1)
-    expect(result.events).not.toContainEqual(
-      expect.objectContaining({ type: 'CURSE_PREVENTED', effectId: 'shield_safety' }),
-    )
+    expect(attack.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED' }))
+    expect(attack.enemyIntent).toEqual({ type: 'wait', baseAmount: 4, amount: 0 })
+
+    const wait = resolveCombatSlot(attack, { action: 'shield', target: 'self', modifier: 'x1' })
+
+    expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(wait.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
+    expect(wait.enemyIntent).toEqual({ type: 'defend', baseAmount: 4, amount: 1 })
+
+    const defend = resolveCombatSlot(wait, { action: 'shield', target: 'self', modifier: 'x1' })
+
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(defend.enemy.block).toBe(1)
+    expect(defend.enemyIntent).toEqual({ type: 'attack', baseAmount: 4, amount: 4 })
+  })
+
+  it('uses wait and defense intents for dual-roll combat without skipping the cycle', () => {
+    const dualRoll = {
+      action: 'bullet' as const,
+      target: 'enemy' as const,
+      modifier: 'x2' as const,
+      attackRoll: 1,
+      defenseRoll: 1,
+      attackModifier: 'x2' as const,
+      defenseModifier: 'x2' as const,
+    }
+    const waitState = createCombatState({
+      enemy: { health: 100, maxHealth: 100 },
+      enemyIntent: { type: 'wait', baseAmount: 4, amount: 0 },
+    })
+
+    const wait = resolveCombatSlot(waitState, dualRoll)
+
+    expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(wait.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
+    expect(wait.enemyIntent.type).toBe('defend')
+
+    const defend = resolveCombatSlot(wait, dualRoll)
+
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(defend.enemy.block).toBe(1)
+    expect(defend.enemyIntent.type).toBe('attack')
   })
 })

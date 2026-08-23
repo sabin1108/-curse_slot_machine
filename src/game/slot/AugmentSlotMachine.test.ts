@@ -65,7 +65,6 @@ function createRewardOption(overrides: Partial<RewardOption> = {}): RewardOption
       synergyValue: 0,
       completionValue: 0,
       futureValue: 2,
-      contentValue: 0,
       total: 3,
     },
     ...overrides,

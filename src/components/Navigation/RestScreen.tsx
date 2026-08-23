@@ -17,7 +17,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
 
     setSelectedAction(type);
     soundManager.playClick();
-    onDispatch({ type: 'RESOLVE_REST', action: type === 'HEAL' ? 'heal' : 'purify' });
+    onDispatch({ type: 'REST_ACTION', actionType: type });
   };
 
   return (
@@ -79,7 +79,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
           <div className="rest-card-title">🧪 모닥불 휴식</div>
           <div className="rest-card-desc">
             장작불 곁에서 지친 몸을 달래고<br />
-            <strong>HP +15</strong> 즉시 회복합니다.
+            <strong>HP +35</strong> 즉시 회복합니다.
           </div>
           <button className="k-btn primary" type="button">
             {selectedAction === 'HEAL' ? '✅ 완료' : '휴식하기'}
@@ -95,7 +95,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
           <div className="rest-card-title">🔮 저주 정화 의식</div>
           <div className="rest-card-desc">
             신성한 정화 기도를 올려<br />
-            <strong>저주 5</strong>를 정화합니다.
+            <strong>현재 저주 80%</strong>를 정화합니다.
           </div>
           <button className="k-btn warning" type="button">
             {selectedAction === 'UPGRADE' ? '✅ 완료' : '정화하기'}

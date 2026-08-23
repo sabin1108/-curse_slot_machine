@@ -16,15 +16,12 @@ import type {
 } from './BuildTypes'
 import type { EffectDefinition } from '../effects/EffectTypes'
 
-export function createBuildState(
-  overrides: BuildStateOverrides = {},
-  catalog: BuildCatalog = DEFAULT_BUILD_CATALOG,
-): BuildState {
+export function createBuildState(overrides: BuildStateOverrides = {}): BuildState {
   const rewards = {
     augments: [...(overrides.augments ?? [])],
     items: [...(overrides.items ?? [])],
   }
-  const synergies = evaluateSynergies(rewards, catalog)
+  const synergies = evaluateSynergies(rewards, DEFAULT_BUILD_CATALOG)
 
   return {
     augments: [...rewards.augments],

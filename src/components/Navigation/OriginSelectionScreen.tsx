@@ -46,7 +46,7 @@ export const OriginSelectionScreen: React.FC<OriginSelectionScreenProps> = ({ on
                 </div>
                 <div className="stat-row">
                   <span>최대 HP:</span>
-                  <span className="stat-val">{30 + orig.startingHpBonus}</span>
+                  <span className="stat-val">{100 + orig.startingHpBonus}</span>
                 </div>
                 <div className="stat-row">
                   <span>시작 수호:</span>

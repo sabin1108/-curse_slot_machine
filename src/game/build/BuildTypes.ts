@@ -9,6 +9,7 @@ export type SynergyTag =
   | 'CURSE'
   | 'RISK'
   | 'RESOURCE'
+  | 'LIMIT'
 
 export type RewardKind = 'augment' | 'item'
 

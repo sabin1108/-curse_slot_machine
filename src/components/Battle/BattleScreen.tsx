@@ -40,8 +40,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
   const hpPercent = Math.max(0, Math.min(100, Math.round((state.player.hp / state.player.maxHp) * 100)));
   const mobHpPercent = Math.max(0, Math.min(100, Math.round((state.enemy.hp / state.enemy.maxHp) * 100)));
   const mobShieldPercent = Math.max(0, Math.min(100, Math.round((state.enemy.shield / state.enemy.maxHp) * 100)));
-  const ownedRewardCards = [...state.build.augments, ...state.build.items];
-  const buildRewardIds = new Set(ownedRewardCards.map((reward) => reward.id));
+  const buildRewardIds = new Set([
+    ...state.build.augments.map((augment) => augment.id),
+    ...state.build.items,
+  ]);
   const currentMultiplierMax = Math.max(
     state.build.activeSynergies.includes('한계 돌파') || (buildRewardIds.has('limit_core') && buildRewardIds.has('limit_breaker')) ? 10 : 3,
     buildRewardIds.has('limit_breaker') ? 5 : 3,
@@ -192,19 +194,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
           <div className="side-panel">
             <div className="side-panel-title">
               <span>보유 증강/아이템</span>
-              <span>{ownedRewardCards.length}/12</span>
+              <span>{state.build.augments.length}/12</span>
             </div>
 
-            <div className="reward-card-list">
-              {ownedRewardCards.map((rewardCard) => (
-                <div key={`${rewardCard.kind}-${rewardCard.id}`} className={`reward-card-row reward-card-row-${rewardCard.kind}`}>
-                  <img src={rewardCard.imgUrl || getAsset('sword_gold')} alt={rewardCard.name} />
-                  <span className="reward-card-name" title={`${rewardCard.name} · ${rewardCard.tags.map(getTagLabel).join(' / ')}`}>
-                    {rewardCard.name}
-                    <small>{rewardCard.tags.map(getTagLabel).join(' / ')}</small>
+            <div className="aug-list">
+              {state.build.augments.map((aug) => (
+                <div key={aug.id} className="aug-row">
+                  <img src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
+                  <span className="aug-name" title={`${aug.name} · ${aug.tags.map(getTagLabel).join(' / ')}`}>
+                    {aug.name}
+                    <small>{aug.tags.map(getTagLabel).join(' / ')}</small>
                   </span>
-                  <span className="reward-card-kind">{rewardCard.kind === 'item' ? 'ITEM' : 'AUG'}</span>
-                  <span className="reward-card-value">{rewardCard.effectValue}</span>
+                  <span className="aug-val">{aug.effectValue}</span>
                 </div>
               ))}
             </div>
@@ -266,13 +267,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
             {/* High Threat Red Warning Banner above Monster */}
             <div className="mob-intent-threat-banner">
               <div className="threat-title-row">
-                <span className="threat-warning-tag">⚠️ 몬스터 공격 예고</span>
+                <span className="threat-warning-tag">
+                  {state.enemy.intent.type === 'ATTACK'
+                    ? '⚠️ 몬스터 공격 예고'
+                    : state.enemy.intent.type === 'WAIT'
+                      ? '몬스터 대기 턴'
+                      : '몬스터 방어 예고'}
+                </span>
                 <span className="threat-intent-name">{state.enemy.intent.name}</span>
               </div>
               <div className="threat-damage-display">
                 <span className="threat-icon">{state.enemy.intent.icon}</span>
                 <span className="threat-damage-val">{state.enemy.intent.value}</span>
-                <span className="threat-damage-unit">피해 예상!</span>
+                <span className="threat-damage-unit">
+                  {state.enemy.intent.type === 'ATTACK'
+                    ? '피해 예상!'
+                    : state.enemy.intent.type === 'WAIT'
+                      ? '피해 없음'
+                      : '방어 획득'}
+                </span>
               </div>
             </div>
 
@@ -323,9 +336,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
               hasSpunThisTurn={state.hasSpunThisTurn}
               currentResult={state.currentResult}
               onSpin={() => onDispatch({ type: 'SPIN_COMBAT_SLOT' })}
-              onToggleLock={(reel: ReelId) => onDispatch({ type: 'TOGGLE_REEL_LOCK', reel })}
+              onToggleLock={(reelId: ReelId) => onDispatch({ type: 'TOGGLE_LOCK_REEL', reelId })}
               onReroll={() => onDispatch({ type: 'REROLL_UNLOCKED' })}
-              onConfirm={() => onDispatch({ type: 'CONFIRM_COMBAT_SLOT' })}
+              onConfirm={() => onDispatch({ type: 'CONFIRM_SLOT_RESULT' })}
               isFreeRerollAvailable={state.originTraitState.freeRerollAvailable}
               multiplierMax={currentMultiplierMax}
             />

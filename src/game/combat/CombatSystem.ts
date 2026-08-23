@@ -4,21 +4,15 @@ import type {
   CombatActorState,
   CombatEvent,
   CombatEffectContext,
-  CombatEndReason,
-  EnemyIntentPattern,
-  EnemyIntentPatternStepOverrides,
   CombatOutcome,
-  CombatPreview,
   CombatResolution,
   CombatState,
   CombatStateOverrides,
-  CombatStatusStack,
 } from './CombatTypes'
-import type { CombatStatusId, EffectDefinition } from '../effects/EffectTypes'
-import { effectConditionsMatch } from '../effects/EffectResolver'
+import type { EffectCondition, EffectDefinition } from '../effects/EffectTypes'
 
 const COMBAT_BASE_VALUES = {
-  bulletDamage: 6,
+  bulletDamage: 5,
   shieldBlock: 5,
   heartHealing: 4,
   enemyAttack: 4,
@@ -53,62 +47,24 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     },
     overrides.enemy,
   )
-
-  const curseValue = overrides.curse?.value ?? 0
   const enemyIntentType = overrides.enemyIntent?.type ?? 'attack'
-  const enemyIntentBaseAmount = overrides.enemyIntent?.baseAmount ?? overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack
-  const enemyIntentPattern = overrides.enemyIntent?.pattern ? cloneEnemyIntentPattern(overrides.enemyIntent.pattern) : undefined
-  const enemyIntentPatternIndex = enemyIntentPattern && enemyIntentPattern.length > 0
-    ? normalizePatternIndex(overrides.enemyIntent?.patternIndex ?? 0, enemyIntentPattern.length)
-    : undefined
-  const enemyIntentPatternStep = enemyIntentPatternIndex !== undefined ? enemyIntentPattern?.[enemyIntentPatternIndex] : undefined
-  const resolvedEnemyIntentType = enemyIntentPatternStep?.type ?? enemyIntentType
+  const enemyIntentBaseAmount = overrides.enemyIntent?.baseAmount
+    ?? overrides.enemyIntent?.amount
+    ?? COMBAT_BASE_VALUES.enemyAttack
+  const curseValue = overrides.curse?.value ?? 0
 
   return {
     player,
     enemy,
     curse: {
       value: curseValue,
-      max: 10,
-      attackBonus: getCurseAttackBonus(curseValue),
     },
     enemyIntent: {
-      type: resolvedEnemyIntentType,
+      type: enemyIntentType,
       baseAmount: enemyIntentBaseAmount,
-      amount: getIntentAmount(
-        resolvedEnemyIntentType,
-        enemyIntentBaseAmount,
-        curseValue,
-        getPatternStepAmount(enemyIntentPatternStep) ?? overrides.enemyIntent?.amount,
-      ),
-      ...(enemyIntentPattern ? { pattern: enemyIntentPattern } : {}),
-      ...(enemyIntentPatternIndex !== undefined ? { patternIndex: enemyIntentPatternIndex } : {}),
+      amount: overrides.enemyIntent?.amount ?? getIntentAmount(enemyIntentType, enemyIntentBaseAmount, curseValue),
     },
-    statuses: {
-      player: (overrides.statuses?.player ?? []).map((status) => ({ ...status })),
-      enemy: (overrides.statuses?.enemy ?? []).map((status) => ({ ...status })),
-    },
-    effectUses: [...(overrides.effectUses ?? [])],
     ...(overrides.lastSlotResult ? { lastSlotResult: overrides.lastSlotResult } : {}),
-  }
-}
-
-export function previewCombatSlot(
-  state: CombatState,
-  slotResult: CombatSlotResult,
-  context: CombatEffectContext = {},
-): CombatPreview {
-  const resolution = resolveCombatSlot(state, slotResult, context)
-  return {
-    playerHealthDelta: resolution.player.health - state.player.health,
-    playerBlockDelta: resolution.player.block - state.player.block,
-    enemyHealthDelta: resolution.enemy.health - state.enemy.health,
-    enemyBlockDelta: resolution.enemy.block - state.enemy.block,
-    curseDelta: resolution.curse.value - state.curse.value,
-    enemyAttack: resolution.events.find((event) => event.type === 'ENEMY_ATTACKED')?.amount ?? 0,
-    outcome: resolution.outcome,
-    ...(resolution.endReason ? { endReason: resolution.endReason } : {}),
-    warnings: getPreviewWarnings(state, resolution),
   }
 }
 
@@ -120,38 +76,105 @@ export function resolveCombatSlot(
   const events: CombatEvent[] = []
   let player = { ...state.player }
   let enemy = { ...state.enemy }
+  const affectedActors = slotResult.action === 'heart' && slotResult.target === 'enemy'
+    ? ['player' as const]
+    : getAffectedActors(slotResult.target)
   const effects = context.effects ?? []
-  const statuses = cloneStatuses(state.statuses)
-  const effectUses = [...state.effectUses]
-  let statusConsumed = false
-  let enemyIntent = getPressuredIntent(state.enemyIntent, state.curse.value)
-
-  const burnStacks = getStatusStacks(statuses.enemy, 'burn')
-  if (burnStacks > 0 && enemy.health > 0) {
-    const burnDamage = burnStacks * 2
-    const resolved = applyDamage(enemy, burnDamage)
+  if (typeof slotResult.attackRoll === 'number' && typeof slotResult.defenseRoll === 'number') {
+    const attackSlot = {
+      ...slotResult,
+      action: 'bullet' as const,
+      target: 'enemy' as const,
+      modifier: slotResult.attackModifier ?? slotResult.modifier,
+    }
+    const defenseSlot = {
+      ...slotResult,
+      action: 'shield' as const,
+      target: 'self' as const,
+      modifier: slotResult.defenseModifier ?? slotResult.modifier,
+    }
+    const attackAmount = getSlotAmount(attackSlot, state, effects, slotResult.attackRoll)
+    const defenseAmount = getSlotAmount(defenseSlot, state, effects, slotResult.defenseRoll)
+    const resolved = applyDamage(enemy, attackAmount)
     enemy = resolved.actor
-    consumeStatus(statuses.enemy, 'burn', 1)
     events.push({
       type: 'DAMAGE_APPLIED',
       target: 'enemy',
-      amount: burnDamage,
+      amount: attackAmount,
       blocked: resolved.blocked,
       healthLost: resolved.healthLost,
     })
-    events.push({ type: 'STATUS_CONSUMED', target: 'enemy', status: 'burn', stacks: 1 })
-    statusConsumed = true
+    player = {
+      ...player,
+      block: player.block + defenseAmount,
+    }
+    events.push({
+      type: 'BLOCK_GAINED',
+      target: 'player',
+      amount: defenseAmount,
+    })
+
+    for (const extraHitAmount of getExtraHitAmounts(attackAmount, attackSlot, state, effects)) {
+      const extraResolved = applyDamage(enemy, extraHitAmount)
+      enemy = extraResolved.actor
+      events.push({
+        type: 'DAMAGE_APPLIED',
+        target: 'enemy',
+        amount: extraHitAmount,
+        blocked: extraResolved.blocked,
+        healthLost: extraResolved.healthLost,
+      })
+    }
+
+    if (context.originTrait === 'swordsman' && attackAmount >= 16 && enemy.health > 0) {
+      const bonusStrikeAmount = Math.max(1, Math.round(attackAmount * 0.5))
+      const bonusResolved = applyDamage(enemy, bonusStrikeAmount)
+      enemy = bonusResolved.actor
+      events.push({
+        type: 'DAMAGE_APPLIED',
+        target: 'enemy',
+        amount: bonusStrikeAmount,
+        blocked: bonusResolved.blocked,
+        healthLost: bonusResolved.healthLost,
+      })
+    }
+
+    ;({ player, enemy } = resolveEnemyIntent(player, enemy, state, events))
+
+    const curse = getNextCurse(state, attackSlot, effects, context.originTrait)
+    events.push({
+      type: 'CURSE_INCREASED',
+      amount: getCurseGain(state, attackSlot, effects),
+      value: curse.value,
+    })
+
+    const outcome = getOutcome(player, enemy)
+    if (outcome !== 'ongoing') {
+      events.push({
+        type: 'COMBAT_ENDED',
+        outcome,
+      })
+    }
+
+    const nextEnemyIntent = outcome === 'ongoing'
+      ? getNextEnemyIntent(state.enemyIntent, curse.value)
+      : getPressuredEnemyIntent(state.enemyIntent, curse.value)
+
+    return {
+      player,
+      enemy,
+      curse,
+      enemyIntent: nextEnemyIntent,
+      lastSlotResult: slotResult,
+      events,
+      outcome,
+    }
   }
 
-  const effectiveSlotResult = applyModifierSteps(slotResult, state, effects, statuses, context, events)
-  if (effectiveSlotResult.modifier !== slotResult.modifier && getStatusStacks(state.statuses.enemy, 'exposed') > 0) {
-    statusConsumed = true
-  }
-  const affectedActors = getAffectedActors(effectiveSlotResult.target)
-  const amount = getSlotAmount(effectiveSlotResult, state, effects, context)
+  const amount = getSlotAmount(slotResult, state, effects)
 
   for (const actorId of affectedActors) {
-    if (effectiveSlotResult.action === 'bullet') {
+    if (slotResult.action === 'bullet') {
       const target = actorId === 'player' ? player : enemy
       const resolved = applyDamage(target, amount)
       player = actorId === 'player' ? resolved.actor : player
@@ -165,7 +188,7 @@ export function resolveCombatSlot(
       })
     }
 
-    if (effectiveSlotResult.action === 'shield') {
+    if (slotResult.action === 'shield') {
       const target = actorId === 'player' ? player : enemy
       const resolved = {
         ...target,
@@ -180,7 +203,7 @@ export function resolveCombatSlot(
       })
     }
 
-    if (effectiveSlotResult.action === 'heart') {
+    if (slotResult.action === 'heart') {
       const target = actorId === 'player' ? player : enemy
       const nextHealth = Math.min(target.maxHealth, target.health + amount)
       const resolved = {
@@ -198,21 +221,8 @@ export function resolveCombatSlot(
     }
   }
 
-  let extraHitOccurred = false
-  if (effectiveSlotResult.action === 'bullet') {
-    const extraHitAmounts = getExtraHitAmounts(amount, effectiveSlotResult, state, effects, context)
-    for (const effect of effects.filter((candidate) => candidate.type === 'combat.status.consume_extra_hit')) {
-      if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
-      const targetStatuses = statuses[effect.params.target]
-      if (getStatusStacks(targetStatuses, effect.params.status) <= 0) continue
-      consumeStatus(targetStatuses, effect.params.status, 1)
-      events.push({ type: 'STATUS_CONSUMED', target: effect.params.target, status: effect.params.status, stacks: 1 })
-      extraHitAmounts.push(Math.floor((amount * effect.params.percent) / 100))
-      statusConsumed = true
-    }
-
-    for (const extraHitAmount of extraHitAmounts) {
-      extraHitOccurred = true
+  if (slotResult.action === 'bullet') {
+    for (const extraHitAmount of getExtraHitAmounts(amount, slotResult, state, effects)) {
       for (const actorId of affectedActors) {
         const target = actorId === 'player' ? player : enemy
         const resolved = applyDamage(target, extraHitAmount)
@@ -228,7 +238,7 @@ export function resolveCombatSlot(
       }
     }
 
-    if (context.originTrait === 'swordsman' && affectedActors.includes('enemy') && amount >= 16) {
+    if (context.originTrait === 'swordsman' && affectedActors.includes('enemy') && amount >= 16 && enemy.health > 0) {
       const bonusStrikeAmount = Math.max(1, Math.round(amount * 0.5))
       const resolved = applyDamage(enemy, bonusStrikeAmount)
       enemy = resolved.actor
@@ -239,154 +249,38 @@ export function resolveCombatSlot(
         blocked: resolved.blocked,
         healthLost: resolved.healthLost,
       })
-      events.push({
-        type: 'ORIGIN_TRAIT_TRIGGERED',
-        origin: 'swordsman',
-        effect: 'bonus_strike',
-        amount: bonusStrikeAmount,
-      })
     }
   }
 
-  if (
-    enemy.phase === 1
-    && enemy.phaseTwoThreshold !== undefined
-    && enemy.phaseTwoAttack !== undefined
-    && enemy.health <= enemy.phaseTwoThreshold
-  ) {
-    const phaseTwoAttack = enemy.phaseTwoAttack
-    enemy = { ...enemy, health: Math.max(1, enemy.health), phase: 2 }
-    enemyIntent = getPressuredIntent({
-      ...enemyIntent,
-      baseAmount: phaseTwoAttack,
-    }, state.curse.value)
-    events.push({ type: 'BOSS_PHASE_CHANGED', phase: 2, attack: phaseTwoAttack })
-  }
+  ;({ player, enemy } = resolveEnemyIntent(player, enemy, state, events))
 
-  let fullBlock = false
-  let blockDepleted = false
-  if (enemy.health > 0 && player.health > 0) {
-    if (enemyIntent.type === 'attack') {
-      const blockBeforeAttack = player.block
-      const resolved = applyDamage(player, enemyIntent.amount)
-      player = resolved.actor
-      fullBlock = enemyIntent.amount > 0 && resolved.blocked === enemyIntent.amount && resolved.healthLost === 0
-      blockDepleted = blockBeforeAttack > 0 && player.block === 0
-      events.push({
-        type: 'ENEMY_ATTACKED',
-        amount: enemyIntent.amount,
-        blocked: resolved.blocked,
-        healthLost: resolved.healthLost,
-      })
-    } else if (enemyIntent.type === 'wait') {
-      events.push({ type: 'ENEMY_WAITED' })
-    } else {
-      const defenseGained = Math.min(enemyIntent.amount, Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block))
-      enemy = { ...enemy, block: enemy.block + defenseGained }
-      events.push({ type: 'ENEMY_DEFENDED', amount: defenseGained })
-    }
-  }
-
-  if (fullBlock && enemy.health > 0) {
-    const retaliation = effects
-      .filter((effect): effect is Extract<EffectDefinition, { type: 'combat.full_block.retaliate' }> =>
-        effect.type === 'combat.full_block.retaliate',
-      )
-      .find((effect) => effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context)))
-    if (retaliation) {
-      const resolved = applyDamage(enemy, retaliation.params.amount)
-      enemy = resolved.actor
-      events.push({
-        type: 'DAMAGE_APPLIED', target: 'enemy', amount: retaliation.params.amount,
-        blocked: resolved.blocked, healthLost: resolved.healthLost,
-      })
-      for (const effect of effects.filter((candidate) => candidate.type === 'combat.retaliation.status_apply')) {
-        if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
-        addStatus(statuses.enemy, effect.params.status, effect.params.stacks)
-        events.push({ type: 'STATUS_APPLIED', target: 'enemy', status: effect.params.status, stacks: effect.params.stacks })
-      }
-    }
-  }
-
-  for (const effect of effects.filter((candidate) => candidate.type === 'combat.status.apply')) {
-    if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
-    addStatus(statuses[effect.params.target], effect.params.status, effect.params.stacks)
-    events.push({ type: 'STATUS_APPLIED', target: effect.params.target, status: effect.params.status, stacks: effect.params.stacks })
-  }
-  if (extraHitOccurred) {
-    for (const effect of effects.filter((candidate) => candidate.type === 'combat.extra_hit.status_apply')) {
-      if (!effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context))) continue
-      addStatus(statuses[effect.params.target], effect.params.status, effect.params.stacks)
-      events.push({ type: 'STATUS_APPLIED', target: effect.params.target, status: effect.params.status, stacks: effect.params.stacks })
-    }
-  }
-
-  const baseCurseGain = getCurseGain(state, effectiveSlotResult, effects, context)
-  let curseGain = context.originTrait === 'priest' && (effectiveSlotResult.action === 'shield' || effectiveSlotResult.action === 'heart')
-    ? Math.max(0, baseCurseGain - 1)
-    : baseCurseGain
-  const guard = fullBlock
-    ? effects.find((effect) =>
-      effect.type === 'combat.full_block.curse_prevent'
-      && !effectUses.includes(effect.id)
-      && effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context)),
-    )
-    : undefined
-  const safety = (statusConsumed || blockDepleted)
-    ? effects.find((effect) =>
-      effect.type === 'combat.curse_gain.prevent_once'
-      && !effectUses.includes(effect.id)
-      && effectConditionsMatch(effect, getResolverContext(effectiveSlotResult, state, context)),
-    )
-    : undefined
-  const prevention = guard ?? safety
-  if (prevention && curseGain > 0) {
-    curseGain = 0
-    effectUses.push(prevention.id)
-    events.push({ type: 'CURSE_PREVENTED', effectId: prevention.id })
-  }
-  const jackpotCurseReduction = context.originTrait === 'gambler' && effectiveSlotResult.modifier === 'x3' ? 1 : 0
-  const curseValue = clamp(state.curse.value + curseGain - jackpotCurseReduction, 0, 10)
-  const curse = {
-    value: curseValue,
-    max: 10 as const,
-    attackBonus: getCurseAttackBonus(curseValue),
-  }
+  const curse = getNextCurse(state, slotResult, effects, context.originTrait)
   events.push({
     type: 'CURSE_INCREASED',
-    amount: curseGain,
+    amount: getCurseGain(state, slotResult, effects),
     value: curse.value,
   })
 
-  for (const threshold of [5, 8, 10] as const) {
-    if (state.curse.value < threshold && curse.value >= threshold) {
-      events.push({ type: 'CURSE_THRESHOLD_REACHED', threshold, attackBonus: getCurseAttackBonus(threshold) })
-    }
-  }
-
-  const endReason = getEndReason(player, enemy, curse)
-  const outcome = getOutcome(endReason)
+  const outcome = getOutcome(player, enemy)
   if (outcome !== 'ongoing') {
     events.push({
       type: 'COMBAT_ENDED',
       outcome,
-      reason: endReason!,
     })
   }
+
+  const nextEnemyIntent = outcome === 'ongoing'
+    ? getNextEnemyIntent(state.enemyIntent, curse.value)
+    : getPressuredEnemyIntent(state.enemyIntent, curse.value)
 
   return {
     player,
     enemy,
     curse,
-    enemyIntent: outcome === 'ongoing'
-      ? getNextEnemyIntent(enemyIntent, curse.value)
-      : getPressuredIntent(enemyIntent, curse.value),
+    enemyIntent: nextEnemyIntent,
     lastSlotResult: slotResult,
-    statuses,
-    effectUses,
     events,
     outcome,
-    ...(endReason ? { endReason } : {}),
   }
 }
 
@@ -410,22 +304,60 @@ function getSlotAmount(
   slotResult: CombatSlotResult,
   state: CombatState,
   effects: EffectDefinition[],
-  context: CombatEffectContext,
+  baseOverride?: number,
 ): number {
-  const multiplier = MODIFIER_MULTIPLIER[slotResult.modifier]
-  const base = getBaseSlotAmount(slotResult) * multiplier
+  const multiplier = getEffectiveMultiplier(slotResult, state, effects)
+  const base = (baseOverride ?? getBaseSlotAmount(slotResult)) * multiplier
   const flatBonus = effects
     .filter((effect) => effect.type === 'combat.action_amount.add')
     .filter((effect) => effect.params.action === slotResult.action)
-    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
   const percentBonus = effects
     .filter((effect) => effect.type === 'combat.action_amount.add_pct')
     .filter((effect) => effect.params.action === slotResult.action)
-    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
     .reduce((sum, effect) => sum + effect.params.percent, 0)
 
   return Math.floor((base + flatBonus) * (1 + Math.min(200, percentBonus) / 100))
+}
+
+function getEffectiveMultiplier(
+  slotResult: CombatSlotResult,
+  state: CombatState,
+  effects: EffectDefinition[],
+): number {
+  const bonus = effects
+    .filter((effect) => effect.type === 'combat.multiplier.add')
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
+    .reduce((sum, effect) => sum + effect.params.amount, 0)
+  const maxMultiplier = effects
+    .filter((effect) => effect.type === 'combat.multiplier.max')
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
+    .reduce((max, effect) => Math.max(max, effect.params.max), 3)
+
+  const minimumMultiplier = typeof slotResult.attackRoll === 'number' && typeof slotResult.defenseRoll === 'number' ? 2 : 1
+  return clamp(MODIFIER_MULTIPLIER[slotResult.modifier] + bonus, minimumMultiplier, maxMultiplier)
+}
+
+function getNextCurse(
+  state: CombatState,
+  slotResult: CombatSlotResult,
+  effects: EffectDefinition[],
+  originTrait?: CombatEffectContext['originTrait'],
+): { value: number } {
+  const baseCurseGain = getCurseGain(state, slotResult, effects)
+  const curseGain = originTrait === 'priest' && (slotResult.action === 'shield' || slotResult.action === 'heart')
+    ? Math.max(0, baseCurseGain - 1)
+    : baseCurseGain
+  const jackpotCurseReduction = originTrait === 'gambler'
+    && (slotResult.modifier === 'x3' || slotResult.attackModifier === 'x3' || slotResult.defenseModifier === 'x3')
+    ? 1
+    : 0
+
+  return {
+    value: Math.max(0, state.curse.value + curseGain - jackpotCurseReduction),
+  }
 }
 
 function getBaseSlotAmount(slotResult: CombatSlotResult): number {
@@ -440,16 +372,88 @@ function getBaseSlotAmount(slotResult: CombatSlotResult): number {
   return COMBAT_BASE_VALUES.heartHealing
 }
 
+function resolveEnemyIntent(
+  player: CombatActorState,
+  enemy: CombatActorState,
+  state: CombatState,
+  events: CombatEvent[],
+): { player: CombatActorState; enemy: CombatActorState } {
+  if (enemy.health <= 0 || player.health <= 0) {
+    return { player, enemy }
+  }
+
+  if (state.enemyIntent.type === 'wait') {
+    events.push({ type: 'ENEMY_WAITED' })
+    return { player, enemy }
+  }
+
+  if (state.enemyIntent.type === 'defend') {
+    const amount = Math.min(
+      COMBAT_BASE_VALUES.enemyDefense,
+      Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block),
+    )
+    events.push({ type: 'ENEMY_DEFENDED', amount })
+    return {
+      player,
+      enemy: {
+        ...enemy,
+        block: enemy.block + amount,
+      },
+    }
+  }
+
+  const amount = getIntentAmount('attack', state.enemyIntent.baseAmount, state.curse.value)
+  const resolved = applyDamage(player, amount)
+  events.push({
+    type: 'ENEMY_ATTACKED',
+    amount,
+    blocked: resolved.blocked,
+    healthLost: resolved.healthLost,
+  })
+  return { player: resolved.actor, enemy }
+}
+
+function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  const type = intent.type === 'attack' ? 'wait' : intent.type === 'wait' ? 'defend' : 'attack'
+  return {
+    type,
+    baseAmount: intent.baseAmount,
+    amount: getIntentAmount(type, intent.baseAmount, curseValue),
+  }
+}
+
+function getPressuredEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  return {
+    ...intent,
+    amount: getIntentAmount(intent.type, intent.baseAmount, curseValue),
+  }
+}
+
+function getIntentAmount(
+  type: CombatState['enemyIntent']['type'],
+  baseAmount: number,
+  curseValue: number,
+): number {
+  if (type === 'wait') {
+    return 0
+  }
+
+  if (type === 'defend') {
+    return COMBAT_BASE_VALUES.enemyDefense
+  }
+
+  return Math.max(0, Math.round(baseAmount * (1 + curseValue * 0.1)))
+}
+
 function getExtraHitAmounts(
   amount: number,
   slotResult: CombatSlotResult,
   state: CombatState,
   effects: EffectDefinition[],
-  context: CombatEffectContext,
 ): number[] {
   return effects
     .filter((effect) => effect.type === 'combat.bullet.extra_hit')
-    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
     .slice(0, 2)
     .map((effect) => Math.floor((amount * effect.params.percent) / 100))
     .filter((extraHitAmount) => extraHitAmount > 0)
@@ -459,88 +463,43 @@ function getCurseGain(
   state: CombatState,
   slotResult: CombatSlotResult,
   effects: EffectDefinition[],
-  context: CombatEffectContext,
 ): number {
   const adjustment = effects
     .filter((effect) => effect.type === 'combat.curse_gain.add')
-    .filter((effect) => effectConditionsMatch(effect, getResolverContext(slotResult, state, context)))
+    .filter((effect) => conditionsMatch(effect.conditions ?? [], slotResult, state))
     .reduce((sum, effect) => sum + effect.params.amount, 0)
 
-  return clamp(1 + adjustment, 0, 3)
+  return clamp(adjustment, 0, 3)
 }
 
-function getResolverContext(
+function conditionsMatch(
+  conditions: EffectCondition[],
   slotResult: CombatSlotResult,
   state: CombatState,
-  context: CombatEffectContext,
-): Parameters<typeof effectConditionsMatch>[1] {
-  return {
-    slotResult,
-    curseValue: state.curse.value,
-    playerHealthPct: (state.player.health / state.player.maxHealth) * 100,
-    lockedReelCount: [
-      context.lockedReels?.action,
-      context.lockedReels?.target,
-      context.lockedReels?.modifier,
-    ].filter(Boolean).length,
-  }
-}
+): boolean {
+  return conditions.every((condition) => {
+    if (condition.type === 'slot.action_is') {
+      return slotResult.action === condition.params.action
+    }
 
-function applyModifierSteps(
-  slotResult: CombatSlotResult,
-  state: CombatState,
-  effects: EffectDefinition[],
-  statuses: CombatState['statuses'],
-  context: CombatEffectContext,
-  events: CombatEvent[],
-): CombatSlotResult {
-  let modifier = slotResult.modifier
+    if (condition.type === 'slot.target_is') {
+      return slotResult.target === condition.params.target
+    }
 
-  if (slotResult.action === 'bullet' && getStatusStacks(statuses.enemy, 'exposed') > 0) {
-    modifier = stepModifier(modifier)
-    consumeStatus(statuses.enemy, 'exposed', 1)
-    events.push({ type: 'STATUS_CONSUMED', target: 'enemy', status: 'exposed', stacks: 1 })
-  }
+    if (condition.type === 'slot.modifier_is') {
+      return slotResult.modifier === condition.params.modifier
+    }
 
-  for (const effect of effects.filter((candidate) => candidate.type === 'combat.modifier.step_up')) {
-    const candidate = { ...slotResult, modifier }
-    if (modifier !== effect.params.from || !effectConditionsMatch(effect, getResolverContext(candidate, state, context))) continue
-    modifier = effect.params.to
-  }
+    if (condition.type === 'combat.curse_at_least') {
+      return state.curse.value >= condition.params.value
+    }
 
-  return { ...slotResult, modifier }
-}
+    if (condition.type === 'combat.player_health_pct_at_most') {
+      return (state.player.health / state.player.maxHealth) * 100 <= condition.params.percent
+    }
 
-function stepModifier(modifier: CombatSlotResult['modifier']): CombatSlotResult['modifier'] {
-  if (modifier === 'x1') return 'x2'
-  return 'x3'
-}
-
-function cloneStatuses(statuses: CombatState['statuses']): CombatState['statuses'] {
-  return {
-    player: statuses.player.map((status) => ({ ...status })),
-    enemy: statuses.enemy.map((status) => ({ ...status })),
-  }
-}
-
-function getStatusStacks(statuses: CombatStatusStack[], id: CombatStatusId): number {
-  return statuses.find((status) => status.id === id)?.stacks ?? 0
-}
-
-function addStatus(statuses: CombatStatusStack[], id: CombatStatusId, stacks: number): void {
-  const existing = statuses.find((status) => status.id === id)
-  if (existing) {
-    existing.stacks += stacks
-  } else {
-    statuses.push({ id, stacks })
-  }
-}
-
-function consumeStatus(statuses: CombatStatusStack[], id: CombatStatusId, stacks: number): void {
-  const existing = statuses.find((status) => status.id === id)
-  if (!existing) return
-  existing.stacks -= stacks
-  if (existing.stacks <= 0) statuses.splice(statuses.indexOf(existing), 1)
+    return false
+  })
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -577,93 +536,14 @@ function applyDamage(
   }
 }
 
-function getEndReason(
-  player: CombatActorState,
-  enemy: CombatActorState,
-  curse: CombatState['curse'],
-): CombatEndReason | undefined {
-  if (curse.value >= curse.max) return 'curse_overload'
-  if (enemy.health <= 0) return 'enemy_defeated'
-  if (player.health <= 0) return 'player_defeated'
-  return undefined
-}
+function getOutcome(player: CombatActorState, enemy: CombatActorState): CombatOutcome {
+  if (enemy.health <= 0) {
+    return 'victory'
+  }
 
-function getOutcome(reason: CombatEndReason | undefined): CombatOutcome {
-  if (reason === 'enemy_defeated') return 'victory'
-  if (reason) return 'defeat'
+  if (player.health <= 0) {
+    return 'defeat'
+  }
+
   return 'ongoing'
-}
-
-export function getCurseAttackBonus(value: number): number {
-  if (value >= 8) return 2
-  if (value >= 5) return 1
-  return 0
-}
-
-export function recalculateEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
-  return getPressuredIntent(intent, curseValue)
-}
-
-function getPressuredIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
-  const patternStep = getCurrentPatternStep(intent)
-  const type = patternStep?.type ?? intent.type
-  return {
-    ...intent,
-    type,
-    amount: getIntentAmount(type, intent.baseAmount, curseValue, getPatternStepAmount(patternStep)),
-  }
-}
-
-function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
-  if (intent.pattern && intent.pattern.length > 0) {
-    const nextIndex = normalizePatternIndex((intent.patternIndex ?? 0) + 1, intent.pattern.length)
-    const step = intent.pattern[nextIndex]
-    return getPressuredIntent({
-      ...intent,
-      type: step.type,
-      patternIndex: nextIndex,
-    }, curseValue)
-  }
-
-  return getPressuredIntent({
-    ...intent,
-    type: intent.type === 'attack' ? 'wait' : intent.type === 'wait' ? 'defend' : 'attack',
-  }, curseValue)
-}
-
-function getIntentAmount(
-  type: CombatState['enemyIntent']['type'],
-  baseAmount: number,
-  curseValue: number,
-  amount?: number,
-): number {
-  if (type === 'wait') return 0
-  if (type === 'defend') return amount ?? COMBAT_BASE_VALUES.enemyDefense
-  return baseAmount + getCurseAttackBonus(curseValue)
-}
-
-function getCurrentPatternStep(intent: CombatState['enemyIntent']): EnemyIntentPatternStepOverrides | undefined {
-  if (!intent.pattern || intent.pattern.length === 0) return undefined
-  return intent.pattern[normalizePatternIndex(intent.patternIndex ?? 0, intent.pattern.length)]
-}
-
-function getPatternStepAmount(step: EnemyIntentPatternStepOverrides | undefined): number | undefined {
-  return step?.type === 'defend' ? step.amount : undefined
-}
-
-function cloneEnemyIntentPattern(pattern: EnemyIntentPattern): EnemyIntentPattern {
-  return pattern.map((step) => ({ ...step })) as unknown as EnemyIntentPattern
-}
-
-function normalizePatternIndex(index: number, length: number): number {
-  return ((index % length) + length) % length
-}
-
-function getPreviewWarnings(state: CombatState, resolution: CombatResolution): string[] {
-  const warnings: string[] = []
-  if (state.curse.value < 5 && resolution.curse.value >= 5) warnings.push('저주 5: 다음 적 공격 +1')
-  if (state.curse.value < 8 && resolution.curse.value >= 8) warnings.push('저주 8: 다음 적 공격 +2')
-  if (resolution.endReason === 'curse_overload') warnings.push('저주 10: 즉시 패배')
-  if (resolution.events.some((event) => event.type === 'BOSS_PHASE_CHANGED')) warnings.push('보스 2페이즈: 공격 10')
-  return warnings
 }

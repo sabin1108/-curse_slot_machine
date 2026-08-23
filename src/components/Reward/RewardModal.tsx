@@ -1,25 +1,25 @@
-﻿import React, { useState } from 'react';
-import { GameCommand, RewardCard } from '../../types/game';
+import React, { useState } from 'react';
+import { AugmentItem, GameCommand } from '../../types/game';
 import { getAsset } from '../../assets/assetHelper';
 import { soundManager } from '../../utils/soundManager';
 
 interface RewardModalProps {
-  candidates: RewardCard[];
+  candidates: AugmentItem[];
   augSlotPresentation: {
     reels: [string, string, string];
-    targetAugment: RewardCard | null;
+    targetAugment: AugmentItem | null;
     isRevealed: boolean;
   } | null;
   onDispatch: (cmd: GameCommand) => void;
 }
 
 export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPresentation, onDispatch }) => {
-  const [selectedRewardCard, setSelectedRewardCard] = useState<RewardCard | null>(candidates[0] || null);
+  const [selectedAug, setSelectedAug] = useState<AugmentItem | null>(candidates[0] || null);
 
-  const handleSelectReward = (rewardCard: RewardCard) => {
-    setSelectedRewardCard(rewardCard);
+  const handleSelectReward = (augment: AugmentItem) => {
+    setSelectedAug(augment);
     soundManager.playJackpotSound();
-    onDispatch({ type: 'CHOOSE_REWARD', rewardId: rewardCard.id });
+    onDispatch({ type: 'CHOOSE_REWARD', augmentId: augment.id });
   };
 
   const getCardFrame = (rarity: string) => {
@@ -54,9 +54,9 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
     return labels[tag] ?? tag;
   };
 
-  const getKindLabel = (rewardCard: RewardCard) => {
-    if (rewardCard.kind === 'item') return '아이템';
-    if (rewardCard.rarity === 'CURSED') return '저주 증강';
+  const getKindLabel = (augment: AugmentItem) => {
+    if (augment.icon === 'ITEM') return '아이템';
+    if (augment.rarity === 'CURSED') return '저주 증강';
     return '증강';
   };
 
@@ -81,29 +81,29 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
         )}
 
         <div className="reward-card-grid">
-          {candidates.map((rewardCard) => {
-            const isSelected = selectedRewardCard?.id === rewardCard.id;
+          {candidates.map((aug) => {
+            const isSelected = selectedAug?.id === aug.id;
             return (
               <button
-                key={rewardCard.id}
-                data-reward-id={rewardCard.id}
+                key={aug.id}
+                data-reward-id={aug.id}
                 className={`reward-card-pixel ${isSelected ? 'selected' : ''}`}
-                style={{ backgroundImage: `url(${getCardFrame(rewardCard.rarity)})` }}
+                style={{ backgroundImage: `url(${getCardFrame(aug.rarity)})` }}
                 type="button"
-                aria-label={`${rewardCard.name} 선택`}
+                aria-label={`${aug.name} 선택`}
                 aria-pressed={isSelected}
-                onClick={() => handleSelectReward(rewardCard)}
+                onClick={() => handleSelectReward(aug)}
               >
-                <div className="card-pixel-rarity">{getRarityLabel(rewardCard.rarity)}</div>
-                <img className="card-pixel-icon" src={rewardCard.imgUrl || getAsset('sword_gold')} alt={rewardCard.name} />
-                <h3 className="card-pixel-title">{rewardCard.name}</h3>
+                <div className="card-pixel-rarity">{getRarityLabel(aug.rarity)}</div>
+                <img className="card-pixel-icon" src={aug.imgUrl || getAsset('sword_gold')} alt={aug.name} />
+                <h3 className="card-pixel-title">{aug.name}</h3>
                 <div className="card-info-panel">
                   <div className="card-kind-row">
-                    <span>{getKindLabel(rewardCard)}</span>
-                    <strong>{rewardCard.tags.map(getTagLabel).join(' / ')}</strong>
+                    <span>{getKindLabel(aug)}</span>
+                    <strong>{aug.tags.map(getTagLabel).join(' / ')}</strong>
                   </div>
-                  <p className="card-pixel-desc">{rewardCard.description}</p>
-                  <div className="card-pixel-val">효과: {rewardCard.effectValue}</div>
+                  <p className="card-pixel-desc">{aug.description}</p>
+                  <div className="card-pixel-val">효과: {aug.effectValue}</div>
                 </div>
                 <span className="k-btn card-select-btn">선택하기</span>
               </button>

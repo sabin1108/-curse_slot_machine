@@ -43,7 +43,7 @@ export type SynergyTag =
   | 'RESOURCE'
   | 'LIMIT';
 
-interface RewardCardBase {
+export interface AugmentItem {
   id: string;
   name: string;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'CURSED' | 'LEGENDARY';
@@ -53,16 +53,6 @@ interface RewardCardBase {
   imgUrl?: string;
   effectValue: string;
 }
-
-export interface AugmentCard extends RewardCardBase {
-  kind: 'augment';
-}
-
-export interface ItemCard extends RewardCardBase {
-  kind: 'item';
-}
-
-export type RewardCard = AugmentCard | ItemCard;
 
 export interface SynergyProgress {
   synergyId: string;
@@ -76,8 +66,8 @@ export interface SynergyProgress {
 }
 
 export interface BuildState {
-  augments: AugmentCard[];
-  items: ItemCard[];
+  augments: AugmentItem[];
+  items: string[];
   activeSynergies: string[];
   synergyProgress: SynergyProgress[];
 }
@@ -143,27 +133,6 @@ export type GameMode = 'NORMAL' | 'SHOWCASE';
 
 export type MapNodeType = 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
 
-export type RouteNodeType = 'combat' | 'elite' | 'rest' | 'shop' | 'event' | 'gate' | 'boss';
-
-export type MapNodeStatus = 'completed' | 'current' | 'available' | 'locked';
-
-export interface MapNodeView {
-  id: number;
-  type: RouteNodeType;
-  label: string;
-  rewardPolicy: string;
-  status: MapNodeStatus;
-  positionPct: number;
-}
-
-export interface MapViewState {
-  nodes: MapNodeView[];
-  completedStageIds: number[];
-  currentNode: MapNodeView | null;
-  nextAvailableNode: MapNodeView | null;
-  activeNode: MapNodeView | null;
-}
-
 export type EventChoice = 'OPEN' | 'REST' | 'SKIP';
 
 export interface ShowcaseStep {
@@ -193,7 +162,6 @@ export interface GameState {
   curse: CurseState;
   build: BuildState;
   visitedNodePath: number[]; // Persistent visited map node IDs
-  map: MapViewState;
   
   // Narrative & Origin State
   selectedOrigin?: OriginId;
@@ -222,10 +190,10 @@ export interface GameState {
   isSpinning: boolean;
   
   // Augment Slot Machine Presentation State (Reward reveal)
-  rewardCandidates: RewardCard[];
+  rewardCandidates: AugmentItem[];
   augSlotPresentation: {
     reels: [string, string, string];
-    targetAugment: RewardCard | null;
+    targetAugment: AugmentItem | null;
     isRevealed: boolean;
   } | null;
 
@@ -244,19 +212,19 @@ export interface GameState {
 }
 
 export type GameCommand =
-  | { type: 'START_RUN'; seed?: string }
+  | { type: 'START_RUN'; seed?: string; mode?: GameMode }
+  | { type: 'OPEN_PROLOGUE' }
   | { type: 'SELECT_ORIGIN'; originId: OriginId }
-  | { type: 'ENTER_NEXT_STAGE' }
+  | { type: 'SELECT_MAP_NODE'; nodeId: number; nodeType?: MapNodeType }
   | { type: 'SPIN_COMBAT_SLOT' }
-  | { type: 'TOGGLE_REEL_LOCK'; reel: ReelId }
+  | { type: 'TOGGLE_LOCK_REEL'; reelId: ReelId }
   | { type: 'REROLL_UNLOCKED' }
-  | { type: 'CONFIRM_COMBAT_SLOT' }
-  | { type: 'CHOOSE_REWARD'; rewardId: string }
-  | { type: 'RESOLVE_EVENT'; choice: 'reward' | 'gold' | 'rest' | 'skip' }
-  | { type: 'BUY_SHOP_ITEM'; rewardId: string }
-  | { type: 'LEAVE_SHOP' }
-  | { type: 'RESOLVE_REST'; action: 'heal' | 'purify' }
+  | { type: 'CONFIRM_SLOT_RESULT' }
+  | { type: 'CHOOSE_REWARD'; augmentId: string }
   | { type: 'NAVIGATE'; screen: GameScreen }
   | { type: 'START_SHOWCASE'; scenarioId?: string }
-  | { type: 'NEXT_SHOWCASE_STEP' };
+  | { type: 'NEXT_SHOWCASE_STEP' }
+  | { type: 'RESOLVE_EVENT_CHOICE'; choice: EventChoice }
+  | { type: 'BUY_SHOP_ITEM'; itemId: string; price: number }
+  | { type: 'REST_ACTION'; actionType: 'HEAL' | 'UPGRADE' };
 
