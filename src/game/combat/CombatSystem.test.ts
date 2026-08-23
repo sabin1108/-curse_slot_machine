@@ -217,4 +217,54 @@ describe('CombatSystem', () => {
       }),
     )
   })
+
+  it('cycles enemy attack, wait, and low defense intents', () => {
+    const attack = resolveCombatSlot(
+      createCombatState({ enemy: { health: 100, maxHealth: 100 } }),
+      { action: 'shield', target: 'self', modifier: 'x1' },
+    )
+
+    expect(attack.events).toContainEqual(expect.objectContaining({ type: 'ENEMY_ATTACKED' }))
+    expect(attack.enemyIntent).toEqual({ type: 'wait', baseAmount: 4, amount: 0 })
+
+    const wait = resolveCombatSlot(attack, { action: 'shield', target: 'self', modifier: 'x1' })
+
+    expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(wait.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
+    expect(wait.enemyIntent).toEqual({ type: 'defend', baseAmount: 4, amount: 1 })
+
+    const defend = resolveCombatSlot(wait, { action: 'shield', target: 'self', modifier: 'x1' })
+
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(defend.enemy.block).toBe(1)
+    expect(defend.enemyIntent).toEqual({ type: 'attack', baseAmount: 4, amount: 4 })
+  })
+
+  it('uses wait and defense intents for dual-roll combat without skipping the cycle', () => {
+    const dualRoll = {
+      action: 'bullet' as const,
+      target: 'enemy' as const,
+      modifier: 'x2' as const,
+      attackRoll: 1,
+      defenseRoll: 1,
+      attackModifier: 'x2' as const,
+      defenseModifier: 'x2' as const,
+    }
+    const waitState = createCombatState({
+      enemy: { health: 100, maxHealth: 100 },
+      enemyIntent: { type: 'wait', baseAmount: 4, amount: 0 },
+    })
+
+    const wait = resolveCombatSlot(waitState, dualRoll)
+
+    expect(wait.events).toContainEqual({ type: 'ENEMY_WAITED' })
+    expect(wait.events.some((event) => event.type === 'ENEMY_ATTACKED')).toBe(false)
+    expect(wait.enemyIntent.type).toBe('defend')
+
+    const defend = resolveCombatSlot(wait, dualRoll)
+
+    expect(defend.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(defend.enemy.block).toBe(1)
+    expect(defend.enemyIntent.type).toBe('attack')
+  })
 })

@@ -16,6 +16,8 @@ const COMBAT_BASE_VALUES = {
   shieldBlock: 5,
   heartHealing: 4,
   enemyAttack: 4,
+  enemyDefense: 1,
+  enemyBlockCap: 2,
 } as const
 
 const MODIFIER_MULTIPLIER = {
@@ -45,16 +47,22 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     },
     overrides.enemy,
   )
+  const enemyIntentType = overrides.enemyIntent?.type ?? 'attack'
+  const enemyIntentBaseAmount = overrides.enemyIntent?.baseAmount
+    ?? overrides.enemyIntent?.amount
+    ?? COMBAT_BASE_VALUES.enemyAttack
+  const curseValue = overrides.curse?.value ?? 0
 
   return {
     player,
     enemy,
     curse: {
-      value: overrides.curse?.value ?? 0,
+      value: curseValue,
     },
     enemyIntent: {
-      type: overrides.enemyIntent?.type ?? 'attack',
-      amount: overrides.enemyIntent?.amount ?? COMBAT_BASE_VALUES.enemyAttack,
+      type: enemyIntentType,
+      baseAmount: enemyIntentBaseAmount,
+      amount: overrides.enemyIntent?.amount ?? getIntentAmount(enemyIntentType, enemyIntentBaseAmount, curseValue),
     },
     ...(overrides.lastSlotResult ? { lastSlotResult: overrides.lastSlotResult } : {}),
   }
@@ -131,17 +139,7 @@ export function resolveCombatSlot(
       })
     }
 
-    if (enemy.health > 0 && player.health > 0) {
-      const enemyAttackAmount = getCursedEnemyAttackAmount(state)
-      const enemyAttack = applyDamage(player, enemyAttackAmount)
-      player = enemyAttack.actor
-      events.push({
-        type: 'ENEMY_ATTACKED',
-        amount: enemyAttackAmount,
-        blocked: enemyAttack.blocked,
-        healthLost: enemyAttack.healthLost,
-      })
-    }
+    ;({ player, enemy } = resolveEnemyIntent(player, enemy, state, events))
 
     const curse = getNextCurse(state, attackSlot, effects, context.originTrait)
     events.push({
@@ -158,11 +156,15 @@ export function resolveCombatSlot(
       })
     }
 
+    const nextEnemyIntent = outcome === 'ongoing'
+      ? getNextEnemyIntent(state.enemyIntent, curse.value)
+      : getPressuredEnemyIntent(state.enemyIntent, curse.value)
+
     return {
       player,
       enemy,
       curse,
-      enemyIntent: state.enemyIntent,
+      enemyIntent: nextEnemyIntent,
       lastSlotResult: slotResult,
       events,
       outcome,
@@ -250,17 +252,7 @@ export function resolveCombatSlot(
     }
   }
 
-  if (enemy.health > 0 && player.health > 0) {
-    const enemyAttackAmount = getCursedEnemyAttackAmount(state)
-    const resolved = applyDamage(player, enemyAttackAmount)
-    player = resolved.actor
-    events.push({
-      type: 'ENEMY_ATTACKED',
-      amount: enemyAttackAmount,
-      blocked: resolved.blocked,
-      healthLost: resolved.healthLost,
-    })
-  }
+  ;({ player, enemy } = resolveEnemyIntent(player, enemy, state, events))
 
   const curse = getNextCurse(state, slotResult, effects, context.originTrait)
   events.push({
@@ -277,11 +269,15 @@ export function resolveCombatSlot(
     })
   }
 
+  const nextEnemyIntent = outcome === 'ongoing'
+    ? getNextEnemyIntent(state.enemyIntent, curse.value)
+    : getPressuredEnemyIntent(state.enemyIntent, curse.value)
+
   return {
     player,
     enemy,
     curse,
-    enemyIntent: state.enemyIntent,
+    enemyIntent: nextEnemyIntent,
     lastSlotResult: slotResult,
     events,
     outcome,
@@ -376,8 +372,77 @@ function getBaseSlotAmount(slotResult: CombatSlotResult): number {
   return COMBAT_BASE_VALUES.heartHealing
 }
 
-function getCursedEnemyAttackAmount(state: CombatState): number {
-  return Math.max(0, Math.round(state.enemyIntent.amount * (1 + state.curse.value * 0.1)))
+function resolveEnemyIntent(
+  player: CombatActorState,
+  enemy: CombatActorState,
+  state: CombatState,
+  events: CombatEvent[],
+): { player: CombatActorState; enemy: CombatActorState } {
+  if (enemy.health <= 0 || player.health <= 0) {
+    return { player, enemy }
+  }
+
+  if (state.enemyIntent.type === 'wait') {
+    events.push({ type: 'ENEMY_WAITED' })
+    return { player, enemy }
+  }
+
+  if (state.enemyIntent.type === 'defend') {
+    const amount = Math.min(
+      COMBAT_BASE_VALUES.enemyDefense,
+      Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block),
+    )
+    events.push({ type: 'ENEMY_DEFENDED', amount })
+    return {
+      player,
+      enemy: {
+        ...enemy,
+        block: enemy.block + amount,
+      },
+    }
+  }
+
+  const amount = getIntentAmount('attack', state.enemyIntent.baseAmount, state.curse.value)
+  const resolved = applyDamage(player, amount)
+  events.push({
+    type: 'ENEMY_ATTACKED',
+    amount,
+    blocked: resolved.blocked,
+    healthLost: resolved.healthLost,
+  })
+  return { player: resolved.actor, enemy }
+}
+
+function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  const type = intent.type === 'attack' ? 'wait' : intent.type === 'wait' ? 'defend' : 'attack'
+  return {
+    type,
+    baseAmount: intent.baseAmount,
+    amount: getIntentAmount(type, intent.baseAmount, curseValue),
+  }
+}
+
+function getPressuredEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+  return {
+    ...intent,
+    amount: getIntentAmount(intent.type, intent.baseAmount, curseValue),
+  }
+}
+
+function getIntentAmount(
+  type: CombatState['enemyIntent']['type'],
+  baseAmount: number,
+  curseValue: number,
+): number {
+  if (type === 'wait') {
+    return 0
+  }
+
+  if (type === 'defend') {
+    return COMBAT_BASE_VALUES.enemyDefense
+  }
+
+  return Math.max(0, Math.round(baseAmount * (1 + curseValue * 0.1)))
 }
 
 function getExtraHitAmounts(

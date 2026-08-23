@@ -267,13 +267,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ state, onDispatch })
             {/* High Threat Red Warning Banner above Monster */}
             <div className="mob-intent-threat-banner">
               <div className="threat-title-row">
-                <span className="threat-warning-tag">⚠️ 몬스터 공격 예고</span>
+                <span className="threat-warning-tag">
+                  {state.enemy.intent.type === 'ATTACK'
+                    ? '⚠️ 몬스터 공격 예고'
+                    : state.enemy.intent.type === 'WAIT'
+                      ? '몬스터 대기 턴'
+                      : '몬스터 방어 예고'}
+                </span>
                 <span className="threat-intent-name">{state.enemy.intent.name}</span>
               </div>
               <div className="threat-damage-display">
                 <span className="threat-icon">{state.enemy.intent.icon}</span>
                 <span className="threat-damage-val">{state.enemy.intent.value}</span>
-                <span className="threat-damage-unit">피해 예상!</span>
+                <span className="threat-damage-unit">
+                  {state.enemy.intent.type === 'ATTACK'
+                    ? '피해 예상!'
+                    : state.enemy.intent.type === 'WAIT'
+                      ? '피해 없음'
+                      : '방어 획득'}
+                </span>
               </div>
             </div>
 

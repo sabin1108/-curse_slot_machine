@@ -36,6 +36,15 @@ export class GameEngine {
   }
 
   syncCombatFromPresentation(player: UiPlayerState, enemy: UiEnemyState, curseValue: number): void {
+    const intentType = enemy.intent.type === 'WAIT'
+      ? 'wait'
+      : enemy.intent.type === 'DEFEND'
+        ? 'defend'
+        : 'attack'
+    const baseAmount = intentType === 'attack'
+      ? enemy.intent.value
+      : this.state.combat.enemyIntent.baseAmount
+
     this.state = {
       ...this.state,
       combat: {
@@ -58,7 +67,8 @@ export class GameEngine {
           value: curseValue,
         },
         enemyIntent: {
-          type: 'attack',
+          type: intentType,
+          baseAmount,
           amount: enemy.intent.value,
         },
       },

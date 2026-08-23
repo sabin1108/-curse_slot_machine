@@ -403,6 +403,28 @@ describe('UiGameEngine', () => {
     expect(resolvedState.lastEnemyDamagePop).toEqual(resolvedState.enemyDamagePops.at(-1))
   })
 
+  it('projects attack, wait, and defense intents through the dual-engine adapter', () => {
+    const engine = new GameEngine('enemy-intent-cycle-ui')
+
+    engine.dispatch({ type: 'START_RUN', seed: 'enemy-intent-cycle-ui' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1501, nodeType: 'BOSS' })
+
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const afterAttack = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    expect(afterAttack.enemy.intent).toMatchObject({ type: 'WAIT', value: 0 })
+    expect(afterAttack.isEnemyAttacking).toBe(true)
+
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const afterWait = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    expect(afterWait.enemy.intent).toMatchObject({ type: 'DEFEND', value: 1 })
+    expect(afterWait.isEnemyAttacking).toBe(false)
+
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
+    const afterDefense = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    expect(afterDefense.enemy.intent).toMatchObject({ type: 'ATTACK' })
+    expect(afterDefense.isEnemyAttacking).toBe(false)
+  })
+
   it('projects multiplier caps from item and matching limit synergy', () => {
     const engine = new GameEngine('limit-break-ui')
     const forcedSlot = {

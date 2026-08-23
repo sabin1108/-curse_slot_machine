@@ -1,5 +1,6 @@
 import type {
   AugmentItem,
+  EnemyIntent as UiEnemyIntent,
   ReelSymbol,
   SlotResult,
   SynergyProgress as UiSynergyProgress,
@@ -13,7 +14,41 @@ import type {
 } from '../build/BuildTypes'
 import type { RewardOption } from '../build/RewardSystem'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import type { EnemyIntent as CoreEnemyIntent } from '../combat/CombatTypes'
 import { getAsset } from '../../assets/assetHelper'
+
+export function toUiEnemyIntent(intent: CoreEnemyIntent): UiEnemyIntent {
+  if (intent.type === 'wait') {
+    return {
+      id: 'wait',
+      name: '\uC228 \uACE0\uB974\uAE30',
+      type: 'WAIT',
+      value: 0,
+      icon: '\u{1F4A4}',
+      description: '\uC774\uBC88 \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.',
+    }
+  }
+
+  if (intent.type === 'defend') {
+    return {
+      id: 'defend',
+      name: '\uBC29\uC5B4 \uD0DC\uC138',
+      type: 'DEFEND',
+      value: intent.amount,
+      icon: '\u{1F6E1}\uFE0F',
+      description: '\uBC29\uC5B4\uB97C 1 \uC5BB\uC2B5\uB2C8\uB2E4. (\uC0C1\uD55C 2)',
+    }
+  }
+
+  return {
+    id: 'attack',
+    name: '\uC608\uACE0\uB41C \uACF5\uACA9',
+    type: 'ATTACK',
+    value: intent.amount,
+    icon: '\u2694',
+    description: `\uB2E4\uC74C \uBC18\uACA9 ${intent.amount}`,
+  }
+}
 
 export function toUiAugment(reward: BuildRewardDefinition): AugmentItem {
   const localized = localizeReward(reward)

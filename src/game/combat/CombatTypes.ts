@@ -12,7 +12,8 @@ export type CombatActorState = {
 }
 
 export type EnemyIntent = {
-  type: 'attack'
+  type: 'attack' | 'wait' | 'defend'
+  baseAmount: number
   amount: number
 }
 
@@ -54,6 +55,13 @@ export type CombatEvent =
       amount: number
       blocked: number
       healthLost: number
+    }
+  | {
+      type: 'ENEMY_WAITED'
+    }
+  | {
+      type: 'ENEMY_DEFENDED'
+      amount: number
     }
   | {
       type: 'CURSE_INCREASED'

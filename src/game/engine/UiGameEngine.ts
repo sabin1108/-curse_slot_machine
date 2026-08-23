@@ -11,6 +11,7 @@ import { GameEngine as StructuredGameEngine } from './GameEngine'
 import {
   getReelIndex,
   toUiAugment,
+  toUiEnemyIntent,
   toUiReward,
   toUiSlotResult,
   toUiSynergyName,
@@ -205,6 +206,7 @@ export class GameEngine {
       hp: combat.enemy.health,
       maxHp: combat.enemy.maxHealth,
       shield: combat.enemy.block,
+      intent: toUiEnemyIntent(combat.enemyIntent),
     }
     this.presentation.curse = {
       ...this.presentation.curse,
@@ -359,6 +361,14 @@ export class GameEngine {
           id: Date.now(),
         }
       }
+    }
+
+    if (event.type === 'ENEMY_WAITED') {
+      this.presentation.combatLogs.push('\uC801\uC774 \uC228\uC744 \uACE0\uB985\uB2C8\uB2E4.')
+    }
+
+    if (event.type === 'ENEMY_DEFENDED') {
+      this.presentation.combatLogs.push(`\uC801\uC774 \uBC29\uC5B4 ${event.amount}\uC744 \uC5BB\uC2B5\uB2C8\uB2E4.`)
     }
 
     if (event.type === 'CURSE_INCREASED') {
