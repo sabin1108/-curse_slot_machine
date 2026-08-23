@@ -281,6 +281,27 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     expect(engine.getState().player.hp).toBe(initialHp);
     expect(engine.getState().player.shield).toBe(5);
   });
+
+  it('resolves event skip back to the map with transient combat state cleared', () => {
+    const engine = new GameEngine('event-skip-progression');
+
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 501, nodeType: 'EVENT' });
+    const enemyBeforeSkip = structuredClone(engine.getState().enemy);
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' });
+    engine.dispatch({ type: 'TOGGLE_LOCK_REEL', reelId: 'action' });
+    engine.getState().isEnemyAttacking = true;
+
+    const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'SKIP' });
+
+    expect(state.screen).toBe('MAP');
+    expect(state.visitedNodePath).toContain(501);
+    expect(state.enemy).toEqual(enemyBeforeSkip);
+    expect(state.currentResult).toBeNull();
+    expect(state.hasSpunThisTurn).toBe(false);
+    expect(state.isSpinning).toBe(false);
+    expect(state.isEnemyAttacking).toBe(false);
+    expect(state.lockedReels.size).toBe(0);
+  });
 });
 
 

@@ -326,11 +326,16 @@ describe('UiGameEngine', () => {
     const engine = new GameEngine('event-choice-skip')
 
     engine.dispatch({ type: 'START_RUN', seed: 'event-choice-skip' })
-    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 501, nodeType: 'EVENT' })
 
     const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'SKIP' })
 
-    expect(state.screen).toBe('BATTLE')
+    expect(state.screen).toBe('MAP')
+    expect(state.visitedNodePath).toContain(501)
+    expect(state.currentResult).toBeNull()
+    expect(state.hasSpunThisTurn).toBe(false)
+    expect(state.isEnemyAttacking).toBe(false)
+    expect(state.lockedReels.size).toBe(0)
   })
 
   it('uses showcase forced slot results instead of structured slot rng', () => {

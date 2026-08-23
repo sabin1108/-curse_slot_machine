@@ -1,6 +1,7 @@
 import {
   GameState,
   GameCommand,
+  EventChoice,
   MapNodeType,
   ReelId,
   SlotResult,
@@ -147,6 +148,9 @@ export class GameEngine {
       case 'REST_ACTION':
         this.handleRestAction(command.actionType);
         break;
+      case 'RESOLVE_EVENT_CHOICE':
+        this.handleResolveEventChoice(command.choice);
+        break;
     }
 
     this.updateSynergies();
@@ -232,6 +236,27 @@ export class GameEngine {
     this.state.isEnemyDefeated = false;
     this.state.isEnemyAttacking = false;
     this.resetOriginTraitState();
+  }
+
+  private handleResolveEventChoice(choice: EventChoice) {
+    if (choice === 'OPEN') {
+      this.handleBuyShopItem('보물상자 획득', 0);
+    } else if (choice === 'REST') {
+      this.handleRestAction('HEAL');
+    } else {
+      this.state.combatLogs.push('[Event] Reward skipped. Route exploration continues.');
+    }
+
+    this.state.screen = 'MAP';
+    this.state.currentResult = null;
+    this.state.hasSpunThisTurn = false;
+    this.state.isSpinning = false;
+    this.state.lockedReels.clear();
+    this.state.isEnemyAttacking = false;
+    this.state.lastDamagePop = null;
+    this.state.lastEnemyDamagePop = null;
+    this.state.enemyDamagePops = [];
+    this.state.narrativeMicrocopy = `Event resolved. Choose the next route from Stage ${Math.min(this.state.totalWaves, this.state.wave + 1)}.`;
   }
 
   private handleSpinCombatSlot() {
