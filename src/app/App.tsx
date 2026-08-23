@@ -16,12 +16,13 @@ import { GameEngine } from '../game/engine/GameEngine'
 import { MVP_DEMO_REWARD_SETUP_COMMANDS, MVP_DEMO_SEED } from '../game/demo/MvpDemoTrace'
 import type { GameCommand as CoreGameCommand } from '../game/engine/commands'
 import type { GameEvent } from '../game/engine/events'
-import { projectUiGameState, type UiFeedback } from '../game/engine/UiProjection'
+import { projectUiGameState, toUiScreen, type UiFeedback } from '../game/engine/UiProjection'
 import type { GameCommand, GameScreen, ShowcaseStep } from '../types/game'
 import { soundManager } from '../utils/soundManager'
 import '../styles.css'
 
 const DEFAULT_SEED = MVP_DEMO_SEED
+const BATTLE_OUTRO_MS = 1000
 const SHOWCASE_STEPS: ShowcaseStep[] = [
   { stepIndex: 1, title: '전투 문장', instruction: '[행동 · 대상 · 배율] 세 릴을 확인합니다.', actionScript: 'spin', highlightMessage: '표시가 아니라 코어가 결과를 결정합니다.' },
   { stepIndex: 2, title: '잠금과 리롤', instruction: '원하는 릴을 잠그고 나머지만 다시 돌립니다.', actionScript: 'reroll', highlightMessage: '리롤 저주도 코어 상태에 기록됩니다.' },
@@ -31,6 +32,7 @@ const SHOWCASE_STEPS: ShowcaseStep[] = [
 const SHOWCASE_REWARD_STEP_INDEX = getShowcaseRewardStepIndex()
 
 type IntroScreen = Extract<GameScreen, 'TITLE' | 'PROLOGUE' | 'ORIGIN'> | null
+type BattleOutroScreen = Extract<GameScreen, 'BATTLE'> | null
 
 function createFeedback(): UiFeedback {
   return {
@@ -54,10 +56,33 @@ export function App() {
   const [isCurseLogOpen, setIsCurseLogOpen] = useState(false)
   const [musicVolume, setMusicVolume] = useState(() => soundManager.getMusicVolume())
   const [audioEnabled, setAudioEnabled] = useState(() => soundManager.isEnabled())
+  const [battleOutroScreen, setBattleOutroScreen] = useState<BattleOutroScreen>(null)
+  const battleOutroTimerRef = useRef<number | null>(null)
   const feedbackId = useRef(0)
 
   const projected = useMemo(() => projectUiGameState(coreState, feedback), [coreState, feedback])
-  const gameState = useMemo(() => ({ ...projected, screen: introScreen ?? projected.screen }), [projected, introScreen])
+  const gameState = useMemo(() => ({ ...projected, screen: introScreen ?? battleOutroScreen ?? projected.screen }), [projected, introScreen, battleOutroScreen])
+
+  const clearBattleOutro = () => {
+    if (battleOutroTimerRef.current !== null) {
+      window.clearTimeout(battleOutroTimerRef.current)
+      battleOutroTimerRef.current = null
+    }
+    setBattleOutroScreen(null)
+  }
+
+  const queueBattleOutro = (events: GameEvent[], nextScreen: GameScreen) => {
+    if (!shouldPlayBattleOutro(events, nextScreen)) {
+      return
+    }
+
+    clearBattleOutro()
+    setBattleOutroScreen('BATTLE')
+    battleOutroTimerRef.current = window.setTimeout(() => {
+      battleOutroTimerRef.current = null
+      setBattleOutroScreen(null)
+    }, BATTLE_OUTRO_MS)
+  }
 
   const syncMusicForState = (screen: GameScreen, wave: number) => {
     if (screen === 'TITLE' || screen === 'PROLOGUE' || screen === 'ORIGIN' || screen === 'GAMEOVER' || screen === 'VICTORY') {
@@ -73,10 +98,18 @@ export function App() {
     syncMusicForState(gameState.screen, gameState.wave)
   }, [gameState.screen, gameState.wave])
 
+  useEffect(() => () => {
+    if (battleOutroTimerRef.current !== null) {
+      window.clearTimeout(battleOutroTimerRef.current)
+    }
+  }, [])
+
   const dispatchCore = (command: CoreGameCommand) => {
     const events = engineRef.current.dispatch(command)
-    setCoreState(engineRef.current.getState())
+    const nextState = engineRef.current.getState()
+    setCoreState(nextState)
     setFeedback((previous) => reduceFeedback(previous, events, feedbackId))
+    queueBattleOutro(events, toUiScreen(nextState.phase))
   }
 
   const enterShowcaseRewardStep = (stepIndex: number) => {
@@ -103,14 +136,17 @@ export function App() {
     if (command.type === 'START_RUN') {
       setIntroScreen('PROLOGUE')
       setFeedback(createFeedback())
+      clearBattleOutro()
       return
     }
     if (command.type === 'NAVIGATE') {
       if (command.screen === 'TITLE') {
         setIntroScreen('TITLE')
         setFeedback(createFeedback())
+        clearBattleOutro()
       } else if (command.screen === 'ORIGIN') {
         setIntroScreen('ORIGIN')
+        clearBattleOutro()
       }
       return
     }
@@ -120,6 +156,7 @@ export function App() {
       setIntroScreen('TITLE')
       setCoreState(nextEngine.getState())
       setFeedback((previous) => ({ ...previous, showcase: { ...previous.showcase, active: true, currentStep: 0 } }))
+      clearBattleOutro()
       return
     }
     if (command.type === 'NEXT_SHOWCASE_STEP') {
@@ -139,6 +176,7 @@ export function App() {
       setCoreState(nextEngine.getState())
       setFeedback((previous) => reduceFeedback(previous, [...selected, ...started], feedbackId))
       setIntroScreen(null)
+      clearBattleOutro()
       return
     }
     dispatchCore(command as CoreGameCommand)
@@ -174,6 +212,19 @@ export function App() {
       </div></ScreenTransitionOverlay>
     </main>
   )
+}
+
+export function shouldPlayBattleOutro(events: GameEvent[], nextScreen: GameScreen): boolean {
+  if (nextScreen === 'BATTLE') return false
+
+  return events.some((event) => (
+    event.type === 'COMBAT_SLOT_RESOLVED'
+    && event.outcome === 'victory'
+    && event.combatEvents.some((combatEvent) => (
+      combatEvent.type === 'COMBAT_ENDED'
+      && combatEvent.reason === 'enemy_defeated'
+    ))
+  ))
 }
 
 function reduceFeedback(previous: UiFeedback, events: GameEvent[], idRef: { current: number }): UiFeedback {

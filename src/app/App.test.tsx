@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { App } from './App'
+import type { GameEvent } from '../game/engine/events'
+import { App, shouldPlayBattleOutro } from './App'
 
 describe('App', () => {
   it('starts a seeded normal run through prologue and canonical origin selection', () => {
@@ -76,5 +77,21 @@ describe('App', () => {
     const css = readFileSync('src/styles.css', 'utf8')
     expect(css).not.toContain('fonts.googleapis.com')
     expect(css).toContain('--font-display')
+  })
+
+  it('holds the battle screen for enemy defeat outro before showing rewards', () => {
+    const defeatEvents = [{
+      type: 'COMBAT_SLOT_RESOLVED',
+      turn: 3,
+      result: { action: 'bullet', target: 'enemy', modifier: 'x3' },
+      outcome: 'victory',
+      combatEvents: [
+        { type: 'DAMAGE_APPLIED', target: 'enemy', amount: 35, blocked: 0, healthLost: 35 },
+        { type: 'COMBAT_ENDED', outcome: 'victory', reason: 'enemy_defeated' },
+      ],
+    }] as GameEvent[]
+
+    expect(shouldPlayBattleOutro(defeatEvents, 'REWARD')).toBe(true)
+    expect(shouldPlayBattleOutro(defeatEvents, 'BATTLE')).toBe(false)
   })
 })
