@@ -56,7 +56,7 @@ function getNodeType(stage: number, lane: number): MapNodeType {
 
 function getNodeMeta(type: MapNodeType) {
   if (type === 'SHOP') {
-    return { icon: getAsset('dg_coin_anim_f0'), label: '상점', description: '보스 등반 전 마지막 상점입니다.' };
+    return { icon: getAsset('dg_coin_anim_f0'), label: '상점', description: '최종 보스 직전 마지막 거래소입니다.' };
   }
   if (type === 'REST') {
     return { icon: getAsset('rest_campfire'), label: '휴식', description: '체력을 회복하거나 현재 저주의 80%를 정화합니다.' };
@@ -68,7 +68,7 @@ function getNodeMeta(type: MapNodeType) {
     return { icon: getAsset('ogre'), label: '정예', description: '더 강하지만 보상이 좋은 전투입니다.' };
   }
   if (type === 'EVENT') {
-    return { icon: getAsset('dg_crate'), label: '이벤트', description: '골드, 회복, 빈손 중 하나가 걸린 우회로입니다.' };
+    return { icon: getAsset('dg_crate'), label: '이벤트', description: '은닉품, 피신, 통과 중 하나를 고르는 방입니다.' };
   }
   return { icon: getAsset('skull_white'), label: '전투', description: '일반 전투 방입니다.' };
 }
@@ -83,7 +83,7 @@ function buildNodes(): MapNodeData[] {
         id: getNodeId(stage, lane),
         stage,
         lane,
-        name: `Stage ${stage} ${meta.label}`,
+        name: `${stage}층 ${meta.label}`,
         type,
         icon: meta.icon,
         x: 5 + ((stage - 1) / 14) * 90,
@@ -183,15 +183,32 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
     >
       <div className="map-floor-texture" />
 
+      <div className="room-environment map-environment" aria-hidden="true">
+        <div className="dungeon-column column-left-back" />
+        <div className="dungeon-column column-left-mid" />
+        <div className="dungeon-column column-left-front" />
+        <div className="dungeon-column column-right-back" />
+        <div className="dungeon-column column-right-mid" />
+        <div className="dungeon-column column-right-front" />
+        <div className="dungeon-crate-stack stack-a" />
+        <div className="dungeon-crate-stack stack-b" />
+        <img className="dungeon-ground-prop prop-ladder prop-a" src={getAsset('dg_floor_ladder')} alt="" />
+        <img className="dungeon-ground-prop prop-spikes prop-b" src={getAsset('dg_floor_spikes_anim_f0')} alt="" />
+        <img className="dungeon-ground-prop prop-chest prop-c" src={getAsset('dg_chest_empty_open_anim_f0')} alt="" />
+        <img className="dungeon-ground-prop prop-hole prop-d" src={getAsset('dg_wall_hole_1')} alt="" />
+        <img className="dungeon-ground-prop prop-fountain prop-e" src={getAsset('dg_wall_fountain_basin_blue_anim_f0')} alt="" />
+        <img className="dungeon-ground-prop prop-ladder prop-f" src={getAsset('dg_floor_ladder')} alt="" />
+      </div>
+
       <div className="map-boss-goal-banner">
-        경로 규칙: 1층은 외길, 3-12층은 다중 갈림길, 13층 상점, 14층 휴식, 15층 보스.
+        경로 규칙: 1층부터 진입, 3-12층은 분기, 13층 상점, 14층 휴식, 15층 보스.
       </div>
       <div className="map-header-banner">
-        <div className="map-chapter-title">저주받은 성채 경로 - {activeStage} / {totalWaves}층</div>
+        <div className="map-chapter-title">저주받은 던전 경로 - {activeStage} / {totalWaves}층</div>
         <div className="map-chapter-sub">
           {visitedNodePath.length === 0
-            ? '첫 방은 외길입니다. 이후 선택한 길에 따라 닿을 수 없는 경로가 잠깁니다.'
-            : `클리어한 방: ${visitedNodePath.length}. ${activeStage}층에서 연결된 방 하나를 고르세요.`}
+            ? '첫 방에 진입합니다. 이후 선택한 길에 따라 닫히는 경로가 생깁니다.'
+            : `클리어한 방 ${visitedNodePath.length}. ${activeStage}층에서 연결된 방 하나를 고르세요.`}
         </div>
       </div>
 
@@ -244,7 +261,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
             >
               <img src={node.icon} alt="" className="node-icon-img" />
               <div className="node-name-badge">
-                {isCurrent ? 'Here' : isClearedPast ? 'Cleared' : isAvailable ? `S${node.stage}` : node.name}
+                {isCurrent ? '현재' : isClearedPast ? '완료' : isAvailable ? `${node.stage}층` : node.name}
               </div>
             </button>
           );
@@ -267,7 +284,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
                 잠시 피신
               </button>
               <button data-event-choice="skip" className="k-btn big" onClick={() => handleEventChoice('SKIP')} type="button">
-                계속 전진
+                그냥 지나가기
               </button>
             </div>
           </div>
@@ -283,7 +300,7 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
             <div className="hover-desc">{hoveredNode.description}</div>
           </>
         ) : (
-          <div className="hover-hint">방 위에 마우스를 올리면 정보를 볼 수 있습니다. 연결되지 않은 방은 현재 경로에서 잠깁니다.</div>
+          <div className="hover-hint">방 위에 마우스를 올리면 정보를 볼 수 있습니다. 연결되지 않은 방은 현재 경로에서 선택할 수 없습니다.</div>
         )}
       </div>
 

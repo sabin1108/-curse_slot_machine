@@ -7,7 +7,7 @@ describe('App', () => {
   it('renders the cursed slot machine UI shell', () => {
     render(<App />);
 
-    expect(screen.getByText(/START/i)).toBeInTheDocument();
+    expect(screen.getByText(/던전 탐사 시작/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /showcase mode/i })).toBeInTheDocument();
   });
 

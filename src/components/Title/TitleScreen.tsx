@@ -38,8 +38,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurs
       }}
     >
       <div className="dungeon-floor" />
-      <div className="dungeon-wall-top" style={{ height: '220px' }} />
-      <div className="wall-base-shadow" style={{ top: '220px' }} />
+      <div className="dungeon-wall-top" style={{ height: '180px' }} />
+      <div className="wall-base-shadow" style={{ top: '180px' }} />
 
       <img className="wall-pillar" src={getAsset('dg_column_wall')} style={{ left: '290px', top: '50px', height: '160px' }} alt="pillar" />
       <img className="wall-pillar" src={getAsset('dg_column_wall')} style={{ right: '290px', top: '50px', height: '160px' }} alt="pillar" />
@@ -56,16 +56,33 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurs
       <img className="torch torch-l fx-glow" src={getAsset('fx_campfire_strip_f0')} alt="torch" />
       <img className="torch torch-r fx-glow" src={getAsset('fx_campfire_strip_f0')} alt="torch" />
 
-      <img className="deco" src={getAsset('dg_crate')} style={{ left: '40px', bottom: '20px', width: '38px', height: '56px' }} alt="crate" />
-      <img className="deco" src={getAsset('dg_crate')} style={{ left: '84px', bottom: '16px', width: '32px', height: '48px' }} alt="crate" />
-      <img className="deco" src={getAsset('dg_crate')} style={{ right: '40px', bottom: '20px', width: '38px', height: '56px' }} alt="crate" />
-      <img className="deco" src={getAsset('dg_skull_deco')} style={{ right: '96px', bottom: '24px', width: '22px', height: '22px', opacity: 0.85 }} alt="skull" />
+      <div className="title-slot-altar compact-title-altar" aria-hidden="true">
+        <div className="title-slot-window">777</div>
+        <img src={getAsset('dg_lever_right')} alt="" />
+      </div>
+
+      <div className="room-environment title-environment" aria-hidden="true">
+        <div className="dungeon-column column-left-back" />
+        <div className="dungeon-column column-left-mid" />
+        <div className="dungeon-column column-left-front" />
+        <div className="dungeon-column column-right-back" />
+        <div className="dungeon-column column-right-mid" />
+        <div className="dungeon-column column-right-front" />
+        <div className="dungeon-crate-stack stack-a" />
+        <div className="dungeon-crate-stack stack-b" />
+        <img className="dungeon-ground-prop prop-ladder prop-a" src={getAsset('dg_floor_ladder')} alt="" />
+        <img className="dungeon-ground-prop prop-spikes prop-b" src={getAsset('dg_floor_spikes_anim_f0')} alt="" />
+        <img className="dungeon-ground-prop prop-chest prop-c" src={getAsset('dg_chest_empty_open_anim_f0')} alt="" />
+        <img className="dungeon-ground-prop prop-hole prop-d" src={getAsset('dg_wall_hole_1')} alt="" />
+        <img className="dungeon-ground-prop prop-fountain prop-e" src={getAsset('dg_wall_fountain_basin_blue_anim_f0')} alt="" />
+        <img className="dungeon-ground-prop prop-ladder prop-f" src={getAsset('dg_floor_ladder')} alt="" />
+      </div>
 
       <div className="warm-glow" />
 
       <div className="logo-wrap">
         <div className="logo-title">SLOT ROGUE</div>
-        <div className="logo-sub">릴을 당겨 던전을 돌파하라 — 저주받은 슬롯머신</div>
+        <div className="logo-sub">룬을 뽑고 던전을 돌파하라 - 저주받은 슬롯머신</div>
       </div>
 
       <div className="title-btns" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
@@ -78,13 +95,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onDispatch, onOpenCurs
           />
         </label>
         <div className="k-btn big primary glow-pulse" onClick={handleStartNormal}>
-          🎮 던전 탐사 시작 (START GAME)
+          던전 탐사 시작
         </div>
         <button className="k-btn big showcase glow-pulse" onClick={handleStartShowcase} type="button">
           Showcase Mode
         </button>
         <div className="k-btn sub-btn" onClick={handleOpenCurseLog} style={{ cursor: 'pointer', padding: '6px 16px', background: 'rgba(0,0,0,0.6)', border: '1px solid #7c6f50', borderRadius: '4px', color: '#e2d3a8', fontSize: '13px' }}>
-          📜 저주 일지 (Curse Log)
+          저주 일지
         </div>
       </div>
 

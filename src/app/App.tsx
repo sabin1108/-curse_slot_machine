@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { GameEngine } from '../game/engine/UiGameEngine';
-import { GameCommand } from '../types/game';
+import { GameCommand, GameState } from '../types/game';
 
 import { TitleScreen } from '../components/Title/TitleScreen';
 import { PrologueScreen } from '../components/Navigation/PrologueScreen';
@@ -24,10 +24,16 @@ export function App() {
   const [gameState, setGameState] = useState(() => engine.getState());
   const [isCurseLogOpen, setIsCurseLogOpen] = useState(false);
   const [musicVolume, setMusicVolume] = useState(() => soundManager.getMusicVolume());
+  const [sfxVolume, setSfxVolume] = useState(() => soundManager.getSfxVolume());
   const [audioEnabled, setAudioEnabled] = useState(() => soundManager.isEnabled());
 
   const syncMusicForState = (state: ReturnType<GameEngine['getState']>) => {
-    const shouldPlayMusic = !['TITLE', 'PROLOGUE', 'ORIGIN', 'GAMEOVER', 'VICTORY'].includes(state.screen);
+    if (state.screen === 'TITLE') {
+      soundManager.startTitleMusic();
+      return;
+    }
+
+    const shouldPlayMusic = !['PROLOGUE', 'ORIGIN', 'GAMEOVER', 'VICTORY'].includes(state.screen);
     if (!shouldPlayMusic) {
       soundManager.stopMusic();
       return;
@@ -47,9 +53,34 @@ export function App() {
 
   const handleDispatch = (command: GameCommand) => {
     soundManager.unlockAudio();
+    const previousState = engine.getState();
     const updatedState = engine.dispatch(command);
     syncMusicForState(updatedState);
-    // Clone state object to force React state trigger
+    if (
+      command.type === 'CONFIRM_SLOT_RESULT'
+      && updatedState.isEnemyDefeated
+      && (updatedState.screen === 'REWARD' || updatedState.screen === 'VICTORY')
+    ) {
+      const defeatState: GameState = {
+        ...updatedState,
+        screen: 'BATTLE',
+        enemy: {
+          ...previousState.enemy,
+          hp: 0,
+        },
+        currentResult: null,
+        hasSpunThisTurn: false,
+        isEnemyDefeated: true,
+        isEnemyAttacking: false,
+        lockedReels: new Set(updatedState.lockedReels),
+      };
+      setGameState(defeatState);
+      window.setTimeout(() => {
+        syncMusicForState(updatedState);
+        setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
+      }, 900);
+      return;
+    }
     setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
   };
 
@@ -62,9 +93,13 @@ export function App() {
     setMusicVolume(nextVolume);
   };
 
+  const handleSfxVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextVolume = soundManager.setSfxVolume(Number(event.target.value));
+    setSfxVolume(nextVolume);
+  };
+
   return (
     <main className="app-shell">
-      {/* Top Navigation Bar */}
       <nav className="global-nav-bar">
         <div className="nav-brand">
           <span className="brand-tag">OpenAI Hackathon</span>
@@ -135,16 +170,32 @@ export function App() {
           >
             {audioEnabled ? 'Audio' : 'Muted'}
           </button>
-          <input
-            aria-label="Music volume"
-            className="music-volume-slider"
-            max="1"
-            min="0"
-            onChange={handleMusicVolumeChange}
-            step="0.05"
-            type="range"
-            value={musicVolume}
-          />
+          <label className="audio-slider-label">
+            BGM
+            <input
+              aria-label="Music volume"
+              className="music-volume-slider"
+              max="1"
+              min="0"
+              onChange={handleMusicVolumeChange}
+              step="0.05"
+              type="range"
+              value={musicVolume}
+            />
+          </label>
+          <label className="audio-slider-label">
+            SFX
+            <input
+              aria-label="Sound effects volume"
+              className="music-volume-slider sfx-volume-slider"
+              max="1"
+              min="0"
+              onChange={handleSfxVolumeChange}
+              step="0.05"
+              type="range"
+              value={sfxVolume}
+            />
+          </label>
         </div>
       </nav>
 
@@ -156,7 +207,6 @@ export function App() {
         />
       )}
 
-      {/* Main View Area with Screen Transition Wipe */}
       <ScreenTransitionOverlay screen={gameState.screen}>
         <div className="view-stage">
           {gameState.screen === 'TITLE' && (
@@ -203,6 +253,7 @@ export function App() {
             <GameOverVictoryModal
               screen={gameState.screen}
               wave={gameState.wave}
+              totalWaves={gameState.totalWaves}
               combatLogs={gameState.combatLogs}
               onDispatch={handleDispatch}
             />
@@ -221,5 +272,3 @@ export function App() {
 }
 
 export default App;
-
-

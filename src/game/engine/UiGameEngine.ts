@@ -149,8 +149,25 @@ export class GameEngine {
     }
 
     if (command.type === 'RESOLVE_EVENT_CHOICE') {
-      this.presentation = this.legacy.dispatch(getEventChoiceCommand(command.choice))
+      this.resolveEventChoice(command.choice)
       return this.presentation
+    }
+
+    if (command.type === 'BUY_SHOP_ITEM') {
+      const reward = getStructuredReward(command.itemId)
+      if (reward && this.presentation.player.gold >= command.price) {
+        this.presentation.player.gold -= command.price
+        this.structured.dispatch({
+          type: 'CHOOSE_REWARD',
+          reward: {
+            kind: reward.kind,
+            id: reward.id,
+          },
+        })
+        this.projectStructuredBuild()
+        this.presentation.combatLogs.push(`[Shop] ${reward.name}`)
+        return this.presentation
+      }
     }
 
     if (command.type === 'CONFIRM_SLOT_RESULT' && (this.currentStructuredSlot || this.hasStructuredBuild())) {
@@ -212,7 +229,14 @@ export class GameEngine {
       ...this.presentation.curse,
       current: combat.curse.value,
     }
-    this.presentation.screen = state.phase === 'reward' ? 'REWARD' : state.phase === 'defeat' ? 'GAMEOVER' : 'BATTLE'
+    const clearedFinalBoss = state.phase === 'reward' && this.presentation.wave >= this.presentation.totalWaves
+    this.presentation.screen = clearedFinalBoss
+      ? 'VICTORY'
+      : state.phase === 'reward'
+        ? 'REWARD'
+        : state.phase === 'defeat'
+          ? 'GAMEOVER'
+          : 'BATTLE'
     this.presentation.hasSpunThisTurn = false
     this.presentation.currentResult = null
     this.presentation.isEnemyAttacking = combatEvents.some((event) => event.type === 'ENEMY_ATTACKED')
@@ -221,8 +245,77 @@ export class GameEngine {
     this.presentation.lastEnemyDamagePop = this.presentation.enemyDamagePops.at(-1) ?? null
     this.presentation.lockedReels.clear()
     this.projectStructuredBuild()
-    this.projectStructuredRewards()
+    if (clearedFinalBoss) {
+      this.presentation.rewardCandidates = []
+      this.presentation.augSlotPresentation = null
+      this.presentation.narrativeMicrocopy = 'Stage 15 final boss cleared. The cursed slot machine is broken.'
+      this.presentation.combatLogs.push('[Victory] Final boss defeated. Ending unlocked.')
+    } else {
+      this.projectStructuredRewards()
+    }
     this.appendCombatLogs(events)
+  }
+
+  private resolveEventChoice(choice: EventChoice): void {
+    if (choice === 'OPEN') {
+      const reward = this.getRandomStructuredItem()
+      if (reward) {
+        this.structured.dispatch({
+          type: 'CHOOSE_REWARD',
+          reward: {
+            kind: reward.kind,
+            id: reward.id,
+          },
+        })
+        this.projectStructuredBuild()
+        this.presentation.combatLogs.push(`[Event] Stash opened: ${reward.name}`)
+      }
+
+      if (this.rollPercent(35)) {
+        this.presentation.screen = 'BATTLE'
+        this.presentation.narrativeMicrocopy = 'The stash was trapped. A monster blocks the exit.'
+        this.syncStructuredCombatFromPresentation()
+      } else {
+        this.presentation.screen = 'MAP'
+        this.presentation.narrativeMicrocopy = 'The stash yielded one item. The passage stays quiet.'
+      }
+      return
+    }
+
+    if (choice === 'REST') {
+      const healAmount = 25
+      this.presentation.player.hp = Math.min(this.presentation.player.maxHp, this.presentation.player.hp + healAmount)
+      this.presentation.combatLogs.push(`[Event] Shelter found: HP +${healAmount}`)
+
+      if (this.rollPercent(18)) {
+        this.presentation.curse.current = Math.min(this.presentation.curse.max, this.presentation.curse.current + 5)
+        this.presentation.combatLogs.push('[Event] Unsafe shelter: curse +5')
+      }
+
+      this.presentation.screen = 'MAP'
+      this.syncStructuredCombatFromPresentation()
+      return
+    }
+
+    this.presentation.screen = 'MAP'
+    this.presentation.narrativeMicrocopy = 'You leave the room untouched and move on.'
+  }
+
+  private rollPercent(chance: number): boolean {
+    return this.slotRng.nextInt(100) < chance
+  }
+
+  private getRandomStructuredItem(): BuildRewardDefinition | undefined {
+    const owned = new Set([
+      ...this.structured.getState().build.augments,
+      ...this.structured.getState().build.items,
+    ])
+    const options = DEFAULT_BUILD_CATALOG.rewards.filter((reward) => reward.kind === 'item' && !owned.has(reward.id))
+    const pool = options.length > 0
+      ? options
+      : DEFAULT_BUILD_CATALOG.rewards.filter((reward) => reward.kind === 'item')
+
+    return pool[this.slotRng.nextInt(pool.length)]
   }
 
   private projectStructuredBuild(): void {
