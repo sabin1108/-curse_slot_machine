@@ -876,7 +876,7 @@ html, body {
 }
 
 .cabinet {
-  width: min(440px, 92vw);
+  width: min(640px, 92vw);
   height: 224px;
   background: linear-gradient(180deg, #7a4a20, #4a2a10);
   border: 6px solid #1c0f04;
@@ -930,6 +930,14 @@ html, body {
   font-weight: bold;
 }
 
+.reel-bank {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  gap: 14px;
+  width: min(100%, 360px);
+  align-items: stretch;
+}
+
 .reel-col-wrap {
   display: flex;
   flex-direction: column;
@@ -952,7 +960,7 @@ html, body {
 .reel-window {
   width: 100%;
   min-width: 72px;
-  height: 74px;
+  height: 142px;
   background: #0c0c10;
   border: 3px solid #2a1808;
   border-radius: 6px;
@@ -960,8 +968,65 @@ html, body {
   position: relative;
   box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.8);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  color: #fff2d0;
+  font-family: var(--font-display);
+  padding: 10px 8px 8px;
+  cursor: pointer;
+}
+
+.reel-window:disabled {
+  cursor: default;
+}
+
+.reel-window.is-locked {
+  border-color: #ffb703;
+  box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.8), 0 0 14px rgba(255, 183, 3, 0.75);
+}
+
+.reel-label {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffd25a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.reel-symbol-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.symbol-icon {
+  display: flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  color: #7fd8ff;
+  font-size: 32px;
+  font-weight: 900;
+  text-shadow: 0 0 12px rgba(127, 216, 255, 0.75), 2px 2px 0 #000;
+}
+
+.reel-symbol-name {
+  max-width: 100%;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 1px 1px 0 #000;
+  overflow-wrap: anywhere;
 }
 
 .reel-window.spinning .symbol-cell {

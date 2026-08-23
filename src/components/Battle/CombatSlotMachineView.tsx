@@ -21,9 +21,14 @@ const REELS: Array<{ id: ReelId; label: string }> = [
   { id: 'modifier', label: '배율' },
 ]
 
-function resultLabel(result: SlotResult | null | undefined, reelId: ReelId): string {
-  if (!result) return '?'
-  return result[reelId].name
+function getVisibleSymbol(
+  reels: Record<ReelId, ReelSymbol[]>,
+  reelIndexes: Record<ReelId, number>,
+  result: SlotResult | null | undefined,
+  reelId: ReelId,
+): ReelSymbol | null {
+  if (result) return result[reelId]
+  return reels[reelId][reelIndexes[reelId]] ?? reels[reelId][0] ?? null
 }
 
 export function CombatSlotMachineView({
@@ -56,6 +61,7 @@ export function CombatSlotMachineView({
           <div className="reel-bank">
             {REELS.map(({ id, label }) => {
               const isLocked = lockedReels.has(id)
+              const symbol = getVisibleSymbol(reels, reelIndexes, currentResult, id)
               return (
                 <button
                   aria-label={`${label} 릴${isLocked ? ' 잠금됨' : ''}`}
@@ -67,7 +73,18 @@ export function CombatSlotMachineView({
                   type="button"
                 >
                   <span className="reel-label">{label}</span>
-                  <strong>{resultLabel(currentResult, id)}</strong>
+                  {symbol ? (
+                    <span className="reel-symbol-cell">
+                      {symbol.imgUrl ? (
+                        <img className="symbol-img" src={symbol.imgUrl} alt="" />
+                      ) : (
+                        <span className="symbol-icon">{symbol.icon}</span>
+                      )}
+                      <strong className="reel-symbol-name">{symbol.name}</strong>
+                    </span>
+                  ) : (
+                    <strong className="reel-symbol-name">?</strong>
+                  )}
                   {isLocked && <span className="lock-badge">LOCK</span>}
                 </button>
               )
