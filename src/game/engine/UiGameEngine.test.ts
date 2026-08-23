@@ -100,6 +100,7 @@ describe('UiGameEngine', () => {
 
     expect(firstReroll.curse.current).toBe(0)
     expect(firstReroll.originTraitState.freeRerollAvailable).toBe(false)
+    expect(firstReroll.combatLogs).toContain('[기원:도박사] 무료 재회전으로 저주 증가 무효')
 
     const secondReroll = engine.dispatch({ type: 'REROLL_UNLOCKED' })
     expect(secondReroll.curse.current).toBe(2)
@@ -208,7 +209,7 @@ describe('UiGameEngine', () => {
     expect(state.screen).toBe('VICTORY')
     expect(state.rewardCandidates).toEqual([])
     expect(state.augSlotPresentation).toBeNull()
-    expect(state.combatLogs).toContain('[Victory] Final boss defeated. Ending unlocked.')
+    expect(state.combatLogs).toContain('[승리] 최종 보스를 처치해 결말이 해금되었습니다.')
   })
 
   it('chooses structured rewards and returns the UI to map progression', () => {

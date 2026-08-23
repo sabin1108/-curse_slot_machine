@@ -107,7 +107,7 @@ export class GameEngine {
       )
       this.projectStructuredSlot(this.currentStructuredSlot)
       if (hasFreeReroll) {
-        this.presentation.combatLogs.push('[Origin:Gambler] free reroll ignored curse gain')
+        this.presentation.combatLogs.push('[기원:도박사] 무료 재회전으로 저주 증가 무효')
       }
       return this.presentation
     }
@@ -135,7 +135,7 @@ export class GameEngine {
         this.projectStructuredBuild()
         this.projectStructuredRewards()
         this.resetOriginTraitState()
-        this.presentation.combatLogs.push(`[Reward] ${reward.name}`)
+        this.presentation.combatLogs.push(`[보상 획득] ${reward.name}`)
         return this.presentation
       }
     }
@@ -186,7 +186,7 @@ export class GameEngine {
         if (this.presentation.rewardCandidates.length === 0) {
           this.presentation.screen = 'MAP'
           this.presentation.rewardSource = null
-          this.presentation.combatLogs.push('[Event] No unowned rewards remain.')
+          this.presentation.combatLogs.push('[이벤트] 획득 가능한 새 보상이 없어 경로 지도로 돌아갑니다.')
         }
       }
       return this.presentation
@@ -218,7 +218,7 @@ export class GameEngine {
       this.presentation.player.gold -= offer.price
       offer.purchased = true
       this.projectStructuredBuild()
-      this.presentation.combatLogs.push(`[Shop] ${reward.name}`)
+      this.presentation.combatLogs.push(`[상점 구매] ${reward.name}`)
       return this.presentation
     }
 
@@ -313,8 +313,8 @@ export class GameEngine {
     if (clearedFinalBoss) {
       this.presentation.rewardCandidates = []
       this.presentation.augSlotPresentation = null
-      this.presentation.narrativeMicrocopy = 'Stage 15 final boss cleared. The cursed slot machine is broken.'
-      this.presentation.combatLogs.push('[Victory] Final boss defeated. Ending unlocked.')
+      this.presentation.narrativeMicrocopy = '15단계 최종 보스를 처치했습니다. 저주받은 슬롯머신이 파괴되었습니다.'
+      this.presentation.combatLogs.push('[승리] 최종 보스를 처치해 결말이 해금되었습니다.')
     } else {
       this.projectStructuredRewards()
     }

@@ -110,6 +110,7 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     engine.dispatch({ type: 'REROLL_UNLOCKED' });
     expect(engine.getState().curse.current).toBe(0);
     expect(engine.getState().originTraitState.freeRerollAvailable).toBe(false);
+    expect(engine.getState().combatLogs.at(-1)).toContain('[기원:도박사] 무료 재회전');
 
     engine.dispatch({ type: 'REROLL_UNLOCKED' });
     expect(engine.getState().curse.current).toBe(2);
@@ -226,7 +227,7 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
     engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: 'aug_combo_1' });
 
     expect(engine.getState().screen).toBe('VICTORY');
-    expect(engine.getState().narrativeMicrocopy).toContain('Stage 15 final boss cleared');
+    expect(engine.getState().narrativeMicrocopy).toContain('15단계 최종 보스를 처치했습니다.');
   });
 
   it('should keep the first encounter tense and scale the final boss as a hard check', () => {
