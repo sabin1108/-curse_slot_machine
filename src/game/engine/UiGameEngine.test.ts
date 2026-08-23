@@ -300,13 +300,34 @@ describe('UiGameEngine', () => {
     const engine = new GameEngine('event-choice-open')
 
     engine.dispatch({ type: 'START_RUN', seed: 'event-choice-open' })
-    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
-    const before = engine.getState().build.items.length
+    const eventState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 501, nodeType: 'EVENT' })
+    const waveBeforeReward = eventState.wave
+    const enemyBeforeReward = structuredClone(eventState.enemy)
+    const ownedBeforeReward = [
+      ...eventState.build.augments.map((augment) => augment.id),
+      ...eventState.build.items,
+    ]
 
     const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'OPEN' })
 
-    expect(state.build.items).toHaveLength(before + 1)
-    expect(state.screen).toBe('MAP')
+    expect(state.screen).toBe('REWARD')
+    expect(state.rewardSource).toBe('EVENT')
+    expect(state.rewardCandidates).toHaveLength(3)
+    expect(state.rewardCandidates.every((candidate) => !ownedBeforeReward.includes(candidate.id))).toBe(true)
+
+    const chosenRewardId = state.rewardCandidates[0].id
+    const afterChoose = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    expect(afterChoose.screen).toBe('MAP')
+    expect(afterChoose.rewardSource).toBeNull()
+    expect(afterChoose.wave).toBe(waveBeforeReward)
+    expect(afterChoose.enemy).toEqual(enemyBeforeReward)
+    expect(afterChoose.visitedNodePath).toContain(501)
+    expect(afterChoose.rewardCandidates).toEqual([])
+    expect([
+      ...afterChoose.build.augments.map((augment) => augment.id),
+      ...afterChoose.build.items,
+    ]).toContain(chosenRewardId)
   })
 
   it('resolves event rest choice through the adapter command', () => {

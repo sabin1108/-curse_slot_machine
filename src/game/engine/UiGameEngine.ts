@@ -109,7 +109,7 @@ export class GameEngine {
     if (command.type === 'CHOOSE_REWARD') {
       const reward = getStructuredReward(command.augmentId)
       if (reward) {
-        const shouldAdvanceMapShell = this.presentation.screen === 'REWARD'
+        const rewardSource = this.structured.getState().rewards.source
         this.structured.dispatch({
           type: 'CHOOSE_REWARD',
           reward: {
@@ -117,10 +117,14 @@ export class GameEngine {
             id: reward.id,
           },
         })
-        if (shouldAdvanceMapShell) {
+        if (rewardSource === 'combat' && this.presentation.screen === 'REWARD') {
           this.presentation = this.legacy.dispatch(command)
           this.presentation.player.shield = 0
           this.syncStructuredCombatFromPresentation()
+        } else if (rewardSource === 'event') {
+          this.presentation.screen = 'MAP'
+          this.presentation.rewardSource = null
+          this.presentation.narrativeMicrocopy = `이벤트 보상 '${reward.name}'을 획득했습니다. 다음 경로를 선택하세요.`
         }
         this.projectStructuredBuild()
         this.projectStructuredRewards()
@@ -151,6 +155,15 @@ export class GameEngine {
     if (command.type === 'RESOLVE_EVENT_CHOICE') {
       this.currentStructuredSlot = null
       this.presentation = this.legacy.dispatch(command)
+      if (command.choice === 'OPEN') {
+        this.structured.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+        this.projectStructuredRewards()
+        if (this.presentation.rewardCandidates.length === 0) {
+          this.presentation.screen = 'MAP'
+          this.presentation.rewardSource = null
+          this.presentation.combatLogs.push('[Event] No unowned rewards remain.')
+        }
+      }
       return this.presentation
     }
 
@@ -296,6 +309,11 @@ export class GameEngine {
   private projectStructuredRewards(): void {
     const rewards = this.structured.getState().rewards
 
+    this.presentation.rewardSource = rewards.source === 'event'
+      ? 'EVENT'
+      : rewards.source === 'combat'
+        ? 'COMBAT'
+        : null
     this.presentation.rewardCandidates = rewards.options.map(toUiReward)
     this.presentation.augSlotPresentation = rewards.augmentSlot
       ? {

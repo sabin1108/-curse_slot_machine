@@ -194,6 +194,7 @@ export function App() {
           {gameState.screen === 'REWARD' && (
             <RewardModal
               candidates={gameState.rewardCandidates}
+              source={gameState.rewardSource}
               augSlotPresentation={gameState.augSlotPresentation}
               onDispatch={handleDispatch}
             />

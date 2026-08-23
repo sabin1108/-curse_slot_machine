@@ -1,5 +1,5 @@
 import { applyReward, getActiveEffects } from '../build/BuildSystem'
-import { generateRewardOptions } from '../build/RewardSystem'
+import { generateRandomRewardOptions, generateRewardOptions } from '../build/RewardSystem'
 import { resolveCombatSlot } from '../combat/CombatSystem'
 import { createEnemyBehaviorState, getEnemyIntentProfile } from '../combat/EnemyIntentProfiles'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
@@ -25,6 +25,8 @@ export class GameEngine {
         return this.startRun()
       case 'ADVANCE_TURN':
         return this.advanceTurn()
+      case 'GENERATE_EVENT_REWARDS':
+        return this.generateEventRewards()
       case 'RESOLVE_COMBAT_SLOT':
         return this.resolveCombatSlot(command)
       case 'CHOOSE_REWARD':
@@ -143,6 +145,7 @@ export class GameEngine {
         lastSlotResult: resolution.lastSlotResult,
       },
       rewards: {
+        source: rewards.length > 0 ? 'combat' : null,
         options: rewards,
         augmentSlot,
       },
@@ -161,12 +164,33 @@ export class GameEngine {
     if (augmentSlot) {
       events.push({
         type: 'REWARDS_GENERATED',
+        source: 'combat',
         options: rewards,
         augmentSlot,
       })
     }
 
     return events
+  }
+
+  private generateEventRewards(): GameEvent[] {
+    const rewards = generateRandomRewardOptions(this.state.build, (maxExclusive) => this.rng.nextInt(maxExclusive))
+    const augmentSlot = rewards.length > 0 ? createAugmentSlotPresentation(rewards[0]) : null
+
+    this.state = {
+      ...this.state,
+      phase: rewards.length > 0 ? 'reward' : this.state.phase,
+      rng: this.rng.snapshot(),
+      rewards: {
+        source: rewards.length > 0 ? 'event' : null,
+        options: rewards,
+        augmentSlot,
+      },
+    }
+
+    return augmentSlot
+      ? [{ type: 'REWARDS_GENERATED', source: 'event', options: rewards, augmentSlot }]
+      : []
   }
 
   private chooseReward(command: Extract<GameCommand, { type: 'CHOOSE_REWARD' }>): GameEvent[] {
@@ -177,6 +201,7 @@ export class GameEngine {
       phase: 'battle',
       build: result.build,
       rewards: {
+        source: null,
         options: [],
         augmentSlot: null,
       },

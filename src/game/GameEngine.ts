@@ -91,6 +91,7 @@ export class GameEngine {
       hasSpunThisTurn: false,
       isSpinning: false,
       rewardCandidates: [],
+      rewardSource: null,
       augSlotPresentation: null,
       combatLogs: ['[시스템] 저주받은 던전에 진입했습니다.'],
       lastDamagePop: null,
@@ -239,15 +240,14 @@ export class GameEngine {
   }
 
   private handleResolveEventChoice(choice: EventChoice) {
-    if (choice === 'OPEN') {
-      this.handleBuyShopItem('보물상자 획득', 0);
-    } else if (choice === 'REST') {
+    if (choice === 'REST') {
       this.handleRestAction('HEAL');
-    } else {
+    } else if (choice === 'SKIP') {
       this.state.combatLogs.push('[Event] Reward skipped. Route exploration continues.');
     }
 
-    this.state.screen = 'MAP';
+    this.state.screen = choice === 'OPEN' ? 'REWARD' : 'MAP';
+    this.state.rewardSource = choice === 'OPEN' ? 'EVENT' : null;
     this.state.currentResult = null;
     this.state.hasSpunThisTurn = false;
     this.state.isSpinning = false;
@@ -256,7 +256,9 @@ export class GameEngine {
     this.state.lastDamagePop = null;
     this.state.lastEnemyDamagePop = null;
     this.state.enemyDamagePops = [];
-    this.state.narrativeMicrocopy = `Event resolved. Choose the next route from Stage ${Math.min(this.state.totalWaves, this.state.wave + 1)}.`;
+    this.state.narrativeMicrocopy = choice === 'OPEN'
+      ? '은닉품에서 발견한 보상 하나를 선택하세요.'
+      : `Event resolved. Choose the next route from Stage ${Math.min(this.state.totalWaves, this.state.wave + 1)}.`;
   }
 
   private handleSpinCombatSlot() {
@@ -581,6 +583,7 @@ export class GameEngine {
 
   private prepareRewardScreen() {
     this.state.screen = 'REWARD';
+    this.state.rewardSource = 'COMBAT';
     const available = ALL_AUGMENTS.filter(
       (aug) => !this.state.build.augments.some((existing) => existing.id === aug.id)
     );
@@ -655,6 +658,7 @@ export class GameEngine {
     }
 
     if (this.state.wave >= this.state.totalWaves) {
+      this.state.rewardSource = null;
       this.state.screen = 'VICTORY';
       this.state.narrativeMicrocopy = 'Stage 15 final boss cleared. The cursed slot machine is broken.';
       return;
@@ -668,6 +672,7 @@ export class GameEngine {
     this.state.isEnemyAttacking = false;
     this.resetOriginTraitState();
     this.state.screen = 'MAP';
+    this.state.rewardSource = null;
   }
 
   private checkCurseThresholds() {

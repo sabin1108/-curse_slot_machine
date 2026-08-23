@@ -181,6 +181,28 @@ describe('GameEngine', () => {
     ])
   })
 
+  it('generates deterministic random event rewards with event source', () => {
+    const first = new GameEngine('event-reward-random')
+    const second = new GameEngine('event-reward-random')
+    const differentSeed = new GameEngine('event-reward-random-alt')
+    first.dispatch({ type: 'START_RUN' })
+    second.dispatch({ type: 'START_RUN' })
+    differentSeed.dispatch({ type: 'START_RUN' })
+
+    const firstEvents = first.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+    const secondEvents = second.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+    differentSeed.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+
+    expect(firstEvents).toEqual(secondEvents)
+    expect(first.getState()).toEqual(second.getState())
+    expect(first.getState().phase).toBe('reward')
+    expect(first.getState().rewards.source).toBe('event')
+    expect(first.getState().rewards.options).toHaveLength(3)
+    expect(new Set(first.getState().rewards.options.map((option) => option.id)).size).toBe(3)
+    expect(differentSeed.getState().rewards.options.map((option) => option.id))
+      .not.toEqual(first.getState().rewards.options.map((option) => option.id))
+  })
+
   it('selects enemy intent profiles from presentation enemy identity', () => {
     const engine = new GameEngine('enemy-profile-sync')
     const player = { hp: 30, maxHp: 30, shield: 0, gold: 0 }

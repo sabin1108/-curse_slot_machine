@@ -3,6 +3,7 @@ import type { RewardOption } from '../build/RewardSystem'
 import type { CombatEvent, CombatOutcome } from '../combat/CombatTypes'
 import type { AugmentSlotPresentation } from '../slot/AugmentSlotTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import type { RewardSource } from './GameState'
 
 export type GameEvent =
   | {
@@ -24,6 +25,7 @@ export type GameEvent =
     }
   | {
       type: 'REWARDS_GENERATED'
+      source: RewardSource
       options: RewardOption[]
       augmentSlot: AugmentSlotPresentation
     }
