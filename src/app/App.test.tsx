@@ -77,6 +77,9 @@ describe('App', () => {
     const css = readFileSync('src/styles.css', 'utf8')
     expect(css).not.toContain('fonts.googleapis.com')
     expect(css).toContain('--font-display')
+    expect(css).toContain('height: 100dvh')
+    expect(css).toContain('.screen-transition-wrapper')
+    expect(css).toContain('flex: 1')
   })
 
   it('holds the battle screen for enemy defeat outro before showing rewards', () => {
