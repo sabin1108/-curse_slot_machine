@@ -385,7 +385,7 @@ export class GameEngine {
     }
 
     this.presentation.player.gold += 25
-    this.presentation.combatLogs.push('[Origin:Gambler] x3 jackpot: gold +25, curse -1')
+    this.presentation.combatLogs.push('[기원:도박사] x3 잭팟: 골드 +25, 저주 -1')
   }
 
   private projectStructuredRewards(): void {

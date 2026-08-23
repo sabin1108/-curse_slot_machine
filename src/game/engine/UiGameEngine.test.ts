@@ -120,6 +120,7 @@ describe('UiGameEngine', () => {
     const state = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
 
     expect(state.player.gold).toBe(225)
+    expect(state.combatLogs).toContain('[기원:도박사] x3 잭팟: 골드 +25, 저주 -1')
   })
 
   it('projects structured combo combat effects into UI-visible state', () => {

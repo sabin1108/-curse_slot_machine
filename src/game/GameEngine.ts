@@ -578,8 +578,8 @@ export class GameEngine {
     this.state.curse.current = Math.max(0, this.state.curse.current - 1);
     this.state.combatLogs.push(
       purifiedCurse
-        ? `[Origin:Gambler] x3 jackpot: gold +25, curse -1`
-        : `[Origin:Gambler] x3 jackpot: gold +25`
+        ? `[기원:도박사] x3 잭팟: 골드 +25, 저주 -1`
+        : `[기원:도박사] x3 잭팟: 골드 +25`
     );
   }
 

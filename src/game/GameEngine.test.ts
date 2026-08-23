@@ -176,6 +176,7 @@ describe('GameEngine - Specification v2.1 Contracts', () => {
 
     expect(engine.getState().player.gold).toBe(225);
     expect(engine.getState().curse.current).toBe(2);
+    expect(engine.getState().combatLogs).toContain('[기원:도박사] x3 잭팟: 골드 +25, 저주 -1');
   });
 
   it('purifies curse when Priest confirms shield or heart results', () => {
