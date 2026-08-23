@@ -36,23 +36,6 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
       <img className="wall-pillar" src={getAsset('dg_column_wall')} style={{ left: '20px', top: '0px', height: '160px', opacity: 0.85 }} alt="pillar" />
       <img className="wall-pillar" src={getAsset('dg_column_wall')} style={{ right: '20px', top: '0px', height: '160px', opacity: 0.85 }} alt="pillar" />
 
-      <div className="room-environment rest-environment" aria-hidden="true">
-        <div className="dungeon-column column-left-back" />
-        <div className="dungeon-column column-left-mid" />
-        <div className="dungeon-column column-left-front" />
-        <div className="dungeon-column column-right-back" />
-        <div className="dungeon-column column-right-mid" />
-        <div className="dungeon-column column-right-front" />
-        <div className="dungeon-crate-stack stack-a" />
-        <div className="dungeon-crate-stack stack-b" />
-        <img className="dungeon-ground-prop prop-ladder prop-a" src={getAsset('dg_floor_ladder')} alt="" />
-        <img className="dungeon-ground-prop prop-spikes prop-b" src={getAsset('dg_floor_spikes_anim_f0')} alt="" />
-        <img className="dungeon-ground-prop prop-fountain prop-c" src={getAsset('dg_wall_fountain_basin_blue_anim_f0')} alt="" />
-        <img className="dungeon-ground-prop prop-hole prop-d" src={getAsset('dg_wall_hole_1')} alt="" />
-        <img className="dungeon-ground-prop prop-chest prop-e" src={getAsset('dg_chest_empty_open_anim_f0')} alt="" />
-        <img className="dungeon-ground-prop prop-spikes prop-f" src={getAsset('dg_floor_spikes_anim_f0')} alt="" />
-      </div>
-
       <div className="rest-header-bar">
         <div className="rest-title-badge">모닥불 쉼터</div>
         <div className="rest-status-hud">

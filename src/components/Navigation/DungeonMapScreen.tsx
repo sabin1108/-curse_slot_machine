@@ -183,23 +183,6 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
     >
       <div className="map-floor-texture" />
 
-      <div className="room-environment map-environment" aria-hidden="true">
-        <div className="dungeon-column column-left-back" />
-        <div className="dungeon-column column-left-mid" />
-        <div className="dungeon-column column-left-front" />
-        <div className="dungeon-column column-right-back" />
-        <div className="dungeon-column column-right-mid" />
-        <div className="dungeon-column column-right-front" />
-        <div className="dungeon-crate-stack stack-a" />
-        <div className="dungeon-crate-stack stack-b" />
-        <img className="dungeon-ground-prop prop-ladder prop-a" src={getAsset('dg_floor_ladder')} alt="" />
-        <img className="dungeon-ground-prop prop-spikes prop-b" src={getAsset('dg_floor_spikes_anim_f0')} alt="" />
-        <img className="dungeon-ground-prop prop-chest prop-c" src={getAsset('dg_chest_empty_open_anim_f0')} alt="" />
-        <img className="dungeon-ground-prop prop-hole prop-d" src={getAsset('dg_wall_hole_1')} alt="" />
-        <img className="dungeon-ground-prop prop-fountain prop-e" src={getAsset('dg_wall_fountain_basin_blue_anim_f0')} alt="" />
-        <img className="dungeon-ground-prop prop-ladder prop-f" src={getAsset('dg_floor_ladder')} alt="" />
-      </div>
-
       <div className="map-boss-goal-banner">
         경로 규칙: 1층부터 진입, 3-12층은 분기, 13층 상점, 14층 휴식, 15층 보스.
       </div>
