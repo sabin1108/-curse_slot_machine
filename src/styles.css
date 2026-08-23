@@ -261,6 +261,33 @@ html, body {
   align-items: center;
 }
 
+.seed-field {
+  display: grid;
+  gap: 6px;
+  min-width: 280px;
+  color: #ffd79a;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-align: left;
+}
+
+.seed-field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #7c6f50;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff2d0;
+  font: inherit;
+  padding: 8px 10px;
+}
+
+.seed-field input:focus-visible {
+  outline: 2px solid #ffc83b;
+  outline-offset: 2px;
+}
+
 .k-btn {
   background: linear-gradient(180deg, #ffc83b, #d88907);
   border: 2px solid #3a1c00;

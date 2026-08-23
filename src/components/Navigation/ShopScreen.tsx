@@ -118,6 +118,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({ player, onDispatch }) =>
           return (
             <div
               key={item.id}
+              data-shop-reward-id={item.id}
               className={`shop-card-pixel rarity-${item.rarity.toLowerCase()} ${isPurchased ? 'purchased' : ''}`}
             >
               <div className="card-rarity-badge">{item.rarity}</div>

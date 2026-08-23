@@ -260,13 +260,13 @@ export const DungeonMapScreen: React.FC<DungeonMapScreenProps> = ({
             </div>
 
             <div className="event-choices-grid" style={{ display: 'flex', gap: '16px', justifyContent: 'center', margin: '20px 0' }}>
-              <button className="k-btn primary big" onClick={() => handleEventChoice('OPEN')} type="button">
+              <button data-event-choice="open" className="k-btn primary big" onClick={() => handleEventChoice('OPEN')} type="button">
                 은닉품 열기
               </button>
-              <button className="k-btn warning big" onClick={() => handleEventChoice('REST')} type="button">
+              <button data-event-choice="rest" className="k-btn warning big" onClick={() => handleEventChoice('REST')} type="button">
                 잠시 피신
               </button>
-              <button className="k-btn big" onClick={() => handleEventChoice('SKIP')} type="button">
+              <button data-event-choice="skip" className="k-btn big" onClick={() => handleEventChoice('SKIP')} type="button">
                 계속 전진
               </button>
             </div>

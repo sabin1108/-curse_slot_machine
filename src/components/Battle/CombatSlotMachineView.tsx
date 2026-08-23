@@ -169,7 +169,12 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
   );
 
   return (
-    <div className="cabinet-wrap">
+    <div
+      className="cabinet-wrap"
+      data-reel-count={Object.keys(reels).length}
+      data-reel-position={`${reelIndexes.action}:${reelIndexes.target}:${reelIndexes.modifier}`}
+      data-multiplier-max={multiplierMax}
+    >
       <div className="cabinet-row">
         <div className="cabinet">
           <div className="cabinet-topper">공격 / 방어 룰렛</div>

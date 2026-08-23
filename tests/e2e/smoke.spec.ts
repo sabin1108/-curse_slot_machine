@@ -6,5 +6,6 @@ test('loads the game shell at 1280x720', async ({ page }) => {
   await expect(page).toHaveTitle(/Curse Slot Machine/)
   await expect(page.getByText('저주받은 슬롯머신').first()).toBeVisible()
   await expect(page.getByText(/START GAME/i)).toBeVisible()
+  await expect(page.getByLabel('Run seed')).toHaveValue('curse_slot_demo_2026')
 })
 

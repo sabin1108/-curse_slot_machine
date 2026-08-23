@@ -30,6 +30,7 @@ export const OriginSelectionScreen: React.FC<OriginSelectionScreenProps> = ({ on
           return (
             <div
               key={orig.id}
+              data-origin-id={orig.id}
               className={`origin-card ${isSelected ? 'selected' : ''}`}
               onClick={() => setSelectedOrigin(orig.id)}
             >

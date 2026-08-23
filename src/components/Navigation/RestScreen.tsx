@@ -71,6 +71,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
       {/* 3 Rest Choice Cards */}
       <div className="rest-choice-cards">
         <div
+          data-rest-action="heal"
           className={`rest-option-card ${selectedAction === 'HEAL' ? 'active' : ''}`}
           onClick={() => handleRestAction('HEAL')}
         >
@@ -86,6 +87,7 @@ export const RestScreen: React.FC<RestScreenProps> = ({ player, curseCurrent, on
         </div>
 
         <div
+          data-rest-action="purify"
           className={`rest-option-card ${selectedAction === 'UPGRADE' ? 'active' : ''}`}
           onClick={() => handleRestAction('UPGRADE')}
         >

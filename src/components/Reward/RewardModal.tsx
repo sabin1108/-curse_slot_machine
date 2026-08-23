@@ -86,6 +86,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
             return (
               <button
                 key={aug.id}
+                data-reward-id={aug.id}
                 className={`reward-card-pixel ${isSelected ? 'selected' : ''}`}
                 style={{ backgroundImage: `url(${getCardFrame(aug.rarity)})` }}
                 type="button"
