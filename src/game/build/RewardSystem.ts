@@ -55,6 +55,31 @@ export function generateRewardOptions(
     .slice(0, count)
 }
 
+export function generateRandomRewardOptions(
+  build: BuildState,
+  nextInt: (maxExclusive: number) => number,
+  config: GenerateRewardOptionsConfig = {},
+): RewardOption[] {
+  const catalog = config.catalog ?? DEFAULT_BUILD_CATALOG
+  const count = config.count ?? 3
+  const available = catalog.rewards
+    .filter((reward) => !hasReward(build, { kind: reward.kind, id: reward.id }))
+    .map((reward) => createRewardOption(build, reward, catalog))
+  const selectionCount = Math.min(count, available.length)
+
+  for (let index = 0; index < selectionCount; index += 1) {
+    const remaining = available.length - index
+    const offset = nextInt(remaining)
+    if (!Number.isInteger(offset) || offset < 0 || offset >= remaining) {
+      throw new Error(`random reward index must be within 0..${remaining - 1}`)
+    }
+    const selectedIndex = index + offset
+    ;[available[index], available[selectedIndex]] = [available[selectedIndex], available[index]]
+  }
+
+  return available.slice(0, selectionCount)
+}
+
 function createRewardOption(
   build: BuildState,
   reward: BuildRewardDefinition,

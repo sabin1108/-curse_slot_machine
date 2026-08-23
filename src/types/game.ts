@@ -134,6 +134,7 @@ export type GameMode = 'NORMAL' | 'SHOWCASE';
 export type MapNodeType = 'BATTLE' | 'ELITE' | 'SHOP' | 'REST' | 'EVENT' | 'BOSS';
 
 export type EventChoice = 'OPEN' | 'REST' | 'SKIP';
+export type RewardSource = 'COMBAT' | 'EVENT';
 
 export interface ShowcaseStep {
   stepIndex: number;
@@ -190,6 +191,7 @@ export interface GameState {
   isSpinning: boolean;
   
   // Augment Slot Machine Presentation State (Reward reveal)
+  rewardSource: RewardSource | null;
   rewardCandidates: AugmentItem[];
   augSlotPresentation: {
     reels: [string, string, string];

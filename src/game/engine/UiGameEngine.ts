@@ -1,4 +1,4 @@
-import type { EventChoice, GameCommand as UiGameCommand, GameState as UiGameState, MapNodeType } from '../../types/game'
+import type { GameCommand as UiGameCommand, GameState as UiGameState, MapNodeType } from '../../types/game'
 import { GameEngine as LegacyGameEngine } from '../GameEngine'
 import { DEFAULT_BUILD_CATALOG } from '../build/BuildCatalog'
 import { getActiveEffects } from '../build/BuildSystem'
@@ -109,7 +109,7 @@ export class GameEngine {
     if (command.type === 'CHOOSE_REWARD') {
       const reward = getStructuredReward(command.augmentId)
       if (reward) {
-        const shouldAdvanceMapShell = this.presentation.screen === 'REWARD'
+        const rewardSource = this.structured.getState().rewards.source
         this.structured.dispatch({
           type: 'CHOOSE_REWARD',
           reward: {
@@ -117,10 +117,14 @@ export class GameEngine {
             id: reward.id,
           },
         })
-        if (shouldAdvanceMapShell) {
+        if (rewardSource === 'combat' && this.presentation.screen === 'REWARD') {
           this.presentation = this.legacy.dispatch(command)
           this.presentation.player.shield = 0
           this.syncStructuredCombatFromPresentation()
+        } else if (rewardSource === 'event') {
+          this.presentation.screen = 'MAP'
+          this.presentation.rewardSource = null
+          this.presentation.narrativeMicrocopy = `이벤트 보상 '${reward.name}'을 획득했습니다. 다음 경로를 선택하세요.`
         }
         this.projectStructuredBuild()
         this.projectStructuredRewards()
@@ -149,7 +153,17 @@ export class GameEngine {
     }
 
     if (command.type === 'RESOLVE_EVENT_CHOICE') {
-      this.resolveEventChoice(command.choice)
+      this.currentStructuredSlot = null
+      this.presentation = this.legacy.dispatch(command)
+      if (command.choice === 'OPEN') {
+        this.structured.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+        this.projectStructuredRewards()
+        if (this.presentation.rewardCandidates.length === 0) {
+          this.presentation.screen = 'MAP'
+          this.presentation.rewardSource = null
+          this.presentation.combatLogs.push('[Event] No unowned rewards remain.')
+        }
+      }
       return this.presentation
     }
 
@@ -256,68 +270,6 @@ export class GameEngine {
     this.appendCombatLogs(events)
   }
 
-  private resolveEventChoice(choice: EventChoice): void {
-    if (choice === 'OPEN') {
-      const reward = this.getRandomStructuredItem()
-      if (reward) {
-        this.structured.dispatch({
-          type: 'CHOOSE_REWARD',
-          reward: {
-            kind: reward.kind,
-            id: reward.id,
-          },
-        })
-        this.projectStructuredBuild()
-        this.presentation.combatLogs.push(`[Event] Stash opened: ${reward.name}`)
-      }
-
-      if (this.rollPercent(35)) {
-        this.presentation.screen = 'BATTLE'
-        this.presentation.narrativeMicrocopy = 'The stash was trapped. A monster blocks the exit.'
-        this.syncStructuredCombatFromPresentation()
-      } else {
-        this.presentation.screen = 'MAP'
-        this.presentation.narrativeMicrocopy = 'The stash yielded one item. The passage stays quiet.'
-      }
-      return
-    }
-
-    if (choice === 'REST') {
-      const healAmount = 25
-      this.presentation.player.hp = Math.min(this.presentation.player.maxHp, this.presentation.player.hp + healAmount)
-      this.presentation.combatLogs.push(`[Event] Shelter found: HP +${healAmount}`)
-
-      if (this.rollPercent(18)) {
-        this.presentation.curse.current = Math.min(this.presentation.curse.max, this.presentation.curse.current + 5)
-        this.presentation.combatLogs.push('[Event] Unsafe shelter: curse +5')
-      }
-
-      this.presentation.screen = 'MAP'
-      this.syncStructuredCombatFromPresentation()
-      return
-    }
-
-    this.presentation.screen = 'MAP'
-    this.presentation.narrativeMicrocopy = 'You leave the room untouched and move on.'
-  }
-
-  private rollPercent(chance: number): boolean {
-    return this.slotRng.nextInt(100) < chance
-  }
-
-  private getRandomStructuredItem(): BuildRewardDefinition | undefined {
-    const owned = new Set([
-      ...this.structured.getState().build.augments,
-      ...this.structured.getState().build.items,
-    ])
-    const options = DEFAULT_BUILD_CATALOG.rewards.filter((reward) => reward.kind === 'item' && !owned.has(reward.id))
-    const pool = options.length > 0
-      ? options
-      : DEFAULT_BUILD_CATALOG.rewards.filter((reward) => reward.kind === 'item')
-
-    return pool[this.slotRng.nextInt(pool.length)]
-  }
-
   private projectStructuredBuild(): void {
     const build = this.structured.getState().build
     this.presentation.build = {
@@ -388,6 +340,11 @@ export class GameEngine {
   private projectStructuredRewards(): void {
     const rewards = this.structured.getState().rewards
 
+    this.presentation.rewardSource = rewards.source === 'event'
+      ? 'EVENT'
+      : rewards.source === 'combat'
+        ? 'COMBAT'
+        : null
     this.presentation.rewardCandidates = rewards.options.map(toUiReward)
     this.presentation.augSlotPresentation = rewards.augmentSlot
       ? {
@@ -486,18 +443,6 @@ function getMapNodeDestinationScreen(nodeType: MapNodeType | undefined): UiGameS
   }
 
   return 'BATTLE'
-}
-
-function getEventChoiceCommand(choice: EventChoice): UiGameCommand {
-  if (choice === 'OPEN') {
-    return { type: 'BUY_SHOP_ITEM', itemId: '보물상자 획득', price: 0 }
-  }
-
-  if (choice === 'REST') {
-    return { type: 'REST_ACTION', actionType: 'HEAL' }
-  }
-
-  return { type: 'NAVIGATE', screen: 'BATTLE' }
 }
 
 function getStructuredReward(id: string): BuildRewardDefinition | undefined {

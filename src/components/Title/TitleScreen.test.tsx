@@ -9,7 +9,7 @@ describe('TitleScreen', () => {
     render(<TitleScreen onDispatch={onDispatch} />)
 
     fireEvent.change(screen.getByLabelText('Run seed'), { target: { value: 'recovery-seed' } })
-    fireEvent.click(screen.getByText(/START GAME/i))
+    fireEvent.click(screen.getByText(/던전 탐사 시작/i))
 
     expect(onDispatch).toHaveBeenCalledWith({
       type: 'START_RUN',

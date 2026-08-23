@@ -7,6 +7,7 @@ import type { AugmentSlotPresentation } from '../slot/AugmentSlotTypes'
 import { createSeededRng, type RngSeed, type RngSnapshot } from './rng'
 
 export type GamePhase = 'idle' | 'battle' | 'reward' | 'victory' | 'defeat'
+export type RewardSource = 'combat' | 'event'
 
 export type GameState = {
   seed: RngSeed
@@ -17,6 +18,7 @@ export type GameState = {
   combat: CombatState
   build: BuildState
   rewards: {
+    source: RewardSource | null
     options: RewardOption[]
     augmentSlot: AugmentSlotPresentation | null
   }
@@ -32,6 +34,7 @@ export function createInitialGameState(seed: RngSeed): GameState {
     combat: createCombatState(),
     build: createBuildState(),
     rewards: {
+      source: null,
       options: [],
       augmentSlot: null,
     },
