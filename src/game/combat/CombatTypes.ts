@@ -11,10 +11,22 @@ export type CombatActorState = {
   block: number
 }
 
+export type EnemyIntentType = 'attack' | 'wait' | 'defend'
+
 export type EnemyIntent = {
-  type: 'attack' | 'wait' | 'defend'
+  type: EnemyIntentType
   baseAmount: number
   amount: number
+}
+
+export type EnemyRank = 'normal' | 'elite' | 'boss'
+
+export type EnemyBehaviorState = {
+  rank: EnemyRank
+  pattern: EnemyIntentType[]
+  patternIndex: number
+  defenseAmount: number
+  blockCap: number
 }
 
 export type CurseState = {
@@ -26,6 +38,7 @@ export type CombatState = {
   enemy: CombatActorState
   curse: CurseState
   enemyIntent: EnemyIntent
+  enemyBehavior: EnemyBehaviorState
   lastSlotResult?: CombatSlotResult
 }
 
@@ -88,5 +101,6 @@ export type CombatStateOverrides = {
   enemy?: Partial<Omit<CombatActorState, 'id'>>
   curse?: Partial<CurseState>
   enemyIntent?: Partial<EnemyIntent>
+  enemyBehavior?: Partial<EnemyBehaviorState>
   lastSlotResult?: CombatSlotResult
 }

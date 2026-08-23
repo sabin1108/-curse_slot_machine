@@ -10,6 +10,9 @@ export type GameCommand =
       type: 'ADVANCE_TURN'
     }
   | {
+      type: 'GENERATE_EVENT_REWARDS'
+    }
+  | {
     type: 'RESOLVE_COMBAT_SLOT'
     result: CombatSlotResult
   } & Pick<CombatEffectContext, 'originTrait'>

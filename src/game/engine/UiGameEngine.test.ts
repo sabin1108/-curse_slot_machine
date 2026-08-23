@@ -300,13 +300,34 @@ describe('UiGameEngine', () => {
     const engine = new GameEngine('event-choice-open')
 
     engine.dispatch({ type: 'START_RUN', seed: 'event-choice-open' })
-    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
-    const before = engine.getState().build.items.length
+    const eventState = engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 501, nodeType: 'EVENT' })
+    const waveBeforeReward = eventState.wave
+    const enemyBeforeReward = structuredClone(eventState.enemy)
+    const ownedBeforeReward = [
+      ...eventState.build.augments.map((augment) => augment.id),
+      ...eventState.build.items,
+    ]
 
     const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'OPEN' })
 
-    expect(state.build.items).toHaveLength(before + 1)
-    expect(state.screen).toBe('MAP')
+    expect(state.screen).toBe('REWARD')
+    expect(state.rewardSource).toBe('EVENT')
+    expect(state.rewardCandidates).toHaveLength(3)
+    expect(state.rewardCandidates.every((candidate) => !ownedBeforeReward.includes(candidate.id))).toBe(true)
+
+    const chosenRewardId = state.rewardCandidates[0].id
+    const afterChoose = engine.dispatch({ type: 'CHOOSE_REWARD', augmentId: chosenRewardId })
+
+    expect(afterChoose.screen).toBe('MAP')
+    expect(afterChoose.rewardSource).toBeNull()
+    expect(afterChoose.wave).toBe(waveBeforeReward)
+    expect(afterChoose.enemy).toEqual(enemyBeforeReward)
+    expect(afterChoose.visitedNodePath).toContain(501)
+    expect(afterChoose.rewardCandidates).toEqual([])
+    expect([
+      ...afterChoose.build.augments.map((augment) => augment.id),
+      ...afterChoose.build.items,
+    ]).toContain(chosenRewardId)
   })
 
   it('resolves event rest choice through the adapter command', () => {
@@ -326,11 +347,16 @@ describe('UiGameEngine', () => {
     const engine = new GameEngine('event-choice-skip')
 
     engine.dispatch({ type: 'START_RUN', seed: 'event-choice-skip' })
-    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 6, nodeType: 'EVENT' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 501, nodeType: 'EVENT' })
 
     const state = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'SKIP' })
 
-    expect(state.screen).toBe('BATTLE')
+    expect(state.screen).toBe('MAP')
+    expect(state.visitedNodePath).toContain(501)
+    expect(state.currentResult).toBeNull()
+    expect(state.hasSpunThisTurn).toBe(false)
+    expect(state.isEnemyAttacking).toBe(false)
+    expect(state.lockedReels.size).toBe(0)
   })
 
   it('uses showcase forced slot results instead of structured slot rng', () => {
@@ -403,7 +429,7 @@ describe('UiGameEngine', () => {
     expect(resolvedState.lastEnemyDamagePop).toEqual(resolvedState.enemyDamagePops.at(-1))
   })
 
-  it('projects attack, wait, and defense intents through the dual-engine adapter', () => {
+  it('projects the boss attack, attack, and defense cadence through the dual-engine adapter', () => {
     const engine = new GameEngine('enemy-intent-cycle-ui')
 
     engine.dispatch({ type: 'START_RUN', seed: 'enemy-intent-cycle-ui' })
@@ -411,13 +437,13 @@ describe('UiGameEngine', () => {
 
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
     const afterAttack = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
-    expect(afterAttack.enemy.intent).toMatchObject({ type: 'WAIT', value: 0 })
+    expect(afterAttack.enemy.intent).toMatchObject({ type: 'ATTACK' })
     expect(afterAttack.isEnemyAttacking).toBe(true)
 
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
-    const afterWait = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
-    expect(afterWait.enemy.intent).toMatchObject({ type: 'DEFEND', value: 1 })
-    expect(afterWait.isEnemyAttacking).toBe(false)
+    const afterSecondAttack = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    expect(afterSecondAttack.enemy.intent).toMatchObject({ type: 'DEFEND', value: 3 })
+    expect(afterSecondAttack.isEnemyAttacking).toBe(true)
 
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
     const afterDefense = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })

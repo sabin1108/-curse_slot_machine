@@ -267,4 +267,71 @@ describe('CombatSystem', () => {
     expect(defend.enemy.block).toBe(1)
     expect(defend.enemyIntent.type).toBe('attack')
   })
+
+  it('uses more aggressive intent cadence and stronger defense for elite and boss enemies', () => {
+    const defensiveSpin = { action: 'shield', target: 'self', modifier: 'x1' } as const
+    let elite = resolveCombatSlot(
+      createCombatState({
+        enemy: { health: 100, maxHealth: 100 },
+        enemyIntent: { baseAmount: 1, amount: 1 },
+        enemyBehavior: { rank: 'elite' },
+      }),
+      defensiveSpin,
+    )
+    expect(elite.enemyIntent.type).toBe('defend')
+
+    elite = resolveCombatSlot(elite, defensiveSpin)
+    expect(elite.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 2 })
+    expect(elite.enemy.block).toBe(2)
+    expect(elite.enemyIntent.type).toBe('attack')
+
+    elite = resolveCombatSlot(elite, defensiveSpin)
+    expect(elite.enemyIntent.type).toBe('wait')
+
+    let boss = resolveCombatSlot(
+      createCombatState({
+        enemy: { health: 100, maxHealth: 100 },
+        enemyIntent: { baseAmount: 1, amount: 1 },
+        enemyBehavior: { rank: 'boss' },
+      }),
+      defensiveSpin,
+    )
+    expect(boss.enemyIntent.type).toBe('attack')
+
+    boss = resolveCombatSlot(boss, defensiveSpin)
+    expect(boss.enemyIntent.type).toBe('defend')
+
+    boss = resolveCombatSlot(boss, defensiveSpin)
+    expect(boss.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 3 })
+    expect(boss.enemy.block).toBe(3)
+    expect(boss.enemyIntent.type).toBe('attack')
+
+    boss = resolveCombatSlot(boss, defensiveSpin)
+    expect(boss.enemyIntent.type).toBe('wait')
+  })
+
+  it('caps elite and boss defense at their profile limits', () => {
+    const defensiveSpin = { action: 'shield', target: 'self', modifier: 'x1' } as const
+    const elite = resolveCombatSlot(
+      createCombatState({
+        enemy: { health: 100, maxHealth: 100, block: 49 },
+        enemyIntent: { type: 'defend', baseAmount: 1, amount: 2 },
+        enemyBehavior: { rank: 'elite', patternIndex: 1 },
+      }),
+      defensiveSpin,
+    )
+    const boss = resolveCombatSlot(
+      createCombatState({
+        enemy: { health: 100, maxHealth: 100, block: 79 },
+        enemyIntent: { type: 'defend', baseAmount: 1, amount: 3 },
+        enemyBehavior: { rank: 'boss', patternIndex: 2 },
+      }),
+      defensiveSpin,
+    )
+
+    expect(elite.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(elite.enemy.block).toBe(50)
+    expect(boss.events).toContainEqual({ type: 'ENEMY_DEFENDED', amount: 1 })
+    expect(boss.enemy.block).toBe(80)
+  })
 })

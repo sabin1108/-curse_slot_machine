@@ -1,6 +1,7 @@
 import { applyReward, getActiveEffects } from '../build/BuildSystem'
-import { generateRewardOptions } from '../build/RewardSystem'
+import { generateRandomRewardOptions, generateRewardOptions } from '../build/RewardSystem'
 import { resolveCombatSlot } from '../combat/CombatSystem'
+import { createEnemyBehaviorState, getEnemyIntentProfile } from '../combat/EnemyIntentProfiles'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
@@ -24,6 +25,8 @@ export class GameEngine {
         return this.startRun()
       case 'ADVANCE_TURN':
         return this.advanceTurn()
+      case 'GENERATE_EVENT_REWARDS':
+        return this.generateEventRewards()
       case 'RESOLVE_COMBAT_SLOT':
         return this.resolveCombatSlot(command)
       case 'CHOOSE_REWARD':
@@ -44,6 +47,11 @@ export class GameEngine {
     const baseAmount = intentType === 'attack'
       ? enemy.intent.value
       : this.state.combat.enemyIntent.baseAmount
+    const profile = getEnemyIntentProfile(enemy.id)
+    const isNewEncounter = this.state.combat.enemy.name !== enemy.name
+    const enemyBehavior = isNewEncounter || this.state.combat.enemyBehavior.rank !== profile.rank
+      ? createEnemyBehaviorState(profile.rank)
+      : this.state.combat.enemyBehavior
 
     this.state = {
       ...this.state,
@@ -71,6 +79,7 @@ export class GameEngine {
           baseAmount,
           amount: enemy.intent.value,
         },
+        enemyBehavior,
       },
     }
   }
@@ -132,9 +141,11 @@ export class GameEngine {
         enemy: resolution.enemy,
         curse: resolution.curse,
         enemyIntent: resolution.enemyIntent,
+        enemyBehavior: resolution.enemyBehavior,
         lastSlotResult: resolution.lastSlotResult,
       },
       rewards: {
+        source: rewards.length > 0 ? 'combat' : null,
         options: rewards,
         augmentSlot,
       },
@@ -153,12 +164,33 @@ export class GameEngine {
     if (augmentSlot) {
       events.push({
         type: 'REWARDS_GENERATED',
+        source: 'combat',
         options: rewards,
         augmentSlot,
       })
     }
 
     return events
+  }
+
+  private generateEventRewards(): GameEvent[] {
+    const rewards = generateRandomRewardOptions(this.state.build, (maxExclusive) => this.rng.nextInt(maxExclusive))
+    const augmentSlot = rewards.length > 0 ? createAugmentSlotPresentation(rewards[0]) : null
+
+    this.state = {
+      ...this.state,
+      phase: rewards.length > 0 ? 'reward' : this.state.phase,
+      rng: this.rng.snapshot(),
+      rewards: {
+        source: rewards.length > 0 ? 'event' : null,
+        options: rewards,
+        augmentSlot,
+      },
+    }
+
+    return augmentSlot
+      ? [{ type: 'REWARDS_GENERATED', source: 'event', options: rewards, augmentSlot }]
+      : []
   }
 
   private chooseReward(command: Extract<GameCommand, { type: 'CHOOSE_REWARD' }>): GameEvent[] {
@@ -169,6 +201,7 @@ export class GameEngine {
       phase: 'battle',
       build: result.build,
       rewards: {
+        source: null,
         options: [],
         augmentSlot: null,
       },

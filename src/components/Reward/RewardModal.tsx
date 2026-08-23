@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { AugmentItem, GameCommand } from '../../types/game';
+import { AugmentItem, GameCommand, RewardSource } from '../../types/game';
 import { getAsset } from '../../assets/assetHelper';
 import { soundManager } from '../../utils/soundManager';
 
 interface RewardModalProps {
   candidates: AugmentItem[];
+  source: RewardSource | null;
   augSlotPresentation: {
     reels: [string, string, string];
     targetAugment: AugmentItem | null;
@@ -13,7 +14,7 @@ interface RewardModalProps {
   onDispatch: (cmd: GameCommand) => void;
 }
 
-export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPresentation, onDispatch }) => {
+export const RewardModal: React.FC<RewardModalProps> = ({ candidates, source, augSlotPresentation, onDispatch }) => {
   const [selectedAug, setSelectedAug] = useState<AugmentItem | null>(candidates[0] || null);
 
   const handleSelectReward = (augment: AugmentItem) => {
@@ -64,9 +65,9 @@ export const RewardModal: React.FC<RewardModalProps> = ({ candidates, augSlotPre
     <div className="reward-modal-backdrop">
       <div className="reward-modal-content">
         <div className="reward-header">
-          <span className="reward-badge">전투 보상</span>
-          <h2>승리 보상: 증강 카드 선택</h2>
-          <p>이번 전투에서 얻을 증강 또는 아이템을 하나 선택하세요.</p>
+          <span className="reward-badge">{source === 'EVENT' ? '이벤트 보상' : '전투 보상'}</span>
+          <h2>{source === 'EVENT' ? '은닉품 보상 선택' : '승리 보상 선택'}</h2>
+          <p>{source === 'EVENT' ? '은닉품에서 발견한' : '이번 전투에서 얻을'} 증강 또는 아이템을 하나 선택하세요.</p>
         </div>
 
         {augSlotPresentation && (
