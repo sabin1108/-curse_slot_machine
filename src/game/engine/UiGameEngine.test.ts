@@ -403,7 +403,7 @@ describe('UiGameEngine', () => {
     expect(resolvedState.lastEnemyDamagePop).toEqual(resolvedState.enemyDamagePops.at(-1))
   })
 
-  it('projects attack, wait, and defense intents through the dual-engine adapter', () => {
+  it('projects the boss attack, attack, and defense cadence through the dual-engine adapter', () => {
     const engine = new GameEngine('enemy-intent-cycle-ui')
 
     engine.dispatch({ type: 'START_RUN', seed: 'enemy-intent-cycle-ui' })
@@ -411,13 +411,13 @@ describe('UiGameEngine', () => {
 
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
     const afterAttack = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
-    expect(afterAttack.enemy.intent).toMatchObject({ type: 'WAIT', value: 0 })
+    expect(afterAttack.enemy.intent).toMatchObject({ type: 'ATTACK' })
     expect(afterAttack.isEnemyAttacking).toBe(true)
 
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
-    const afterWait = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
-    expect(afterWait.enemy.intent).toMatchObject({ type: 'DEFEND', value: 1 })
-    expect(afterWait.isEnemyAttacking).toBe(false)
+    const afterSecondAttack = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })
+    expect(afterSecondAttack.enemy.intent).toMatchObject({ type: 'DEFEND', value: 3 })
+    expect(afterSecondAttack.isEnemyAttacking).toBe(true)
 
     engine.dispatch({ type: 'SPIN_COMBAT_SLOT' })
     const afterDefense = engine.dispatch({ type: 'CONFIRM_SLOT_RESULT' })

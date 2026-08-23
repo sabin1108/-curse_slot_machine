@@ -4,20 +4,20 @@ import type {
   CombatActorState,
   CombatEvent,
   CombatEffectContext,
+  EnemyBehaviorState,
   CombatOutcome,
   CombatResolution,
   CombatState,
   CombatStateOverrides,
 } from './CombatTypes'
 import type { EffectCondition, EffectDefinition } from '../effects/EffectTypes'
+import { createEnemyBehaviorState } from './EnemyIntentProfiles'
 
 const COMBAT_BASE_VALUES = {
   bulletDamage: 5,
   shieldBlock: 5,
   heartHealing: 4,
   enemyAttack: 4,
-  enemyDefense: 1,
-  enemyBlockCap: 2,
 } as const
 
 const MODIFIER_MULTIPLIER = {
@@ -48,6 +48,14 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     overrides.enemy,
   )
   const enemyIntentType = overrides.enemyIntent?.type ?? 'attack'
+  const enemyBehavior = createEnemyBehaviorState(
+    overrides.enemyBehavior?.rank ?? 'normal',
+    overrides.enemyBehavior,
+  )
+  if (overrides.enemyBehavior?.patternIndex === undefined) {
+    const matchingPatternIndex = enemyBehavior.pattern.indexOf(enemyIntentType)
+    enemyBehavior.patternIndex = matchingPatternIndex >= 0 ? matchingPatternIndex : 0
+  }
   const enemyIntentBaseAmount = overrides.enemyIntent?.baseAmount
     ?? overrides.enemyIntent?.amount
     ?? COMBAT_BASE_VALUES.enemyAttack
@@ -62,8 +70,10 @@ export function createCombatState(overrides: CombatStateOverrides = {}): CombatS
     enemyIntent: {
       type: enemyIntentType,
       baseAmount: enemyIntentBaseAmount,
-      amount: overrides.enemyIntent?.amount ?? getIntentAmount(enemyIntentType, enemyIntentBaseAmount, curseValue),
+      amount: overrides.enemyIntent?.amount
+        ?? getIntentAmount(enemyIntentType, enemyIntentBaseAmount, curseValue, enemyBehavior.defenseAmount),
     },
+    enemyBehavior,
     ...(overrides.lastSlotResult ? { lastSlotResult: overrides.lastSlotResult } : {}),
   }
 }
@@ -156,15 +166,16 @@ export function resolveCombatSlot(
       })
     }
 
-    const nextEnemyIntent = outcome === 'ongoing'
-      ? getNextEnemyIntent(state.enemyIntent, curse.value)
-      : getPressuredEnemyIntent(state.enemyIntent, curse.value)
+    const nextEnemyState = outcome === 'ongoing'
+      ? getNextEnemyState(state, curse.value)
+      : getPressuredEnemyState(state, curse.value)
 
     return {
       player,
       enemy,
       curse,
-      enemyIntent: nextEnemyIntent,
+      enemyIntent: nextEnemyState.enemyIntent,
+      enemyBehavior: nextEnemyState.enemyBehavior,
       lastSlotResult: slotResult,
       events,
       outcome,
@@ -269,15 +280,16 @@ export function resolveCombatSlot(
     })
   }
 
-  const nextEnemyIntent = outcome === 'ongoing'
-    ? getNextEnemyIntent(state.enemyIntent, curse.value)
-    : getPressuredEnemyIntent(state.enemyIntent, curse.value)
+  const nextEnemyState = outcome === 'ongoing'
+    ? getNextEnemyState(state, curse.value)
+    : getPressuredEnemyState(state, curse.value)
 
   return {
     player,
     enemy,
     curse,
-    enemyIntent: nextEnemyIntent,
+    enemyIntent: nextEnemyState.enemyIntent,
+    enemyBehavior: nextEnemyState.enemyBehavior,
     lastSlotResult: slotResult,
     events,
     outcome,
@@ -389,8 +401,8 @@ function resolveEnemyIntent(
 
   if (state.enemyIntent.type === 'defend') {
     const amount = Math.min(
-      COMBAT_BASE_VALUES.enemyDefense,
-      Math.max(0, COMBAT_BASE_VALUES.enemyBlockCap - enemy.block),
+      state.enemyBehavior.defenseAmount,
+      Math.max(0, state.enemyBehavior.blockCap - enemy.block),
     )
     events.push({ type: 'ENEMY_DEFENDED', amount })
     return {
@@ -402,7 +414,12 @@ function resolveEnemyIntent(
     }
   }
 
-  const amount = getIntentAmount('attack', state.enemyIntent.baseAmount, state.curse.value)
+  const amount = getIntentAmount(
+    'attack',
+    state.enemyIntent.baseAmount,
+    state.curse.value,
+    state.enemyBehavior.defenseAmount,
+  )
   const resolved = applyDamage(player, amount)
   events.push({
     type: 'ENEMY_ATTACKED',
@@ -413,19 +430,40 @@ function resolveEnemyIntent(
   return { player: resolved.actor, enemy }
 }
 
-function getNextEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
-  const type = intent.type === 'attack' ? 'wait' : intent.type === 'wait' ? 'defend' : 'attack'
+function getNextEnemyState(
+  state: CombatState,
+  curseValue: number,
+): Pick<CombatState, 'enemyIntent' | 'enemyBehavior'> {
+  const patternIndex = (state.enemyBehavior.patternIndex + 1) % state.enemyBehavior.pattern.length
+  const type = state.enemyBehavior.pattern[patternIndex]
   return {
-    type,
-    baseAmount: intent.baseAmount,
-    amount: getIntentAmount(type, intent.baseAmount, curseValue),
+    enemyIntent: {
+      type,
+      baseAmount: state.enemyIntent.baseAmount,
+      amount: getIntentAmount(type, state.enemyIntent.baseAmount, curseValue, state.enemyBehavior.defenseAmount),
+    },
+    enemyBehavior: {
+      ...state.enemyBehavior,
+      patternIndex,
+    },
   }
 }
 
-function getPressuredEnemyIntent(intent: CombatState['enemyIntent'], curseValue: number): CombatState['enemyIntent'] {
+function getPressuredEnemyState(
+  state: CombatState,
+  curseValue: number,
+): Pick<CombatState, 'enemyIntent' | 'enemyBehavior'> {
   return {
-    ...intent,
-    amount: getIntentAmount(intent.type, intent.baseAmount, curseValue),
+    enemyIntent: {
+      ...state.enemyIntent,
+      amount: getIntentAmount(
+        state.enemyIntent.type,
+        state.enemyIntent.baseAmount,
+        curseValue,
+        state.enemyBehavior.defenseAmount,
+      ),
+    },
+    enemyBehavior: state.enemyBehavior,
   }
 }
 
@@ -433,13 +471,14 @@ function getIntentAmount(
   type: CombatState['enemyIntent']['type'],
   baseAmount: number,
   curseValue: number,
+  defenseAmount: number,
 ): number {
   if (type === 'wait') {
     return 0
   }
 
   if (type === 'defend') {
-    return COMBAT_BASE_VALUES.enemyDefense
+    return defenseAmount
   }
 
   return Math.max(0, Math.round(baseAmount * (1 + curseValue * 0.1)))

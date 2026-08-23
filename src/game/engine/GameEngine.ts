@@ -1,6 +1,7 @@
 import { applyReward, getActiveEffects } from '../build/BuildSystem'
 import { generateRewardOptions } from '../build/RewardSystem'
 import { resolveCombatSlot } from '../combat/CombatSystem'
+import { createEnemyBehaviorState, getEnemyIntentProfile } from '../combat/EnemyIntentProfiles'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
@@ -44,6 +45,11 @@ export class GameEngine {
     const baseAmount = intentType === 'attack'
       ? enemy.intent.value
       : this.state.combat.enemyIntent.baseAmount
+    const profile = getEnemyIntentProfile(enemy.id)
+    const isNewEncounter = this.state.combat.enemy.name !== enemy.name
+    const enemyBehavior = isNewEncounter || this.state.combat.enemyBehavior.rank !== profile.rank
+      ? createEnemyBehaviorState(profile.rank)
+      : this.state.combat.enemyBehavior
 
     this.state = {
       ...this.state,
@@ -71,6 +77,7 @@ export class GameEngine {
           baseAmount,
           amount: enemy.intent.value,
         },
+        enemyBehavior,
       },
     }
   }
@@ -132,6 +139,7 @@ export class GameEngine {
         enemy: resolution.enemy,
         curse: resolution.curse,
         enemyIntent: resolution.enemyIntent,
+        enemyBehavior: resolution.enemyBehavior,
         lastSlotResult: resolution.lastSlotResult,
       },
       rewards: {
