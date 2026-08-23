@@ -1,4 +1,4 @@
-import type { RunStageType } from '../run/RunTypes'
+import type { RunStageDefinition, RunStageType } from '../run/RunTypes'
 import type { EnemyIntentPattern } from './CombatTypes'
 
 export type MvpEnemyProfile = {
@@ -11,6 +11,10 @@ export type MvpEnemyProfile = {
     thresholdHealth: number
     attack: number
   }
+}
+
+export type MvpEnemyEncounterProfile = MvpEnemyProfile & {
+  stageId: number
 }
 
 export const MVP_ENEMY_CATALOG: Record<MvpEnemyProfile['stageType'], MvpEnemyProfile> = {
@@ -52,6 +56,80 @@ export function getMvpEnemyProfile(stageType: RunStageType): MvpEnemyProfile {
     throw new Error(`stage type ${stageType} does not have an enemy profile`)
   }
   return MVP_ENEMY_CATALOG[stageType]
+}
+
+export function getMvpEnemyEncounterProfile(stage: RunStageDefinition): MvpEnemyEncounterProfile {
+  const profile = getMvpEnemyProfile(stage.type)
+  const tuning = getStageTuning(stage)
+  const maxHealth = profile.maxHealth + tuning.healthBonus
+  const attack = profile.attack + tuning.attackBonus
+
+  return {
+    ...profile,
+    stageId: stage.id,
+    maxHealth,
+    attack,
+    intentPattern: tuning.intentPattern ?? profile.intentPattern,
+    ...(profile.phaseTwo ? {
+      phaseTwo: {
+        thresholdHealth: Math.ceil(maxHealth / 2),
+        attack: profile.phaseTwo.attack + tuning.phaseTwoAttackBonus,
+      },
+    } : {}),
+  }
+}
+
+function getStageTuning(stage: RunStageDefinition): {
+  healthBonus: number
+  attackBonus: number
+  phaseTwoAttackBonus: number
+  intentPattern?: EnemyIntentPattern
+} {
+  switch (stage.id) {
+    case 5:
+      return {
+        healthBonus: 4,
+        attackBonus: 1,
+        phaseTwoAttackBonus: 0,
+        intentPattern: [{ type: 'attack' }, { type: 'wait' }, { type: 'attack' }, { type: 'defend', amount: 1 }],
+      }
+    case 7:
+      return {
+        healthBonus: 6,
+        attackBonus: 1,
+        phaseTwoAttackBonus: 0,
+      }
+    case 9:
+      return {
+        healthBonus: 10,
+        attackBonus: 2,
+        phaseTwoAttackBonus: 0,
+        intentPattern: [{ type: 'attack' }, { type: 'defend', amount: 2 }, { type: 'attack' }, { type: 'wait' }],
+      }
+    case 11:
+      return {
+        healthBonus: 12,
+        attackBonus: 3,
+        phaseTwoAttackBonus: 0,
+        intentPattern: [{ type: 'attack' }, { type: 'defend', amount: 2 }, { type: 'attack' }, { type: 'attack' }, { type: 'wait' }],
+      }
+    case 13:
+      return {
+        healthBonus: 12,
+        attackBonus: 2,
+        phaseTwoAttackBonus: 0,
+        intentPattern: [{ type: 'attack' }, { type: 'defend', amount: 2 }, { type: 'attack' }, { type: 'wait' }],
+      }
+    case 15:
+      return {
+        healthBonus: 10,
+        attackBonus: 1,
+        phaseTwoAttackBonus: 1,
+        intentPattern: [{ type: 'attack' }, { type: 'defend', amount: 2 }, { type: 'attack' }, { type: 'wait' }, { type: 'attack' }],
+      }
+    default:
+      return { healthBonus: 0, attackBonus: 0, phaseTwoAttackBonus: 0 }
+  }
 }
 
 export function validateMvpEnemyCatalog(catalog: Record<MvpEnemyProfile['stageType'], MvpEnemyProfile>): void {

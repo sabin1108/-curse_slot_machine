@@ -4,12 +4,13 @@ import { MVP_BUILD_CATALOG } from '../build/MvpBuildCatalog'
 import { generateMvpRewardOptions } from '../build/MvpRewardSystem'
 import { generateRewardOptions } from '../build/RewardSystem'
 import { getCurseAttackBonus, createCombatState, previewCombatSlot, recalculateEnemyIntent, resolveCombatSlot } from '../combat/CombatSystem'
-import { getMvpEnemyProfile } from '../combat/MvpEnemyCatalog'
+import { getMvpEnemyEncounterProfile } from '../combat/MvpEnemyCatalog'
 import { createAugmentSlotPresentation } from '../slot/AugmentSlotMachine'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
 import type { CombatSlotLocks } from '../slot/CombatSlotTypes'
 import { completeCurrentStage, enterNextStage } from '../run/RunSystem'
 import type { RunStageDefinition } from '../run/RunTypes'
+import type { EnemyIntentPattern } from '../combat/CombatTypes'
 import type { GameCommand } from './commands'
 import type { GameEvent } from './events'
 import { createEmptySlotState, createInitialGameState, type GameState } from './GameState'
@@ -573,7 +574,7 @@ function createStageCombatState(
   stage: RunStageDefinition,
   preserveBlock = false,
 ): GameState['combat'] {
-  const profile = getMvpEnemyProfile(stage.type)
+  const profile = getMvpEnemyEncounterProfile(stage)
   const attackBonus = getCurseAttackBonus(previous.curse.value)
   const openingIntent = profile.intentPattern[0]
 
@@ -606,7 +607,7 @@ function createStageCombatState(
 }
 
 function getOpeningIntentAmount(
-  intent: ReturnType<typeof getMvpEnemyProfile>['intentPattern'][number],
+  intent: EnemyIntentPattern[number],
   attack: number,
   attackBonus: number,
 ): number {
