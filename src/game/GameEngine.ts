@@ -20,6 +20,7 @@ import {
   SHOWCASE_STEPS
 } from './data';
 import { SeededRNG } from './rng';
+import { createShopState } from './shop/ShopSystem';
 
 import { ORIGINS, CURSE_LOGS } from './origins';
 
@@ -67,6 +68,7 @@ export class GameEngine {
         activeSynergies: [],
         synergyProgress: JSON.parse(JSON.stringify(INITIAL_SYNERGIES))
       },
+      shop: createShopState(),
       visitedNodePath: [],
       selectedOrigin: 'SWORDSMAN',
       originTraitState: {
@@ -144,7 +146,7 @@ export class GameEngine {
         this.handleNextShowcaseStep();
         break;
       case 'BUY_SHOP_ITEM':
-        this.handleBuyShopItem(command.itemId, command.price);
+        this.handleBuyShopItem(command.itemId);
         break;
       case 'REST_ACTION':
         this.handleRestAction(command.actionType);
@@ -842,10 +844,12 @@ export class GameEngine {
     }
   }
 
-  private handleBuyShopItem(itemId: string, price: number) {
-    if (this.state.player.gold >= price) {
-      this.state.player.gold -= price;
+  private handleBuyShopItem(itemId: string) {
+    const offer = this.state.shop.offers.find((candidate) => candidate.id === itemId);
+    if (offer && !offer.purchased && !this.state.build.items.includes(itemId) && this.state.player.gold >= offer.price) {
+      this.state.player.gold -= offer.price;
       this.state.build.items.push(itemId);
+      offer.purchased = true;
       this.state.combatLogs.push(`[상점 구매] '${itemId}' 아이템을 구매했습니다.`);
     }
   }

@@ -6,6 +6,7 @@ import type { BuildRewardDefinition } from '../build/BuildTypes'
 import type { EffectDefinition } from '../effects/EffectTypes'
 import type { CombatEvent } from '../combat/CombatTypes'
 import type { CombatSlotResult } from '../slot/CombatSlotTypes'
+import { generateShopOffers } from '../shop/ShopSystem'
 import { getCombatRerollCurseCost, rerollCombatSlot, spinCombatSlot } from '../slot/CombatSlotMachine'
 import { GameEngine as StructuredGameEngine } from './GameEngine'
 import {
@@ -27,6 +28,8 @@ export class GameEngine {
 
   private slotRng: SeededRng
 
+  private shopRng: SeededRng
+
   private currentStructuredSlot: CombatSlotResult | null
 
   private presentation: UiGameState
@@ -35,6 +38,7 @@ export class GameEngine {
     this.legacy = new LegacyGameEngine(seedString)
     this.structured = new StructuredGameEngine(seedString)
     this.slotRng = createSeededRng(seedString)
+    this.shopRng = createSeededRng(`${seedString}:shop`)
     this.currentStructuredSlot = null
     this.presentation = this.legacy.getState()
   }
@@ -50,6 +54,7 @@ export class GameEngine {
       this.structured = new StructuredGameEngine(seed)
       this.structured.dispatch({ type: 'START_RUN' })
       this.slotRng = createSeededRng(seed)
+      this.shopRng = createSeededRng(`${seed}:shop`)
       this.currentStructuredSlot = null
       this.presentation = state
       return this.presentation
@@ -60,6 +65,7 @@ export class GameEngine {
       this.structured = new StructuredGameEngine(state.seed)
       this.structured.dispatch({ type: 'START_RUN' })
       this.slotRng = createSeededRng(state.seed)
+      this.shopRng = createSeededRng(`${state.seed}:shop`)
       this.currentStructuredSlot = null
       this.presentation = state
       return this.presentation
@@ -134,7 +140,23 @@ export class GameEngine {
       }
     }
 
+    if (command.type === 'NAVIGATE') {
+      if (this.presentation.rewardSource !== null) {
+        return this.presentation
+      }
+
+      this.presentation = this.legacy.dispatch(command)
+      if (command.screen === 'SHOP') {
+        this.ensureShopOffers()
+      }
+      return this.presentation
+    }
+
     if (command.type === 'SELECT_MAP_NODE') {
+      if (this.presentation.rewardSource !== null) {
+        return this.presentation
+      }
+
       this.presentation = this.legacy.dispatch(command)
       this.presentation.screen = getMapNodeDestinationScreen(command.nodeType)
       this.currentStructuredSlot = null
@@ -149,6 +171,9 @@ export class GameEngine {
       this.resetOriginTraitState()
       this.projectStructuredBuild()
       this.syncStructuredCombatFromPresentation()
+      if (this.presentation.screen === 'SHOP') {
+        this.ensureShopOffers()
+      }
       return this.presentation
     }
 
@@ -168,20 +193,33 @@ export class GameEngine {
     }
 
     if (command.type === 'BUY_SHOP_ITEM') {
-      const reward = getStructuredReward(command.itemId)
-      if (reward && this.presentation.player.gold >= command.price) {
-        this.presentation.player.gold -= command.price
-        this.structured.dispatch({
-          type: 'CHOOSE_REWARD',
-          reward: {
-            kind: reward.kind,
-            id: reward.id,
-          },
-        })
-        this.projectStructuredBuild()
-        this.presentation.combatLogs.push(`[Shop] ${reward.name}`)
+      if (this.presentation.rewardSource !== null) {
         return this.presentation
       }
+
+      const reward = getStructuredReward(command.itemId)
+      const offer = this.presentation.shop.offers.find((candidate) => candidate.id === command.itemId)
+      if (!reward || reward.kind !== 'item' || !offer || offer.purchased || this.presentation.player.gold < offer.price) {
+        return this.presentation
+      }
+
+      const events = this.structured.dispatch({
+        type: 'APPLY_SHOP_REWARD',
+        reward: {
+          kind: reward.kind,
+          id: reward.id,
+        },
+      })
+      const applied = events.some((event) => event.type === 'SHOP_REWARD_APPLIED' && event.added)
+      if (!applied) {
+        return this.presentation
+      }
+
+      this.presentation.player.gold -= offer.price
+      offer.purchased = true
+      this.projectStructuredBuild()
+      this.presentation.combatLogs.push(`[Shop] ${reward.name}`)
+      return this.presentation
     }
 
     if (command.type === 'CONFIRM_SLOT_RESULT' && (this.currentStructuredSlot || this.hasStructuredBuild())) {
@@ -214,6 +252,19 @@ export class GameEngine {
     this.presentation.isEnemyAttacking = false
     this.presentation.lastEnemyDamagePop = null
     this.presentation.enemyDamagePops = []
+  }
+
+  private ensureShopOffers(): void {
+    if (this.presentation.shop.offers.length > 0) {
+      return
+    }
+
+    this.presentation.shop = {
+      offers: generateShopOffers(
+        this.structured.getState().build,
+        (maxExclusive) => this.shopRng.nextInt(maxExclusive),
+      ),
+    }
   }
 
   private hasStructuredBuild(): boolean {

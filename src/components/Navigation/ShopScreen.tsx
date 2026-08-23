@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { GameCommand, PlayerState } from '../../types/game';
 import { getAsset } from '../../assets/assetHelper';
 import { soundManager } from '../../utils/soundManager';
 import { DEFAULT_BUILD_CATALOG } from '../../game/build/BuildCatalog';
 import type { BuildRewardDefinition } from '../../game/build/BuildTypes';
+import type { ShopOffer } from '../../game/shop/ShopTypes';
 
 interface ShopItem {
   id: string;
@@ -13,10 +14,12 @@ interface ShopItem {
   effect: string;
   price: number;
   icon: string;
+  purchased: boolean;
 }
 
 interface ShopScreenProps {
   player: PlayerState;
+  offers: ShopOffer[];
   onDispatch: (cmd: GameCommand) => void;
 }
 
@@ -39,64 +42,34 @@ const SHOP_TEXT: Record<string, { name: string; desc: string; effect: string }> 
   panic_button: { name: '비상 탈출 버튼', desc: '체력이 낮을 때 회복 룰렛을 크게 바꿉니다.', effect: '저체력 회복 +80%' },
 };
 
-const SHOP_ITEM_IDS = [
-  'multi_hit_charm',
-  'echo_trigger',
-  'ash_powder',
-  'wildfire_contract',
-  'mirror_buckler',
-  'fortress_oath',
-  'cursed_lens',
-  'hex_battery',
-  'red_coin',
-  'green_vial',
-  'lucky_receipt',
-  'loaded_multiplier',
-  'limit_breaker',
-  'royal_joker',
-  'black_candle',
-  'panic_button',
-];
-
 function toShopRarity(rarity: BuildRewardDefinition['rarity']): ShopItem['rarity'] {
   if (rarity === 'legendary' || rarity === 'cursed') return 'LEGENDARY';
   if (rarity === 'rare' || rarity === 'uncommon') return 'RARE';
   return 'COMMON';
 }
 
-function getShopPrice(reward: BuildRewardDefinition): number {
-  if (reward.rarity === 'legendary' || reward.rarity === 'cursed') return 220;
-  if (reward.rarity === 'rare') return 160;
-  if (reward.rarity === 'uncommon') return 120;
-  return 90;
-}
+export const ShopScreen: React.FC<ShopScreenProps> = ({ player, offers, onDispatch }) => {
+  const shopItems: ShopItem[] = offers.flatMap((offer) => {
+    const reward = DEFAULT_BUILD_CATALOG.rewards.find((candidate) => candidate.kind === 'item' && candidate.id === offer.id);
+    if (!reward) return [];
 
-function getRandomShopItems(): ShopItem[] {
-  return [...DEFAULT_BUILD_CATALOG.rewards]
-    .filter((reward) => reward.kind === 'item' && SHOP_ITEM_IDS.includes(reward.id))
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 4)
-    .map((reward) => ({
+    return [{
       id: reward.id,
       name: SHOP_TEXT[reward.id]?.name ?? reward.name,
       rarity: toShopRarity(reward.rarity),
       desc: SHOP_TEXT[reward.id]?.desc ?? reward.description,
       effect: SHOP_TEXT[reward.id]?.effect ?? reward.effectLabel ?? '빌드 효과',
-      price: getShopPrice(reward),
+      price: offer.price,
       icon: getAsset(reward.assetKey ?? 'item_lucky_receipt'),
-    }));
-}
-
-export const ShopScreen: React.FC<ShopScreenProps> = ({ player, onDispatch }) => {
-  const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
-  const shopItems = useMemo(getRandomShopItems, []);
+      purchased: offer.purchased,
+    }];
+  });
 
   const handleBuy = (item: ShopItem) => {
-    if (purchasedIds.has(item.id) || player.gold < item.price) return;
+    if (item.purchased || player.gold < item.price) return;
 
     soundManager.playJackpotSound();
-    setPurchasedIds((prev) => new Set(prev).add(item.id));
-    onDispatch({ type: 'BUY_SHOP_ITEM', itemId: item.id, price: item.price });
+    onDispatch({ type: 'BUY_SHOP_ITEM', itemId: item.id });
   };
 
   return (
@@ -158,7 +131,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({ player, onDispatch }) =>
 
       <div className="shop-goods-grid">
         {shopItems.map((item) => {
-          const isPurchased = purchasedIds.has(item.id);
+          const isPurchased = item.purchased;
           const canAfford = player.gold >= item.price && !isPurchased;
 
           return (

@@ -203,6 +203,47 @@ describe('GameEngine', () => {
       .not.toEqual(first.getState().rewards.options.map((option) => option.id))
   })
 
+  it('applies a shop reward without consuming pending combat or event rewards', () => {
+    const engine = new GameEngine('shop-preserves-reward')
+    engine.dispatch({ type: 'START_RUN' })
+    engine.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+    const pendingRewards = structuredClone(engine.getState().rewards)
+
+    const events = engine.dispatch({
+      type: 'APPLY_SHOP_REWARD',
+      reward: { kind: 'item', id: 'multi_hit_charm' },
+    })
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        type: 'SHOP_REWARD_APPLIED',
+        reward: { kind: 'item', id: 'multi_hit_charm' },
+        added: true,
+      }),
+    ])
+    expect(engine.getState().build.items).toContain('multi_hit_charm')
+    expect(engine.getState().phase).toBe('reward')
+    expect(engine.getState().rewards).toEqual(pendingRewards)
+  })
+
+  it('reports duplicate shop rewards without mutating build or pending rewards', () => {
+    const engine = new GameEngine('shop-duplicate')
+    engine.dispatch({ type: 'START_RUN' })
+    engine.dispatch({ type: 'APPLY_SHOP_REWARD', reward: { kind: 'item', id: 'multi_hit_charm' } })
+    engine.dispatch({ type: 'GENERATE_EVENT_REWARDS' })
+    const before = engine.getState()
+
+    const events = engine.dispatch({
+      type: 'APPLY_SHOP_REWARD',
+      reward: { kind: 'item', id: 'multi_hit_charm' },
+    })
+
+    expect(events).toEqual([
+      expect.objectContaining({ type: 'SHOP_REWARD_APPLIED', added: false }),
+    ])
+    expect(engine.getState()).toEqual(before)
+  })
+
   it('selects enemy intent profiles from presentation enemy identity', () => {
     const engine = new GameEngine('enemy-profile-sync')
     const player = { hp: 30, maxHp: 30, shield: 0, gold: 0 }

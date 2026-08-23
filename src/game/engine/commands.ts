@@ -20,3 +20,7 @@ export type GameCommand =
       type: 'CHOOSE_REWARD'
       reward: RewardRef
     }
+  | {
+      type: 'APPLY_SHOP_REWARD'
+      reward: RewardRef
+    }

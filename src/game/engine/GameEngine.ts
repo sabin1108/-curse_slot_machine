@@ -31,6 +31,8 @@ export class GameEngine {
         return this.resolveCombatSlot(command)
       case 'CHOOSE_REWARD':
         return this.chooseReward(command)
+      case 'APPLY_SHOP_REWARD':
+        return this.applyShopReward(command)
     }
   }
 
@@ -214,6 +216,25 @@ export class GameEngine {
         buildEvents: result.events,
       },
     ]
+  }
+
+  private applyShopReward(command: Extract<GameCommand, { type: 'APPLY_SHOP_REWARD' }>): GameEvent[] {
+    const result = applyReward(this.state.build, command.reward)
+    const added = result.events.some((event) => event.type === 'REWARD_ADDED')
+
+    if (added) {
+      this.state = {
+        ...this.state,
+        build: result.build,
+      }
+    }
+
+    return [{
+      type: 'SHOP_REWARD_APPLIED',
+      reward: command.reward,
+      buildEvents: result.events,
+      added,
+    }]
   }
 
   private getPhaseAfterCombatOutcome(outcome: 'ongoing' | 'victory' | 'defeat'): GameState['phase'] {

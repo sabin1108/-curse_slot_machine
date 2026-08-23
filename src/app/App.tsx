@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { GameEngine } from '../game/engine/UiGameEngine';
 import { GameCommand, GameState } from '../types/game';
@@ -19,9 +19,15 @@ import { soundManager } from '../utils/soundManager';
 
 import '../styles.css';
 
-export function App() {
-  const engine = useMemo(() => new GameEngine(), []);
+interface AppProps {
+  engine?: GameEngine;
+}
+
+export function App({ engine: providedEngine }: AppProps = {}) {
+  const engine = useMemo(() => providedEngine ?? new GameEngine(), [providedEngine]);
   const [gameState, setGameState] = useState(() => engine.getState());
+  const [defeatPresentation, setDefeatPresentation] = useState<GameState | null>(null);
+  const defeatTimerRef = useRef<number | null>(null);
   const [isCurseLogOpen, setIsCurseLogOpen] = useState(false);
   const [musicVolume, setMusicVolume] = useState(() => soundManager.getMusicVolume());
   const [sfxVolume, setSfxVolume] = useState(() => soundManager.getSfxVolume());
@@ -53,9 +59,15 @@ export function App() {
 
   const handleDispatch = (command: GameCommand) => {
     soundManager.unlockAudio();
+    if (defeatTimerRef.current !== null) {
+      window.clearTimeout(defeatTimerRef.current);
+      defeatTimerRef.current = null;
+      setDefeatPresentation(null);
+    }
     const previousState = engine.getState();
     const updatedState = engine.dispatch(command);
     syncMusicForState(updatedState);
+    setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
     if (
       command.type === 'CONFIRM_SLOT_RESULT'
       && updatedState.isEnemyDefeated
@@ -74,15 +86,21 @@ export function App() {
         isEnemyAttacking: false,
         lockedReels: new Set(updatedState.lockedReels),
       };
-      setGameState(defeatState);
-      window.setTimeout(() => {
+      setDefeatPresentation(defeatState);
+      defeatTimerRef.current = window.setTimeout(() => {
+        defeatTimerRef.current = null;
+        setDefeatPresentation(null);
         syncMusicForState(updatedState);
-        setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
       }, 900);
       return;
     }
-    setGameState({ ...updatedState, lockedReels: new Set(updatedState.lockedReels) });
   };
+
+  useEffect(() => () => {
+    if (defeatTimerRef.current !== null) {
+      window.clearTimeout(defeatTimerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     syncMusicForState(gameState);
@@ -98,6 +116,8 @@ export function App() {
     setSfxVolume(nextVolume);
   };
 
+  const displayState = defeatPresentation ?? gameState;
+
   return (
     <main className="app-shell">
       <nav className="global-nav-bar">
@@ -107,42 +127,42 @@ export function App() {
         </div>
         <div className="nav-screen-tabs">
           <button
-            className={`tab-btn ${gameState.screen === 'TITLE' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'TITLE' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'TITLE' })}
             type="button"
           >
             타이틀
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'PROLOGUE' || gameState.screen === 'ORIGIN' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'PROLOGUE' || displayState.screen === 'ORIGIN' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'OPEN_PROLOGUE' })}
             type="button"
           >
             프롤로그/기원
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'BATTLE' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'BATTLE' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'BATTLE' })}
             type="button"
           >
             전투
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'MAP' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'MAP' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'MAP' })}
             type="button"
           >
             경로 맵
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'SHOP' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'SHOP' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'SHOP' })}
             type="button"
           >
             암시장
           </button>
           <button
-            className={`tab-btn ${gameState.screen === 'REST' ? 'active' : ''}`}
+            className={`tab-btn ${displayState.screen === 'REST' ? 'active' : ''}`}
             onClick={() => handleDispatch({ type: 'NAVIGATE', screen: 'REST' })}
             type="button"
           >
@@ -199,63 +219,65 @@ export function App() {
         </div>
       </nav>
 
-      {gameState.showcase.active && gameState.screen !== 'REWARD' && (
+      {displayState.showcase.active && displayState.screen !== 'REWARD' && (
         <ShowcaseOverlay
-          currentStepIndex={gameState.showcase.currentStep}
-          steps={gameState.showcase.steps}
+          currentStepIndex={displayState.showcase.currentStep}
+          steps={displayState.showcase.steps}
           onDispatch={handleDispatch}
         />
       )}
 
-      <ScreenTransitionOverlay screen={gameState.screen}>
+      <ScreenTransitionOverlay screen={displayState.screen}>
         <div className="view-stage">
-          {gameState.screen === 'TITLE' && (
+          {displayState.screen === 'TITLE' && (
             <TitleScreen
               onDispatch={handleDispatch}
               onOpenCurseLog={() => setIsCurseLogOpen(true)}
             />
           )}
 
-          {gameState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
+          {displayState.screen === 'PROLOGUE' && <PrologueScreen onDispatch={handleDispatch} />}
 
-          {gameState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
+          {displayState.screen === 'ORIGIN' && <OriginSelectionScreen onDispatch={handleDispatch} />}
 
-          {gameState.screen === 'BATTLE' && <BattleScreen state={gameState} onDispatch={handleDispatch} />}
+          {displayState.screen === 'BATTLE' && <BattleScreen state={displayState} onDispatch={handleDispatch} />}
 
-          {gameState.screen === 'MAP' && (
+          {displayState.screen === 'MAP' && (
             <DungeonMapScreen
-              currentWave={gameState.wave}
-              totalWaves={gameState.totalWaves}
-              visitedNodePath={gameState.visitedNodePath}
+              currentWave={displayState.wave}
+              totalWaves={displayState.totalWaves}
+              visitedNodePath={displayState.visitedNodePath}
               onDispatch={handleDispatch}
             />
           )}
 
-          {gameState.screen === 'SHOP' && <ShopScreen player={gameState.player} onDispatch={handleDispatch} />}
+          {displayState.screen === 'SHOP' && (
+            <ShopScreen player={displayState.player} offers={displayState.shop.offers} onDispatch={handleDispatch} />
+          )}
 
-          {gameState.screen === 'REST' && (
+          {displayState.screen === 'REST' && (
             <RestScreen
-              player={gameState.player}
-              curseCurrent={gameState.curse.current}
+              player={displayState.player}
+              curseCurrent={displayState.curse.current}
               onDispatch={handleDispatch}
             />
           )}
 
-          {gameState.screen === 'REWARD' && (
+          {displayState.screen === 'REWARD' && (
             <RewardModal
-              candidates={gameState.rewardCandidates}
-              source={gameState.rewardSource}
-              augSlotPresentation={gameState.augSlotPresentation}
+              candidates={displayState.rewardCandidates}
+              source={displayState.rewardSource}
+              augSlotPresentation={displayState.augSlotPresentation}
               onDispatch={handleDispatch}
             />
           )}
 
-          {(gameState.screen === 'GAMEOVER' || gameState.screen === 'VICTORY') && (
+          {(displayState.screen === 'GAMEOVER' || displayState.screen === 'VICTORY') && (
             <GameOverVictoryModal
-              screen={gameState.screen}
-              wave={gameState.wave}
-              totalWaves={gameState.totalWaves}
-              combatLogs={gameState.combatLogs}
+              screen={displayState.screen}
+              wave={displayState.wave}
+              totalWaves={displayState.totalWaves}
+              combatLogs={displayState.combatLogs}
               onDispatch={handleDispatch}
             />
           )}

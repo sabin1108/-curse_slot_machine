@@ -284,6 +284,77 @@ describe('UiGameEngine', () => {
     expect(afterInvalidConfirm.screen).toBe('SHOP')
   })
 
+  it('generates deterministic persistent shop offers without changing combat slot rng', () => {
+    const first = new GameEngine('deterministic-shop')
+    const second = new GameEngine('deterministic-shop')
+    const control = new GameEngine('deterministic-shop')
+
+    first.dispatch({ type: 'START_RUN', seed: 'deterministic-shop' })
+    second.dispatch({ type: 'START_RUN', seed: 'deterministic-shop' })
+    control.dispatch({ type: 'START_RUN', seed: 'deterministic-shop' })
+
+    const firstShop = first.dispatch({ type: 'NAVIGATE', screen: 'SHOP' })
+    const secondShop = second.dispatch({ type: 'NAVIGATE', screen: 'SHOP' })
+    expect(firstShop.shop.offers).toEqual(secondShop.shop.offers)
+    expect(firstShop.shop.offers).toHaveLength(4)
+
+    first.dispatch({ type: 'NAVIGATE', screen: 'MAP' })
+    expect(first.dispatch({ type: 'NAVIGATE', screen: 'SHOP' }).shop.offers).toEqual(firstShop.shop.offers)
+
+    first.dispatch({ type: 'NAVIGATE', screen: 'BATTLE' })
+    control.dispatch({ type: 'NAVIGATE', screen: 'BATTLE' })
+    expect(first.dispatch({ type: 'SPIN_COMBAT_SLOT' }).currentResult)
+      .toEqual(control.dispatch({ type: 'SPIN_COMBAT_SLOT' }).currentResult)
+  })
+
+  it('charges engine-owned shop prices once and rejects duplicate purchases', () => {
+    const engine = new GameEngine('atomic-shop')
+    engine.dispatch({ type: 'START_RUN', seed: 'atomic-shop' })
+    const shopState = engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' })
+    shopState.player.gold = 1000
+    const offer = shopState.shop.offers[0]
+    const goldBefore = shopState.player.gold
+
+    const purchased = engine.dispatch({ type: 'BUY_SHOP_ITEM', itemId: offer.id })
+
+    expect(purchased.player.gold).toBe(goldBefore - offer.price)
+    expect(purchased.build.items).toContain(offer.id)
+    expect(purchased.shop.offers.find((candidate) => candidate.id === offer.id)?.purchased).toBe(true)
+
+    const afterDuplicate = engine.dispatch({ type: 'BUY_SHOP_ITEM', itemId: offer.id })
+    expect(afterDuplicate.player.gold).toBe(purchased.player.gold)
+    expect(afterDuplicate.build.items.filter((id) => id === offer.id)).toHaveLength(1)
+  })
+
+  it('keeps pending event rewards modal and rejects shop navigation or purchases', () => {
+    const engine = new GameEngine('pending-reward-shop')
+    engine.dispatch({ type: 'START_RUN', seed: 'pending-reward-shop' })
+    const stock = engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' }).shop.offers
+    engine.dispatch({ type: 'NAVIGATE', screen: 'MAP' })
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 501, nodeType: 'EVENT' })
+    const rewardState = engine.dispatch({ type: 'RESOLVE_EVENT_CHOICE', choice: 'OPEN' })
+    rewardState.player.gold = 1000
+    const before = structuredClone({
+      screen: rewardState.screen,
+      rewardSource: rewardState.rewardSource,
+      rewardCandidates: rewardState.rewardCandidates,
+      gold: rewardState.player.gold,
+      items: rewardState.build.items,
+    })
+
+    const afterNavigate = engine.dispatch({ type: 'NAVIGATE', screen: 'SHOP' })
+    const afterPurchase = engine.dispatch({ type: 'BUY_SHOP_ITEM', itemId: stock[0].id })
+
+    expect(afterNavigate.screen).toBe('REWARD')
+    expect({
+      screen: afterPurchase.screen,
+      rewardSource: afterPurchase.rewardSource,
+      rewardCandidates: afterPurchase.rewardCandidates,
+      gold: afterPurchase.player.gold,
+      items: afterPurchase.build.items,
+    }).toEqual(before)
+  })
+
   it('selects a rest map node into clean rest entry without resolving a stale slot', () => {
     const engine = new GameEngine('lethal-ui-24')
 

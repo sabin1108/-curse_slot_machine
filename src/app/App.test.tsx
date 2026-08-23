@@ -1,7 +1,12 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { GameEngine } from '../game/engine/UiGameEngine';
 import { App } from './App';
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('App', () => {
   it('renders the cursed slot machine UI shell', () => {
@@ -59,5 +64,33 @@ describe('App', () => {
 
     expect(css).not.toContain('fonts.googleapis.com');
     expect(css).toContain('--font-display');
+  });
+
+  it('does not let the enemy-defeat delay overwrite a newer navigation state', () => {
+    vi.useFakeTimers();
+    const engine = new GameEngine('app-defeat-transition');
+    engine.dispatch({ type: 'START_RUN', seed: 'app-defeat-transition' });
+    engine.dispatch({ type: 'SELECT_MAP_NODE', nodeId: 1502, nodeType: 'BOSS' });
+    engine.dispatch({ type: 'SPIN_COMBAT_SLOT' });
+    ;(engine as any).currentStructuredSlot = {
+      action: 'bullet',
+      target: 'enemy',
+      modifier: 'x3',
+      attackRoll: 1000,
+      defenseRoll: 1,
+      attackModifier: 'x3',
+      defenseModifier: 'x2',
+    };
+    ;(engine as any).projectStructuredSlot((engine as any).currentStructuredSlot);
+
+    render(<App engine={engine} />);
+    fireEvent.click(screen.getByRole('button', { name: '결과 확정' }));
+    const mapTab = screen.getByRole('button', { name: '경로 맵' });
+    fireEvent.click(mapTab);
+    expect(mapTab).toHaveClass('active');
+
+    act(() => vi.advanceTimersByTime(900));
+
+    expect(mapTab).toHaveClass('active');
   });
 });
