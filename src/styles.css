@@ -1270,10 +1270,17 @@ html, body {
 }
 
 .reel-col-header {
+  width: 100%;
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   font-size: 11px;
   color: #ffd79a;
   margin-bottom: 4px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .reel-window {
@@ -1323,20 +1330,16 @@ html, body {
 }
 
 .lock-badge {
-  position: absolute;
-  left: 50%;
-  bottom: 5px;
-  transform: translateX(-50%);
-  font-size: 11px;
+  flex-shrink: 0;
+  font-size: 9px;
+  line-height: 1;
   color: #aaa;
   background: rgba(0, 0, 0, 0.8);
-  padding: 2px 8px;
+  padding: 3px 5px;
   border-radius: 4px;
-  margin-top: 0;
-  cursor: pointer;
   border: 1px solid #444;
   transition: all 0.15s ease;
-  z-index: 2;
+  white-space: nowrap;
 }
 
 .lock-badge.active {

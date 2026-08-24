@@ -144,7 +144,14 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
     const isLocked = lockedReels.has(reelId);
     return (
       <div className={`reel-col-wrap ${isLocked ? 'is-locked' : ''}`}>
-        <div className="reel-col-header">{label}</div>
+        <div className="reel-col-header">
+          <span>{label}</span>
+          {hasSpunThisTurn && (
+            <span className={`lock-badge ${isLocked ? 'active' : ''}`}>
+              {isLocked ? '잠금' : '고정'}
+            </span>
+          )}
+        </div>
         <button
           className={`reel-window ${isSpinningReel ? 'spinning' : ''}`}
           onClick={() => hasSpunThisTurn && handleLockToggle(reelId)}
@@ -154,7 +161,6 @@ export const CombatSlotMachineView: React.FC<CombatSlotMachineViewProps> = ({
             <span className="roll-result-number">{value}</span>
             <span className="symbol-name">{resultLabel}</span>
           </span>
-          {hasSpunThisTurn && <span className={`lock-badge ${isLocked ? 'active' : ''}`}>{isLocked ? '잠금' : '고정'}</span>}
         </button>
       </div>
     );
